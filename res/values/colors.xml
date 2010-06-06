@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="QuestionLink">#07C</color>
+	<color name="no_answers_bg">#9A4444</color>
+	<color name="no_answers_text">#FFF</color>
+	<color name="some_answers_bg">#75845C</color>
+	<color name="some_answers_text">#FFF</color>
+	<color name="answer_accepted_text">#E1E818</color>
+</resources>

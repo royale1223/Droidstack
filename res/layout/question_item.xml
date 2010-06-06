@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:padding="5dip"
+	android:orientation="vertical"
+	android:descendantFocusability="blocksDescendants"
+	>
+	
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:paddingLeft="5dip"
+		android:paddingRight="5dip"
+		android:background="@drawable/arrow"
+		>
+		<include android:id="@+id/score" layout="@layout/stat_box" />
+		<include android:id="@+id/answers" layout="@layout/stat_box" />
+		<include android:id="@+id/views" layout="@layout/stat_box" />
+	</LinearLayout>
+	
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		style="@style/QuestionLink"
+		android:id="@+id/title"
+		/>
+	
+	<HorizontalScrollView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:scrollbars="none"
+		>
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:paddingTop="3dip"
+			android:paddingBottom="3dip"
+			android:paddingLeft="5dip"
+			android:paddingRight="5dip"
+			android:id="@+id/tags"
+			/>
+	</HorizontalScrollView>
+	
+</LinearLayout>

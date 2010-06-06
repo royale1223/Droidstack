@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	android:padding="5dip"
+>
+	<EditText
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:hint="@string/hint_add_site"
+		android:singleLine="true"
+		android:id="@+id/site"
+	/>
+	<EditText
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:hint="@string/hint_add_user"
+		android:inputType="number"
+		android:singleLine="true"
+		android:id="@+id/user"
+	/>
+</LinearLayout>

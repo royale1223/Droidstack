@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="StackTheme" parent="@android:style/Theme.Light" />
+	<style name="SiteLabel" parent="@android:style/TextAppearance.Large">
+		<item name="android:padding">10dip</item>
+		<item name="android:textColor">@android:color/primary_text_light</item>
+	</style>
+	<style name="EmptyList" parent="@android:style/TextAppearance.Large">
+		<item name="android:padding">10dip</item>
+		<item name="android:textColor">@android:color/primary_text_light</item>
+	</style>
+	<style name="StatStyle">
+		<item name="android:layout_marginTop">5dip</item>
+		<item name="android:layout_marginBottom">5dip</item>
+		<item name="android:paddingLeft">5dip</item>
+		<item name="android:paddingRight">5dip</item>
+	</style>
+	<style name="StatNumber" parent="@android:style/TextAppearance.Medium">
+		<item name="android:textStyle">bold</item>
+		<item name="android:paddingRight">5dip</item>
+		<item name="android:textColor">@android:color/primary_text_light</item>
+		<item name="android:gravity">center_vertical</item>
+	</style>
+	<style name="StatLabel" parent="@android:style/TextAppearance.Small">
+		<item name="android:textColor">@android:color/secondary_text_light</item>
+		<item name="android:gravity">center_vertical</item>
+	</style>
+	<style name="QuestionLink" parent="@android:style/TextAppearance.Medium">
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">@color/QuestionLink</item>
+		<item name="android:paddingLeft">5dip</item>
+		<item name="android:paddingRight">5dip</item>
+	</style>
+	<style name="tag" parent="@android:style/TextAppearance.Small">
+		<item name="android:background">#E0EAF1</item>
+		<item name="android:textColor">#3E6D8E</item>
+		<item name="android:paddingLeft">5dip</item>
+		<item name="android:paddingRight">5dip</item>
+		<item name="android:paddingTop">2dip</item>
+		<item name="android:paddingBottom">2dip</item>
+	</style>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Droidstack</string>
+    <string name="menu_add_site">Add site</string>
+    <string name="menu_edit_site">Edit site</string>
+    <string name="menu_set_user">Set/Change user ID</string>
+    <string name="menu_remove">Remove</string>
+    <string name="hint_add_site">stackoverflow.com</string>
+    <string name="hint_add_user">User ID (optional)</string>
+    <string name="no_sites">"You have not added any StackExchange sites yet. To do so, press <b>Menu</b> and select <b>Add site</b>."</string>
+    <string name="user_actions">User-specific actions</string>
+    <string name="no_userid">You need to set a user ID for this site in order to use this feature</string>
+    <string name="title_error">Error</string>
+    <string name="questions_fetch_error">An error has occurred while retrieving the list of questions. Make sure that you have an Internet connection and that you have set up the site correctly and try again in a few moments.</string>
+    <string name="no_questions">No questions were found.</string>
+    <string name="votes">votes</string>
+    <string name="answers">answers</string>
+    <string name="views">views</string>
+</resources>
