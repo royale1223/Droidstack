@@ -14,17 +14,15 @@ public class QuestionsQuery {
 	public final static String QUERY_UNANSWERED = "/questions/unanswered";
 	public final static String QUERY_USER = "/users/{id}/questions";
 	public final static String QUERY_FAVORITES = "/users/{id}/favorites";
-	
-	public final static String SORT_ACTIVE = "active";
+
+	public final static String SORT_ACTIVITY = "activity";
 	public final static String SORT_VOTES = "votes";
-	public final static String SORT_NEWEST = "newest";
+	public final static String SORT_CREATION = "creation";
 	public final static String SORT_FEATURED = "featured";
 	public final static String SORT_HOT = "hot";
 	public final static String SORT_WEEK = "week";
 	public final static String SORT_MONTH = "month";
-	public final static String SORT_ACTIVITY = "activity";
 	public final static String SORT_VIEWS = "views";
-	public final static String SORT_CREATION = "creation";
 	public final static String SORT_ADDED = "added";
 	
 	public final static String ORDER_DESCENDING = "desc";
@@ -34,7 +32,7 @@ public class QuestionsQuery {
 	private final static String KEY_ORDER = "order";
 	private final static String KEY_PAGE = "page";
 	private final static String KEY_PAGESIZE = "pagesize";
-	private final static HashMap<String, String[]> mQuerySortFields = new HashMap<String, String[]>();
+	public final static HashMap<String, String[]> mQuerySortFields = new HashMap<String, String[]>();
 	
 	private final String mQueryType;
 	private long mUserID = 0;
@@ -55,11 +53,11 @@ public class QuestionsQuery {
 		mQueryType = type;
 		
 		mQuerySortFields.put(QUERY_ALL,
-			new String[] { SORT_ACTIVE, SORT_VOTES, SORT_NEWEST, SORT_FEATURED, SORT_HOT, SORT_WEEK, SORT_MONTH });
+			new String[] { SORT_ACTIVITY, SORT_VOTES, SORT_CREATION, SORT_FEATURED, SORT_HOT, SORT_WEEK, SORT_MONTH });
 		mQuerySortFields.put(QUERY_UNANSWERED,
-			new String[] { SORT_NEWEST, SORT_VOTES });
+			new String[] { SORT_CREATION, SORT_VOTES });
 		mQuerySortFields.put(QUERY_USER,
-			new String[] { SORT_ACTIVITY, SORT_CREATION, SORT_VOTES });
+			new String[] { SORT_ACTIVITY, SORT_VIEWS, SORT_CREATION, SORT_VOTES });
 		mQuerySortFields.put(QUERY_FAVORITES,
 			new String[] { SORT_ACTIVITY, SORT_VIEWS, SORT_CREATION, SORT_ADDED, SORT_VOTES });
 	}

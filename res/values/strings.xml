@@ -16,4 +16,5 @@
     <string name="votes">votes</string>
     <string name="answers">answers</string>
     <string name="views">views</string>
+    <string name="menu_sort">Sorting</string>
 </resources>

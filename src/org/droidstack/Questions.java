@@ -18,6 +18,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -100,6 +101,12 @@ public class Questions extends Activity {
 		
 		getQuestions();
 	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+    	getMenuInflater().inflate(R.menu.questions, menu);
+    	return true;
+    }
 	
 	private void getQuestions() {
 		mIsRequestOngoing = true;
