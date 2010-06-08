@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import org.json.JSONArray;
@@ -95,9 +95,9 @@ public class StackAPI {
 	 * @throws MalformedURLException Should never occur, as we are building the URL ourselves. It will occur if you supply a stupid value for <code>host</code> to {@link #StackAPI(String)} or {@link #StackAPI(String, String)}
 	 * @throws JSONException If the site you're querying is fucked up and the json returned is invalid (or it's not json)
 	 */
-	public Set<Question> getQuestions(QuestionsQuery query) throws IOException, MalformedURLException, JSONException {
+	public List<Question> getQuestions(QuestionsQuery query) throws IOException, MalformedURLException, JSONException {
 		int i;
-		final Set<Question> questions = new HashSet<Question>();
+		final List<Question> questions = new ArrayList<Question>();
 		final URL url = buildUrlFromPath(query.buildQueryPath());
 		final JSONObject json = (JSONObject) new JSONTokener(fetchUrlContents(url)).nextValue();
 		final JSONArray jquestions = json.getJSONArray("questions");

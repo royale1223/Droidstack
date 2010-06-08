@@ -2,7 +2,6 @@ package org.droidstack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.droidstack.stackapi.Question;
 import org.droidstack.stackapi.QuestionsQuery;
@@ -19,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
@@ -37,6 +38,7 @@ public class Questions extends Activity {
 	private QuestionsQuery mQuery;
 	private StackAPI mAPI;
 	private Uri mQueryURI;
+	private String mQueryType;
 	private String mSite;
 	private int mPage = 1;
 	private int mPageSize;
@@ -50,6 +52,8 @@ public class Questions extends Activity {
 	private List<Question> mQuestions;
 	private ArrayAdapter<Question> mAdapter;
 	private ListView mListView;
+	private ArrayAdapter<CharSequence> mSortAdapter;
+	private ArrayAdapter<CharSequence> mOrderAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,29 +71,37 @@ public class Questions extends Activity {
 		List<String> path = mQueryURI.getPathSegments();
 		if (path.get(0).equals("questions")) {
 			if (path.size() == 1) {
-				mQuery = new QuestionsQuery(QuestionsQuery.QUERY_ALL);
+				mQueryType = QuestionsQuery.QUERY_ALL;
+				mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 			}
 			else if (path.get(1).equals("unanswered")) {
-				mQuery = new QuestionsQuery(QuestionsQuery.QUERY_UNANSWERED);
+				mQueryType = QuestionsQuery.QUERY_UNANSWERED;
+				mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 			}
 		}
 		else if (path.get(0).equals("users")) {
 			if (path.size() == 3) {
 				mUserID = Long.parseLong(path.get(1));
 				if (path.get(2).equals("questions")) {
-					mQuery = new QuestionsQuery(QuestionsQuery.QUERY_USER).setUser(mUserID);
+					mQueryType = QuestionsQuery.QUERY_USER;
+					mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 				}
 				else if (path.get(2).equals("favorites")) {
-					mQuery = new QuestionsQuery(QuestionsQuery.QUERY_FAVORITES).setUser(mUserID);
+					mQueryType = QuestionsQuery.QUERY_FAVORITES;
+					mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 				}
 			}
 		}
 		
-		if (mQuery == null) {
+		if (mQueryType == null) {
 			Log.e(Const.TAG, "Invalid data URI");
 			finish();
 		}
 		
+		mQuery = new QuestionsQuery(mQueryType).setUser(mUserID);
+		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
+		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mQuery.setPageSize(mPageSize);
 		mAPI = new StackAPI(mSite, Const.APIKEY);
 		mQuestions = new ArrayList<Question>();
@@ -104,8 +116,56 @@ public class Questions extends Activity {
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-    	getMenuInflater().inflate(R.menu.questions, menu);
-    	return true;
+		if (mIsRequestOngoing == false) {
+	    	getMenuInflater().inflate(R.menu.questions, menu);
+	    	return true;
+		}
+		return false;
+    }
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    	case R.id.menu_sort:
+    		AlertDialog.Builder b = new AlertDialog.Builder(this);
+    		b.setTitle(R.string.menu_sort);
+    		View v = getLayoutInflater().inflate(R.layout.questions_menu_sort, null);
+    		final Spinner sort = (Spinner)v.findViewById(R.id.spinner_sort); 
+    		sort.setAdapter(mSortAdapter);
+    		String[] validSortFields = QuestionsQuery.validSortFields.get(mQueryType);
+    		for (int i=0; i < validSortFields.length; i++) {
+    			if (validSortFields[i].equals(mQuery.getSort())) {
+    				sort.setSelection(i);
+    				break;
+    			}
+    		}
+    		final Spinner order = (Spinner)v.findViewById(R.id.spinner_order);
+    		order.setAdapter(mOrderAdapter);
+    		if (mQuery.getOrder().equals(QuestionsQuery.ORDER_DESCENDING)) order.setSelection(0);
+    		if (mQuery.getOrder().equals(QuestionsQuery.ORDER_ASCENDING)) order.setSelection(1);
+    		b.setView(v);
+    		b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// UGLY!! But it's Java, what you gonna do
+					mQuery.setSort(QuestionsQuery.validSortFields.get(mQueryType)[sort.getSelectedItemPosition()]);
+					// a bit hard-coded, but fuck it
+					if (order.getSelectedItemPosition() == 0) {
+						mQuery.setOrder(QuestionsQuery.ORDER_DESCENDING);
+					}
+					else {
+						mQuery.setOrder(QuestionsQuery.ORDER_ASCENDING);
+					}
+					mQuestions.clear();
+					mPage = 1;
+					mQuery.setPage(1);
+					getQuestions();
+				}
+			});
+    		b.setNegativeButton(android.R.string.cancel, null);
+    		b.create().show();
+    		break;
+    	}
+    	return false;
     }
 	
 	private void getQuestions() {
@@ -114,11 +174,11 @@ public class Questions extends Activity {
 		new GetQuestionsAsync().execute(mQuery);
 	}
 	
-	private class GetQuestionsAsync extends AsyncTask<QuestionsQuery, Void, Set<Question>> {
+	private class GetQuestionsAsync extends AsyncTask<QuestionsQuery, Void, List<Question>> {
 		private Exception mException;
 		
 		@Override
-		protected Set<Question> doInBackground(QuestionsQuery... queries) {
+		protected List<Question> doInBackground(QuestionsQuery... queries) {
 			try {
 				return mAPI.getQuestions(queries[0]);
 			}
@@ -129,7 +189,7 @@ public class Questions extends Activity {
 		}
 		
 		@Override
-		protected void onPostExecute(Set<Question> result) {
+		protected void onPostExecute(List<Question> result) {
 			setProgressBarIndeterminateVisibility(false);
 			mIsRequestOngoing = false;
 			if (mException != null) {

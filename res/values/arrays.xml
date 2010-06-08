@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="q_sort_all">
+        <item>Activity</item>
+        <item>Votes</item>
+        <item>Creation</item>
+        <item>Featured</item>
+        <item>Hot</item>
+        <item>Week</item>
+        <item>Month</item>
+    </string-array>
+    
+    <string-array name="q_sort_unanswered">
+        <item>Creation</item>
+        <item>Votes</item>
+    </string-array>
+    
+    <string-array name="q_sort_user">
+        <item>Activity</item>
+        <item>Views</item>
+        <item>Creation</item>
+        <item>Votes</item>
+    </string-array>
+    
+    <string-array name="q_sort_favorites">
+        <item>Activity</item>
+        <item>Views</item>
+        <item>Creation</item>
+        <item>Added</item>
+        <item>Votes</item>
+    </string-array>
+    
+    <string-array name="q_order">
+    	<item>Descending</item>
+    	<item>Ascending</item>
+    </string-array>
+    
+</resources>

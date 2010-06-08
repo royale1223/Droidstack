@@ -32,14 +32,14 @@ public class QuestionsQuery {
 	private final static String KEY_ORDER = "order";
 	private final static String KEY_PAGE = "page";
 	private final static String KEY_PAGESIZE = "pagesize";
-	public final static HashMap<String, String[]> mQuerySortFields = new HashMap<String, String[]>();
+	public final static HashMap<String, String[]> validSortFields = new HashMap<String, String[]>();
 	
 	private final String mQueryType;
-	private long mUserID = 0;
-	private String mSort = null;
-	private String mOrder = null;
-	private int mPage = 0;
-	private int mPageSize = 0;
+	private long mUserID;
+	private String mSort;
+	private String mOrder;
+	private int mPage;
+	private int mPageSize;
 	
 	/**
 	 * Builds a new QuestionQuery object
@@ -52,14 +52,17 @@ public class QuestionsQuery {
 		}
 		mQueryType = type;
 		
-		mQuerySortFields.put(QUERY_ALL,
+		validSortFields.put(QUERY_ALL,
 			new String[] { SORT_ACTIVITY, SORT_VOTES, SORT_CREATION, SORT_FEATURED, SORT_HOT, SORT_WEEK, SORT_MONTH });
-		mQuerySortFields.put(QUERY_UNANSWERED,
+		validSortFields.put(QUERY_UNANSWERED,
 			new String[] { SORT_CREATION, SORT_VOTES });
-		mQuerySortFields.put(QUERY_USER,
+		validSortFields.put(QUERY_USER,
 			new String[] { SORT_ACTIVITY, SORT_VIEWS, SORT_CREATION, SORT_VOTES });
-		mQuerySortFields.put(QUERY_FAVORITES,
+		validSortFields.put(QUERY_FAVORITES,
 			new String[] { SORT_ACTIVITY, SORT_VIEWS, SORT_CREATION, SORT_ADDED, SORT_VOTES });
+		
+		setSort(validSortFields.get(type)[0]);
+		setOrder(ORDER_DESCENDING);
 	}
 	
 	/**
@@ -81,9 +84,9 @@ public class QuestionsQuery {
 	 */
 	public QuestionsQuery setSort(String sort) throws IllegalArgumentException {
 		int i;
-		String[] validSortFields = mQuerySortFields.get(mQueryType);
-		for (i=0; i < validSortFields.length; i++) {
-			if (validSortFields[i].equals(sort)) {
+		String[] sortFields = validSortFields.get(mQueryType);
+		for (i=0; i < sortFields.length; i++) {
+			if (sortFields[i].equals(sort)) {
 				mSort = sort;
 				return this;
 			}
@@ -99,9 +102,10 @@ public class QuestionsQuery {
 	 * @throws IllegalArgumentException If the <b>order</b> parameter is not one of the <code>ORDER_*</code> constants
 	 */
 	public QuestionsQuery setOrder(String order) throws IllegalArgumentException {
-		if (!order.equals(ORDER_DESCENDING) || !order.equals(ORDER_ASCENDING)) {
+		if (!order.equals(ORDER_DESCENDING) && !order.equals(ORDER_ASCENDING)) {
 			throw new IllegalArgumentException("Invalid order specified");
 		}
+		mOrder = order;
 		return this;
 	}
 	
@@ -153,6 +157,22 @@ public class QuestionsQuery {
 			url += "?" + builder.toString();
 		}
 		return url;
+	}
+	
+	/**
+	 * Get the current sort field
+	 * @return One of the <code>SORT_*</code> constants
+	 */
+	public String getSort() {
+		return mSort;
+	}
+	
+	/**
+	 * Get the current order
+	 * @return One of the <code>ORDER_*</code> constants
+	 */
+	public String getOrder() {
+		return mOrder;
 	}
 	
 }

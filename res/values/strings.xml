@@ -17,4 +17,6 @@
     <string name="answers">answers</string>
     <string name="views">views</string>
     <string name="menu_sort">Sorting</string>
+    <string name="dialog_sortby">Sort By</string>
+    <string name="dialog_order">Order</string>
 </resources>
