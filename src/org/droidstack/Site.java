@@ -6,20 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class Site extends Activity {
-	
-	private static final String[] mSiteActions = new String[] {
-		"All questions",
-		"Unanswered",
-		"My questions",
-		"Favorite questions",
-		"My answers"
-	};
 	
 	private static final int POS_ALL = 0;
 	private static final int POS_UNANSWERED = 1;
@@ -31,23 +22,21 @@ public class Site extends Activity {
 	private String mSite;
 	private long mUserID;
 	private ListView mSiteActionsList;
-	private ArrayAdapter<String> mSiteActionsAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.site);
 		
-		mSite = getIntent().getDataString();
+		mSite = getIntent().getData().getHost();
 		setTitle(mSite);
 		
 		mSitesDatabase = new SitesDatabase(getApplicationContext());
 		mUserID = mSitesDatabase.getUserIdForSite(mSite);
+		mSitesDatabase.dispose();
 		
 		mSiteActionsList = (ListView) findViewById(R.id.SiteActionsList);
-		mSiteActionsAdapter = new ArrayAdapter<String>(this, R.layout.action_row, mSiteActions);
 		
-		mSiteActionsList.setAdapter(mSiteActionsAdapter);
 		mSiteActionsList.setOnItemClickListener(onItemClicked);
 	}
 	

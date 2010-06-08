@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+	<string-array name="site_actions">
+		<item>All questions</item>
+		<item>Unanswered</item>
+		<item>My questions</item>
+		<item>Favorite questions</item>
+		<item>My answers</item>
+	</string-array>
+
     <string-array name="q_sort_all">
         <item>Activity</item>
         <item>Votes</item>

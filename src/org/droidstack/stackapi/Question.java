@@ -1,8 +1,8 @@
 package org.droidstack.stackapi;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -11,7 +11,7 @@ import org.json.JSONObject;
 public class Question {
 	
 	public String title;
-	public Set<String> tags;
+	public List<String> tags;
 	public Date created;
 	public Date lastActivity;
 	public long acceptedAnswerID;
@@ -32,7 +32,7 @@ public class Question {
 		title = desc.getString("title");
 		JSONArray jtags = desc.getJSONArray("tags");
 		j = jtags.length();
-		tags = new HashSet<String>(j);
+		tags = new ArrayList<String>(j);
 		for (i=0; i < j; i++) {
 			tags.add(jtags.getString(i));
 		}

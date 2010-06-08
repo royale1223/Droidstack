@@ -38,11 +38,11 @@ public class Sites extends Activity {
         mListView = (ListView) findViewById(R.id.SitesListView);
         mListView.setEmptyView(findViewById(R.id.NoSitesText));
         mAdapter = new SimpleCursorAdapter(
-        	getApplicationContext(),
-        	R.layout.site_row,
+        	this,
+        	android.R.layout.simple_list_item_1,
         	mSites,
         	new String[] { SitesDatabase.KEY_SITE },
-        	new int[] { R.id.SiteTextView }
+        	new int[] { android.R.id.text1 }
         );
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(onSiteClicked);
@@ -65,7 +65,7 @@ public class Sites extends Activity {
 			String site = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_SITE));
 			Intent i = new Intent(getApplicationContext(), Site.class);
 			i.setAction(Intent.ACTION_VIEW);
-			i.setData(Uri.parse(site));
+			i.setData(Uri.parse("stack://" + site + "/"));
 			startActivity(i);
 		}
 	};

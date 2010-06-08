@@ -221,7 +221,6 @@ public class Questions extends Activity {
 		private class ViewHolder {
 			public TextView title;
 			public TextView score;
-			public LinearLayout answerLayout;
 			public TextView answers;
 			public TextView answerLabel;
 			public TextView views;
@@ -247,15 +246,11 @@ public class Questions extends Activity {
 				v = inflater.inflate(R.layout.question_item, null);
 				h = new ViewHolder();
 				h.title = (TextView) v.findViewById(R.id.title);
-				h.score = (TextView) v.findViewById(R.id.score).findViewById(R.id.number);
-				h.answerLayout = (LinearLayout) v.findViewById(R.id.answers); 
-				h.answers = (TextView) h.answerLayout.findViewById(R.id.number);
-				h.answerLabel = (TextView) h.answerLayout.findViewById(R.id.label);
-				h.views = (TextView) v.findViewById(R.id.views).findViewById(R.id.number);
+				h.score = (TextView) v.findViewById(R.id.votesN);
+				h.answers = (TextView) v.findViewById(R.id.answersN);
+				h.answerLabel = (TextView) v.findViewById(R.id.answersL);
+				h.views = (TextView) v.findViewById(R.id.viewsN);
 				h.tags = (LinearLayout) v.findViewById(R.id.tags);
-				((TextView) v.findViewById(R.id.score).findViewById(R.id.label)).setText(R.string.votes);
-				h.answerLabel.setText(R.string.answers);
-				((TextView) v.findViewById(R.id.views).findViewById(R.id.label)).setText(R.string.views);
 				v.setTag(h);
 			}
 			else {
@@ -277,12 +272,14 @@ public class Questions extends Activity {
 			}
 			
 			if (q.answerCount == 0) {
-				h.answerLayout.setBackgroundResource(R.color.no_answers_bg);
+				h.answers.setBackgroundResource(R.color.no_answers_bg);
+				h.answerLabel.setBackgroundResource(R.color.no_answers_bg);
 				h.answers.setTextColor(mResources.getColor(R.color.no_answers_text));
 				h.answerLabel.setTextColor(mResources.getColor(R.color.no_answers_text));
 			}
 			else {
-				h.answerLayout.setBackgroundResource(R.color.some_answers_bg);
+				h.answers.setBackgroundResource(R.color.some_answers_bg);
+				h.answerLabel.setBackgroundResource(R.color.some_answers_bg);
 				if (q.acceptedAnswerID != 0) {
 					h.answers.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 					h.answerLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));

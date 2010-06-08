@@ -4,4 +4,5 @@
 	android:id="@+id/SiteActionsList"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
+	android:entries="@array/site_actions"
 />
