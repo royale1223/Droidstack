@@ -20,6 +20,8 @@ public class Question {
 	public int viewCount;
 	public long id;
 	public int score;
+	public int bounty;
+	public Date bountyEnd;
 	public boolean community;
 	
 	
@@ -46,6 +48,10 @@ public class Question {
 		viewCount = desc.getInt("view_count");
 		id = desc.getLong("question_id");
 		score = desc.getInt("score");
+		if (desc.has("bounty_amount")) {
+			bounty = desc.getInt("bounty_amount");
+			bountyEnd = new Date(desc.getLong("bounty_closes_date"));
+		}
 		community = desc.getBoolean("community_owned");
 	}
 	

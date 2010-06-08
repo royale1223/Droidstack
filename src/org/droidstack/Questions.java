@@ -1,6 +1,7 @@
 package org.droidstack;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.droidstack.stackapi.Question;
@@ -224,6 +225,7 @@ public class Questions extends Activity {
 			public TextView answers;
 			public TextView answerLabel;
 			public TextView views;
+			public TextView bounty;
 			public LinearLayout tags;
 		}
 		
@@ -250,6 +252,7 @@ public class Questions extends Activity {
 				h.answers = (TextView) v.findViewById(R.id.answersN);
 				h.answerLabel = (TextView) v.findViewById(R.id.answersL);
 				h.views = (TextView) v.findViewById(R.id.viewsN);
+				h.bounty = (TextView) v.findViewById(R.id.bounty);
 				h.tags = (LinearLayout) v.findViewById(R.id.tags);
 				v.setTag(h);
 			}
@@ -262,6 +265,12 @@ public class Questions extends Activity {
 			h.score.setText(String.valueOf(q.score));
 			h.answers.setText(String.valueOf(q.answerCount));
 			h.views.setText(String.valueOf(q.viewCount));
+			
+			h.bounty.setVisibility(View.GONE);
+			if (q.bounty != 0 && q.bountyEnd.before(new Date())) {
+				h.bounty.setText("+" + String.valueOf(q.bounty));
+				h.bounty.setVisibility(View.VISIBLE);
+			}
 			
 			h.tags.removeAllViews();
 			for (String tag: q.tags){

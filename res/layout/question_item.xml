@@ -8,51 +8,65 @@
 	android:descendantFocusability="blocksDescendants"
 	>
 	
-	<LinearLayout
+	<HorizontalScrollView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		android:paddingLeft="5dip"
-		android:paddingRight="5dip"
-		android:background="@drawable/arrow"
+		android:scrollbars="none"
 		>
-		<TextView
+		<LinearLayout
 			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatNumber"
-			android:id="@+id/votesN" />
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatLabel"
-			android:id="@+id/votesL"
-			android:text="@string/votes"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatNumber"
-			android:id="@+id/answersN" />
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatLabel"
-			android:id="@+id/answersL"
-			android:text="@string/answers"
-			/>
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatNumber"
-			android:id="@+id/viewsN" />
-		<TextView
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			style="@style/StatLabel"
-			android:id="@+id/viewsL"
-			android:text="@string/views"
-			/>
-	</LinearLayout>
+			android:layout_height="wrap_content"
+			android:orientation="horizontal"
+			android:paddingLeft="5dip"
+			android:paddingRight="5dip"
+			android:background="@drawable/arrow"
+			android:gravity="center_vertical"
+			>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatNumber"
+				android:id="@+id/votesN" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatLabel"
+				android:id="@+id/votesL"
+				android:text="@string/votes"
+				/>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatNumber"
+				android:id="@+id/answersN" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatLabel"
+				android:id="@+id/answersL"
+				android:text="@string/answers"
+				/>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatNumber"
+				android:id="@+id/viewsN" />
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="fill_parent"
+				style="@style/StatLabel"
+				android:id="@+id/viewsL"
+				android:text="@string/views"
+				/>
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:visibility="gone"
+				style="@style/bounty"
+				android:id="@+id/bounty"
+				/>
+		</LinearLayout>
+	</HorizontalScrollView>
 	
 	<TextView
 		android:layout_width="wrap_content"
