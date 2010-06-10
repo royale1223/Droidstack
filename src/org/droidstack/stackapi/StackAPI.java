@@ -27,29 +27,41 @@ public class StackAPI {
 	 */
 	public final static String API_VERSION = "0.8";
 	
-	private final String mHost;
+	private final String mEndpoint;
 	private final String mKey;
 	
 	
 	/**
 	 * Create a StackAPI object without an API key.
-	 * @param host The hostname to which API calls are made (e.g. "api.stackoverflow.com")
+	 * @param endpoint The API endpoint to use
+	 * @see #getEndpoint(String)
 	 */
-	public StackAPI(String host) {
-		mHost = host;
+	public StackAPI(String endpoint) {
+		mEndpoint = endpoint;
 		mKey = null;
 	}
+	
 	/**
 	 * Create a StackAPI object.
-	 * @param host The hostname to which API calls are made (e.g. "api.stackoverflow.com")
-	 * @param key The API key to use in these requests.
+	 * @param host The API endpoint to use
+	 * @param key The API key to use in API calls
+	 * @see #getEndpoint(String)
 	 */
 	public StackAPI(String host, String key) {
-		mHost = host;
+		mEndpoint = host;
 		mKey = key;
 	}
 	
-	private String fetchUrlContents(URL url) throws IOException {
+	/**
+	 * Resolve the API endpoint for a certain domain
+	 * @param domain
+	 * @return the endpoint as a string
+	 */
+	public static String getEndpoint(String domain) {
+		return "http://api." + domain + "/";
+	}
+	
+	private static String fetchURL(URL url) throws IOException {
 		final URLConnection conn = url.openConnection();
 		conn.connect();
 		final InputStream in;
@@ -78,13 +90,18 @@ public class StackAPI {
 		return builder.toString();
 	}
 	
-	private URL buildUrlFromPath(String path) throws MalformedURLException {
-		String url = "http://" + mHost + "/" + String.valueOf(API_VERSION) + path;
+	private URL buildURL(String path) throws MalformedURLException {
+		String url = mEndpoint + String.valueOf(API_VERSION) + path;
 		if (mKey != null) {
 			if (url.indexOf('?') == -1) url += "?key=" + mKey;
 			else url += "&key=" + mKey;
 		}
 		return new URL(url);
+	}
+	
+	public Stats getStats() throws IOException, MalformedURLException, JSONException {
+		final JSONObject json = (JSONObject) new JSONTokener(fetchURL(buildURL("/stats"))).nextValue();
+		return new Stats(json);
 	}
 	
 	/**
@@ -98,8 +115,8 @@ public class StackAPI {
 	public List<Question> getQuestions(QuestionsQuery query) throws IOException, MalformedURLException, JSONException {
 		int i;
 		final List<Question> questions = new ArrayList<Question>();
-		final URL url = buildUrlFromPath(query.buildQueryPath());
-		final JSONObject json = (JSONObject) new JSONTokener(fetchUrlContents(url)).nextValue();
+		final URL url = buildURL(query.buildQueryPath());
+		final JSONObject json = (JSONObject) new JSONTokener(fetchURL(url)).nextValue();
 		final JSONArray jquestions = json.getJSONArray("questions");
 		for (i=0; i < jquestions.length(); i++) {
 			questions.add(new Question(jquestions.getJSONObject(i)));

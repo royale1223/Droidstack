@@ -1,16 +1,23 @@
 package org.droidstack;
 
+import org.droidstack.stackapi.StackAPI;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -26,12 +33,15 @@ public class Sites extends Activity {
 	private ListView mListView;
 	private SimpleCursorAdapter mAdapter;
 	private View mAddSiteDialogView;
+	private Context mContext;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sites);
-        mSitesDatabase = new SitesDatabase(getApplicationContext());
+        mContext = (Context) this;
+        mSitesDatabase = new SitesDatabase(mContext);
         mSites = mSitesDatabase.getSites();
         startManagingCursor(mSites);
         
@@ -41,7 +51,7 @@ public class Sites extends Activity {
         	this,
         	android.R.layout.simple_list_item_1,
         	mSites,
-        	new String[] { SitesDatabase.KEY_SITE },
+        	new String[] { SitesDatabase.KEY_NAME },
         	new int[] { android.R.id.text1 }
         );
         mListView.setAdapter(mAdapter);
@@ -62,10 +72,10 @@ public class Sites extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			mSites.moveToPosition(position);
-			String site = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_SITE));
-			Intent i = new Intent(getApplicationContext(), Site.class);
+			String domain = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_DOMAIN));
+			Intent i = new Intent(mContext, Site.class);
 			i.setAction(Intent.ACTION_VIEW);
-			i.setData(Uri.parse("stack://" + site + "/"));
+			i.setData(Uri.parse("stack://" + domain + "/"));
 			startActivity(i);
 		}
 	};
@@ -76,8 +86,8 @@ public class Sites extends Activity {
     	if (v.getId() == R.id.SitesListView) {
     		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
     		mSites.moveToPosition(info.position);
-    		String site = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_SITE));
-    		menu.setHeaderTitle(site);
+    		String domain = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_DOMAIN));
+    		menu.setHeaderTitle(domain);
     		getMenuInflater().inflate(R.menu.sites_context, menu);
     	}
 	}
@@ -86,14 +96,13 @@ public class Sites extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		mSites.moveToPosition(info.position);
-		String site = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_SITE));
-		long userID = mSites.getLong(mSites.getColumnIndex(SitesDatabase.KEY_UID));
+		String domain = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_DOMAIN));
 		switch(item.getItemId()) {
 		case R.id.menu_set_user:
-			addOrEditSite(site, userID);
+			addOrEditSite(info.position);
 			return true;
 		case R.id.menu_remove:
-			mSitesDatabase.removeSite(site);
+			mSitesDatabase.removeSite(domain);
 			mSites.requery();
 			mAdapter.notifyDataSetChanged();
 			return true;
@@ -110,56 +119,117 @@ public class Sites extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.menu_add_site:
-    		addOrEditSite(null, 0);
+    		addOrEditSite(-1);
     		break;
     	}
     	return false;
     }
     
-    private void addOrEditSite(String site, long userID) {
+    private void addOrEditSite(int position) {
+    	final int pos = position;
     	AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-    	if (site == null) {
-    		dialog.setTitle(R.string.menu_add_site);
-    	}
-    	else {
-    		dialog.setTitle(R.string.menu_edit_site);
-    	}
-		mAddSiteDialogView = getLayoutInflater().inflate(R.layout.add_site, null);
+    	mAddSiteDialogView = getLayoutInflater().inflate(R.layout.add_site, null);
 		EditText siteEdit = (EditText) mAddSiteDialogView.findViewById(R.id.site);
 		EditText userEdit = (EditText) mAddSiteDialogView.findViewById(R.id.user);
-		if (site != null) {
-			siteEdit.setText(site);
+		
+    	if (pos != -1) {
+    		mSites.moveToPosition(pos);
+    		String domain = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_DOMAIN));
+    		long userID = mSites.getLong(mSites.getColumnIndex(SitesDatabase.KEY_UID));
+    		
+    		dialog.setTitle(R.string.menu_edit_site);
+    		siteEdit.setText(domain);
 			siteEdit.setEnabled(false);
 			siteEdit.clearFocus();
 			userEdit.requestFocus();
-		}
-		else {
-			siteEdit.setText("");
+			if (userID != 0) {
+				userEdit.setText(String.valueOf(userID));
+			}
+    	}
+    	else {
+    		dialog.setTitle(R.string.menu_add_site);
+    		siteEdit.setText("");
 			siteEdit.setEnabled(true);
-		}
-		if (userID != 0) {
-			userEdit.setText(String.valueOf(userID));
-		}
-		else {
-			userEdit.setText("");
-		}
+    	}
 		dialog.setView(mAddSiteDialogView);
 		dialog.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				String site = ((EditText)mAddSiteDialogView.findViewById(R.id.site)).getText().toString();
+				String domain = ((EditText)mAddSiteDialogView.findViewById(R.id.site)).getText().toString();
 				long userID = 0;
 				try {
 					userID = Long.parseLong(((EditText)mAddSiteDialogView.findViewById(R.id.user)).getText().toString(), 10);
 				}
 				catch (Exception e) { }
-				mSitesDatabase.addSite(site, userID);
-				mSites.requery();
-				mAdapter.notifyDataSetChanged();
+				if (pos != -1) {
+					mSites.moveToPosition(pos);
+					String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
+					String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+					mSitesDatabase.addSite(domain, name, userID, endpoint);
+					mSites.requery();
+					mAdapter.notifyDataSetChanged();
+				}
+				else {
+					ContentValues cv = new ContentValues();
+					cv.put(SitesDatabase.KEY_DOMAIN, domain);
+					cv.put(SitesDatabase.KEY_UID, userID);
+					new AddSiteTask().execute(cv);
+				}
 			}
 		});
 		dialog.setNegativeButton(android.R.string.cancel, null);
 		dialog.show();
+    }
+    
+    private class AddSiteTask extends AsyncTask<ContentValues, Void, ContentValues> {
+    	
+    	private Exception mException;
+    	
+    	@Override
+		protected void onPreExecute() {
+			setProgressBarIndeterminateVisibility(true);
+		}
+
+		@Override
+		protected ContentValues doInBackground(ContentValues... params) {
+			ContentValues cv = params[0];
+			String domain = cv.getAsString(SitesDatabase.KEY_DOMAIN);
+			try {
+				String endpoint = StackAPI.getEndpoint(domain);
+				StackAPI api = new StackAPI(endpoint, Const.APIKEY);
+				String name = api.getStats().displayName;
+				
+				cv.put(SitesDatabase.KEY_NAME, name);
+				cv.put(SitesDatabase.KEY_ENDPOINT, endpoint);
+			}
+			catch (Exception e) {
+				mException = e;
+			}
+			return cv;
+		}
+
+		@Override
+		protected void onPostExecute(ContentValues result) {
+			setProgressBarIndeterminateVisibility(false);
+			if (mException != null) {
+				new AlertDialog.Builder(mContext)
+				.setTitle(R.string.title_error)
+				.setMessage(R.string.site_add_error)
+				.setNeutralButton(android.R.string.ok, null)
+				.create().show();
+				Log.e(Const.TAG, "Exception: " + mException.getMessage());
+			}
+			else {
+				String domain = result.getAsString(SitesDatabase.KEY_DOMAIN);
+				String name = result.getAsString(SitesDatabase.KEY_NAME);
+				long userID = result.getAsLong(SitesDatabase.KEY_UID);
+				String endpoint = result.getAsString(SitesDatabase.KEY_ENDPOINT);
+				mSitesDatabase.addSite(domain, name, userID, endpoint);
+				mSites.requery();
+				mAdapter.notifyDataSetChanged();
+			}
+		}
+    	
     }
     
 }

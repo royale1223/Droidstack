@@ -19,7 +19,8 @@ public class Site extends Activity {
 	private static final int POS_MY_ANSWERS = 4;
 	
 	private SitesDatabase mSitesDatabase;
-	private String mSite;
+	private String mDomain;
+	private String mSiteName;
 	private long mUserID;
 	private ListView mSiteActionsList;
 	
@@ -28,12 +29,14 @@ public class Site extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.site);
 		
-		mSite = getIntent().getData().getHost();
-		setTitle(mSite);
+		mDomain = getIntent().getData().getHost();
 		
 		mSitesDatabase = new SitesDatabase(getApplicationContext());
-		mUserID = mSitesDatabase.getUserIdForSite(mSite);
+		mUserID = mSitesDatabase.getUserID(mDomain);
+		mSiteName = mSitesDatabase.getName(mDomain);
 		mSitesDatabase.dispose();
+		
+		setTitle(mSiteName);
 		
 		mSiteActionsList = (ListView) findViewById(R.id.SiteActionsList);
 		
@@ -48,12 +51,12 @@ public class Site extends Activity {
 			case POS_ALL:
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mSite + "/questions"));
+				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/questions"));
 				break;
 			case POS_UNANSWERED:
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mSite + "/questions/unanswered"));
+				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/questions/unanswered"));
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {
@@ -64,7 +67,7 @@ public class Site extends Activity {
 				}
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mSite + "/users/" + mUserID + "/questions"));
+				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/users/" + mUserID + "/questions"));
 				break;
 			case POS_FAVORITES:
 				if (mUserID == 0) {
@@ -75,7 +78,7 @@ public class Site extends Activity {
 				}
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mSite + "/users/" + mUserID + "/favorites"));
+				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/users/" + mUserID + "/favorites"));
 				break;
 			case POS_MY_ANSWERS:
 				if (mUserID == 0) {

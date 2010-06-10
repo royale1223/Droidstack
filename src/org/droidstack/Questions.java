@@ -38,9 +38,12 @@ public class Questions extends Activity {
 	
 	private QuestionsQuery mQuery;
 	private StackAPI mAPI;
+	private SitesDatabase mSitesDatabase;
 	private Uri mQueryURI;
 	private String mQueryType;
-	private String mSite;
+	private String mDomain;
+	private String mEndpoint;
+	private String mSiteName;
 	private int mPage = 1;
 	private int mPageSize;
 	private long mUserID = 0;
@@ -67,16 +70,18 @@ public class Questions extends Activity {
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
 		
 		mQueryURI = getIntent().getData();
-		
-		mSite = "api." + mQueryURI.getHost();
+		mDomain = mQueryURI.getHost();
 		List<String> path = mQueryURI.getPathSegments();
+		String title = null;
 		if (path.get(0).equals("questions")) {
 			if (path.size() == 1) {
 				mQueryType = QuestionsQuery.QUERY_ALL;
+				title = "All Questions";
 				mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 			}
 			else if (path.get(1).equals("unanswered")) {
 				mQueryType = QuestionsQuery.QUERY_UNANSWERED;
+				title = "Unanswered Questions";
 				mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 			}
 		}
@@ -85,10 +90,12 @@ public class Questions extends Activity {
 				mUserID = Long.parseLong(path.get(1));
 				if (path.get(2).equals("questions")) {
 					mQueryType = QuestionsQuery.QUERY_USER;
+					title = "User #" + String.valueOf(mUserID) + "'s questions";
 					mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 				}
 				else if (path.get(2).equals("favorites")) {
 					mQueryType = QuestionsQuery.QUERY_FAVORITES;
+					title = "User #" + String.valueOf(mUserID) + "'s favorites";
 					mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 				}
 			}
@@ -99,18 +106,26 @@ public class Questions extends Activity {
 			finish();
 		}
 		
+		mSitesDatabase = new SitesDatabase(mContext);
+		mEndpoint = mSitesDatabase.getEndpoint(mDomain);
+		mSiteName = mSitesDatabase.getName(mDomain);
+		mSitesDatabase.dispose();
+		mAPI = new StackAPI(mEndpoint, Const.APIKEY);
 		mQuery = new QuestionsQuery(mQueryType).setUser(mUserID);
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mQuery.setPageSize(mPageSize);
-		mAPI = new StackAPI(mSite, Const.APIKEY);
 		mQuestions = new ArrayList<Question>();
 		mAdapter = new QuestionsListAdapter<Question>(getApplicationContext(), 0, mQuestions);
 		mListView = (ListView)findViewById(R.id.questions);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(onQuestionClicked);
 		mListView.setOnScrollListener(onQuestionsScrolled);
+		
+		if (title != null) title = mSiteName + ": " + title;
+		else title = mSiteName;
+		setTitle(title);
 		
 		getQuestions();
 	}

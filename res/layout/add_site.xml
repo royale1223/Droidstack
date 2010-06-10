@@ -11,6 +11,7 @@
 		android:layout_height="fill_parent"
 		android:hint="@string/hint_add_site"
 		android:singleLine="true"
+		android:inputType="textUri"
 		android:id="@+id/site"
 	/>
 	<EditText
