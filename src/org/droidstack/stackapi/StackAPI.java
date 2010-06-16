@@ -52,13 +52,14 @@ public class StackAPI {
 		mKey = key;
 	}
 	
-	/**
-	 * Resolve the API endpoint for a certain domain
-	 * @param domain
-	 * @return the endpoint as a string
-	 */
-	public static String getEndpoint(String domain) {
-		return "http://api." + domain + "/";
+	public static List<Site> getSites() throws IOException, MalformedURLException, JSONException {
+		ArrayList<Site> sites = new ArrayList<Site>();
+		// hard-coding FTW.. have a better idea? contribute! :)
+		JSONArray jsites = ((JSONObject)new JSONTokener(fetchURL(new URL("http://stackauth.com/" + API_VERSION + "/sites"))).nextValue()).getJSONArray("api_sites");
+		for (int i=0; i < jsites.length(); i++) {
+			sites.add(new Site(jsites.getJSONObject(i)));
+		}
+		return sites;
 	}
 	
 	private static String fetchURL(URL url) throws IOException {
@@ -99,6 +100,13 @@ public class StackAPI {
 		return new URL(url);
 	}
 	
+	/**
+	 * Get this site's statistics
+	 * @return a {@link Stats} object
+	 * @throws IOException
+	 * @throws MalformedURLException
+	 * @throws JSONException
+	 */
 	public Stats getStats() throws IOException, MalformedURLException, JSONException {
 		final JSONObject json = (JSONObject) new JSONTokener(fetchURL(buildURL("/stats"))).nextValue();
 		return new Stats(json);
@@ -122,6 +130,20 @@ public class StackAPI {
 			questions.add(new Question(jquestions.getJSONObject(i)));
 		}
 		return questions;
+	}
+	
+	/**
+	 * Gets a user by their ID
+	 * @param id the user's ID
+	 * @return a {@link User} object
+	 * @throws IOExceptionIf there's a problem communicating with the server (this includes invalid API key)
+	 * @throws MalformedURLException Should never occur, as we are building the URL ourselves. It will occur if you supply a stupid value for <code>host</code> to {@link #StackAPI(String)} or {@link #StackAPI(String, String)}
+	 * @throws JSONException If the site you're querying is fucked up and the json returned is invalid (or it's not json)
+	 */
+	public User getUser(long id) throws IOException, MalformedURLException, JSONException {
+		final URL url = buildURL("/users/" + String.valueOf(id));
+		final JSONObject json = (JSONObject) new JSONTokener(fetchURL(url)).nextValue();
+		return new User(json.getJSONArray("users").getJSONObject(0));
 	}
 	
 }

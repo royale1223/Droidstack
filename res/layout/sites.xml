@@ -12,9 +12,15 @@
 		android:layout_centerInParent="true"
 		android:text="@string/no_sites"
 	/>
-	<ListView
+	<GridView
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:id="@+id/SitesListView"
+		android:verticalSpacing="10dip"
+		android:horizontalSpacing="10dip"
+		android:numColumns="auto_fit"
+		android:stretchMode="columnWidth"
+		android:gravity="center"
+		android:scrollbarStyle="insideInset"
+		android:id="@+id/sites"
 	/>
 </RelativeLayout>

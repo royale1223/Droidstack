@@ -18,6 +18,11 @@ public class Stats {
 	public final String apiVersion;
 	public final String apiRevision;
 	public final String name;
+	public final String logo;
+	public final String endpoint;
+	public final String url;
+	public final String description;
+	public final String icon;
 	
 	public Stats(JSONObject json) throws JSONException {
 		json = json.getJSONArray("statistics").getJSONObject(0);
@@ -38,6 +43,11 @@ public class Stats {
 		
 		JSONObject site = json.getJSONObject("site");
 		name = site.getString("name");
+		logo = site.getString("logo_url");
+		endpoint = site.getString("api_endpoint");
+		url = site.getString("site_url");
+		description = site.getString("description");
+		icon = site.getString("icon_url");
 	}
 	
 }

@@ -1,5 +1,7 @@
 package org.droidstack;
 
+import org.droidstack.stackapi.QuestionsQuery;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,7 +12,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class Site extends Activity {
+public class SiteActions extends Activity {
 	
 	private static final int POS_ALL = 0;
 	private static final int POS_UNANSWERED = 1;
@@ -19,8 +21,9 @@ public class Site extends Activity {
 	private static final int POS_MY_ANSWERS = 4;
 	
 	private SitesDatabase mSitesDatabase;
-	private String mDomain;
+	private int mSiteID;
 	private String mSiteName;
+	private String mUserName;
 	private long mUserID;
 	private ListView mSiteActionsList;
 	
@@ -29,11 +32,12 @@ public class Site extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.site);
 		
-		mDomain = getIntent().getData().getHost();
+		mSiteID = getIntent().getIntExtra(SitesDatabase.KEY_ID, -1);
 		
 		mSitesDatabase = new SitesDatabase(getApplicationContext());
-		mUserID = mSitesDatabase.getUserID(mDomain);
-		mSiteName = mSitesDatabase.getName(mDomain);
+		mUserID = mSitesDatabase.getUserID(mSiteID);
+		mSiteName = mSitesDatabase.getName(mSiteID);
+		mUserName = mSitesDatabase.getUserName(mSiteID);
 		mSitesDatabase.dispose();
 		
 		setTitle(mSiteName);
@@ -51,12 +55,12 @@ public class Site extends Activity {
 			case POS_ALL:
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/questions"));
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_ALL);
 				break;
 			case POS_UNANSWERED:
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/questions/unanswered"));
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_UNANSWERED);
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {
@@ -67,7 +71,9 @@ public class Site extends Activity {
 				}
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/users/" + mUserID + "/questions"));
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_USER);
+				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
+				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
 				break;
 			case POS_FAVORITES:
 				if (mUserID == 0) {
@@ -78,7 +84,9 @@ public class Site extends Activity {
 				}
 				whatToLaunch = new Intent(getApplicationContext(), Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.setData(Uri.parse("stack://" + mDomain + "/users/" + mUserID + "/favorites"));
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_FAVORITES);
+				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
+				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
 				break;
 			case POS_MY_ANSWERS:
 				if (mUserID == 0) {
@@ -90,7 +98,10 @@ public class Site extends Activity {
 				// TODO: Implement
 				break;
 			}
-			if (whatToLaunch != null) startActivity(whatToLaunch);
+			if (whatToLaunch != null) {
+				whatToLaunch.putExtra(SitesDatabase.KEY_ID, mSiteID);
+				startActivity(whatToLaunch);
+			}
 		}
 	};
 	
