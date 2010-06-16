@@ -17,7 +17,7 @@ public class Stats {
 	public final double badgesPerMinute;
 	public final String apiVersion;
 	public final String apiRevision;
-	public final String displayName;
+	public final String name;
 	
 	public Stats(JSONObject json) throws JSONException {
 		json = json.getJSONArray("statistics").getJSONObject(0);
@@ -36,7 +36,8 @@ public class Stats {
 		apiVersion = json.getJSONObject("api_version").getString("version");
 		apiRevision = json.getJSONObject("api_version").getString("revision");
 		
-		displayName = json.getString("display_name");
+		JSONObject site = json.getJSONObject("site");
+		name = site.getString("name");
 	}
 	
 }

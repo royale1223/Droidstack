@@ -197,7 +197,7 @@ public class Sites extends Activity {
 			try {
 				String endpoint = StackAPI.getEndpoint(domain);
 				StackAPI api = new StackAPI(endpoint, Const.APIKEY);
-				String name = api.getStats().displayName;
+				String name = api.getStats().name;
 				
 				cv.put(SitesDatabase.KEY_NAME, name);
 				cv.put(SitesDatabase.KEY_ENDPOINT, endpoint);
