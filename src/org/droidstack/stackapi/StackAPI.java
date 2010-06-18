@@ -92,7 +92,7 @@ public class StackAPI {
 	}
 	
 	private URL buildURL(String path) throws MalformedURLException {
-		String url = mEndpoint + String.valueOf(API_VERSION) + path;
+		String url = mEndpoint + "/" + String.valueOf(API_VERSION) + path;
 		if (mKey != null) {
 			if (url.indexOf('?') == -1) url += "?key=" + mKey;
 			else url += "&key=" + mKey;
