@@ -5,12 +5,12 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.droidstack.stackapi.Site;
 import org.droidstack.stackapi.StackAPI;
+import org.droidstack.stackapi.Stats;
 import org.droidstack.stackapi.User;
 
 import android.app.Activity;
@@ -23,6 +23,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -92,6 +93,20 @@ public class Sites extends Activity {
         	}
         }
         
+        ArrayList<String> missing = new ArrayList<String>();
+        mSites.moveToFirst();
+        while (!mSites.isAfterLast()) {
+        	String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+        	File icon = new File(mIcons, Uri.parse(endpoint).getHost());
+        	if (!icon.exists()) {
+        		missing.add(endpoint);
+        	}
+        	mSites.moveToNext();
+        }
+        if (missing.size() != 0) {
+        	new FetchMissingIconsTask().execute(missing);
+        }
+        
     }
     
     private void externalMediaError() {
@@ -150,21 +165,7 @@ public class Sites extends Activity {
 			}
 			h.label.setText(name);
 			
-			try {
-				MessageDigest md5 = MessageDigest.getInstance("MD5");
-				md5.reset();
-				md5.update(endpoint.getBytes());
-				byte[] hash = md5.digest();
-				StringBuilder hexHash = new StringBuilder();
-				for (int i=0; i < hash.length; i++) {
-					hexHash.append(Integer.toHexString(0xFF & hash[i]));
-				}
-				Drawable icon = Drawable.createFromPath(new File(mIcons, hexHash.toString()).getAbsolutePath());
-				h.icon.setImageDrawable(icon);
-			}
-			catch (NoSuchAlgorithmException e) {
-				// wtf?
-			}
+			h.icon.setImageDrawable(Drawable.createFromPath(new File(mIcons, Uri.parse(endpoint).getHost()).getAbsolutePath()));
 			return v;
 		}
     	
@@ -244,6 +245,66 @@ public class Sites extends Activity {
     		break;
     	}
     	return false;
+    }
+    
+    private class FetchMissingIconsTask extends AsyncTask<List<String>, Void, Void> {
+    	
+    	private Exception mException;
+    	private ProgressDialog progressDialog;
+    	
+    	@Override
+    	protected void onPreExecute() {
+    		setProgressBarIndeterminateVisibility(true);
+			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+    	}
+
+		@Override
+		protected Void doInBackground(List<String>... params) {
+			List<String> endpoints = params[0];
+			try {
+				for (String endpoint: endpoints) {
+					StackAPI api = new StackAPI(endpoint, Const.APIKEY);
+					Stats site = api.getStats();
+					InputStream in = new URL(site.icon).openStream();
+					OutputStream out = new FileOutputStream(new File(mIcons, Uri.parse(endpoint).getHost()));
+					byte[] buf = new byte[1024];
+					int len;
+					while ((len = in.read(buf)) > 0) {
+						out.write(buf, 0, len);
+					}
+					in.close();
+					out.close();
+				}
+			}
+			catch(Exception e) {
+				mException = e;
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void params) {
+			setProgressBarIndeterminateVisibility(false);
+			progressDialog.dismiss();
+			if (mException != null) {
+				Log.e(Const.TAG, "Error refreshing site icons", mException);
+				new AlertDialog.Builder(mContext)
+					.setTitle(R.string.title_error)
+					.setMessage(R.string.icons_refresh_error)
+					.setCancelable(false)
+					.setNeutralButton(android.R.string.ok, new OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							finish();
+						}
+					})
+					.create().show();
+			}
+			else {
+				mSites.requery();
+				mAdapter.notifyDataSetChanged();
+			}
+		}
     }
     
     private class SetUserIDTask extends AsyncTask<Void, Void, User> {
@@ -385,18 +446,8 @@ public class Sites extends Activity {
 		protected Void doInBackground(Site... params) {
 			site = params[0];
 			try {
-				MessageDigest md5 = MessageDigest.getInstance("MD5");
-				md5.reset();
-				md5.update(site.api_endpoint.getBytes());
-				byte[] hash = md5.digest();
-				StringBuilder hexHash = new StringBuilder();
-				for (int i=0; i < hash.length; i++) {
-					hexHash.append(Integer.toHexString(0xFF & hash[i]));
-				}
-				
-				File icon = new File(mIcons, hexHash.toString());
 				InputStream in = new URL(site.icon_url).openStream();
-				OutputStream out = new FileOutputStream(icon);
+				OutputStream out = new FileOutputStream(new File(mIcons, Uri.parse(site.api_endpoint).getHost()));
 				byte[] buf = new byte[1024];
 				int len;
 				while ((len = in.read(buf)) > 0) {
