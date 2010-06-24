@@ -132,6 +132,18 @@ public class StackAPI {
 		return questions;
 	}
 	
+	public List<Answer> getAnswers(AnswersQuery query) throws IOException, MalformedURLException, JSONException {
+		int i;
+		final List<Answer> answers = new ArrayList<Answer>();
+		final URL url = buildURL(query.buildQueryPath());
+		final JSONObject json = (JSONObject) new JSONTokener(fetchURL(url)).nextValue();
+		final JSONArray janswers = json.getJSONArray("answers");
+		for (i=0; i < janswers.length(); i++) {
+			answers.add(new Answer(janswers.getJSONObject(i)));
+		}
+		return answers;
+	}
+	
 	/**
 	 * Gets a user by their ID
 	 * @param id the user's ID

@@ -6,4 +6,13 @@
 	<color name="some_answers_bg">#75845C</color>
 	<color name="some_answers_text">#FFF</color>
 	<color name="answer_accepted_text">#E1E818</color>
+	
+	<color name="score_low_bg">#9A4444</color>
+	<color name="score_low_text">#FFF</color>
+	<color name="score_neutral_bg">#EEE</color>
+	<color name="score_neutral_text">#555</color>
+	<color name="score_high_bg">#75845C</color>
+	<color name="score_high_text">#FFF</color>
+	<color name="score_max_bg">#75845C</color>
+	<color name="score_max_text">#E1E818</color>
 </resources>

@@ -84,7 +84,6 @@ public class Questions extends Activity {
 		try {
 			mQuery = new QuestionsQuery(mQueryType).setUser(mUserID);
 		}
-		
 		catch (Exception e) {
 			Log.e(Const.TAG, "Invalid invocation", e);
 			finish();
@@ -113,7 +112,7 @@ public class Questions extends Activity {
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mQuery.setPageSize(mPageSize);
 		mQuestions = new ArrayList<Question>();
-		mAdapter = new QuestionsListAdapter<Question>(getApplicationContext(), 0, mQuestions);
+		mAdapter = new QuestionsListAdapter<Question>(mContext, 0, mQuestions);
 		mListView = (ListView)findViewById(R.id.questions);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(onQuestionClicked);
@@ -132,12 +131,13 @@ public class Questions extends Activity {
 		return false;
     }
 	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
     	case R.id.menu_sort:
     		AlertDialog.Builder b = new AlertDialog.Builder(this);
     		b.setTitle(R.string.menu_sort);
-    		View v = getLayoutInflater().inflate(R.layout.questions_menu_sort, null);
+    		View v = getLayoutInflater().inflate(R.layout.menu_sort, null);
     		final Spinner sort = (Spinner)v.findViewById(R.id.spinner_sort); 
     		sort.setAdapter(mSortAdapter);
     		String[] validSortFields = QuestionsQuery.validSortFields.get(mQueryType);
@@ -164,6 +164,7 @@ public class Questions extends Activity {
 					else {
 						mQuery.setOrder(QuestionsQuery.ORDER_ASCENDING);
 					}
+					mNoMoreQuestions = false;
 					mQuestions.clear();
 					mPage = 1;
 					mQuery.setPage(1);
@@ -218,6 +219,10 @@ public class Questions extends Activity {
 				if (result.size() < mPageSize) mNoMoreQuestions = true;
 				mQuestions.addAll(result);
 				mAdapter.notifyDataSetChanged();
+				if (mQuestions.size() == 0) {
+					findViewById(R.id.empty).setVisibility(View.VISIBLE);
+					mListView.setVisibility(View.GONE);
+				}
 			}
 		}
 	}
