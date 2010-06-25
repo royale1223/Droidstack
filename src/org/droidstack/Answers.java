@@ -3,11 +3,10 @@ package org.droidstack;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.droidstack.stackapi.Answer;
-import org.droidstack.stackapi.AnswersQuery;
-import org.droidstack.stackapi.QuestionsQuery;
-import org.droidstack.stackapi.StackAPI;
-
+import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Answer;
+import net.sf.stackwrap4j.enums.Order;
+import net.sf.stackwrap4j.query.AnswerQuery;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -33,9 +32,9 @@ import android.widget.AbsListView.OnScrollListener;
 public class Answers extends Activity {
 	
 	public final static String INTENT_TYPE = "type";
+	public final static String TYPE_USER = "user";
 	
-	private AnswersQuery mQuery;
-	private StackAPI mAPI;
+	private StackWrapper mAPI;
 	private SitesDatabase mSitesDatabase;
 	private int mSiteID;
 	private String mQueryType;
@@ -43,10 +42,12 @@ public class Answers extends Activity {
 	private String mSiteName;
 	private int mPage = 1;
 	private int mPageSize;
-	private long mUserID = 0;
+	private int mUserID = 0;
 	private String mUserName;
 	private boolean mNoMoreAnswers = false;
 	private boolean mIsRequestOngoing = true;
+	private int mSort = -1;
+	private Order mOrder = Order.DESC;
 	
 	private List<Answer> mAnswers;
 	private ArrayAdapter<Answer> mAdapter;
@@ -71,27 +72,19 @@ public class Answers extends Activity {
 		Intent launchParams = getIntent();
 		mQueryType = launchParams.getStringExtra(INTENT_TYPE);
 		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
-		mUserID = launchParams.getLongExtra(SitesDatabase.KEY_UID, 0);
+		mUserID = launchParams.getIntExtra(SitesDatabase.KEY_UID, 0);
 		mUserName = launchParams.getStringExtra(SitesDatabase.KEY_UNAME);
 		mSitesDatabase = new SitesDatabase(mContext);
 		mEndpoint = mSitesDatabase.getEndpoint(mSiteID);
 		mSiteName = mSitesDatabase.getName(mSiteID);
 		mSitesDatabase.dispose();
 		
-		try {
-			mQuery = new AnswersQuery(mQueryType).setUser(mUserID).setPageSize(mPageSize);
-		}
-		catch (Exception e) {
-			Log.e(Const.TAG, "Invalid invocation", e);
-			finish();
-		}
-		
-		if (mQueryType.equals(AnswersQuery.QUERY_USER)) {
+		if (mQueryType.equals(TYPE_USER)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_user_answers).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.a_sort_user, android.R.layout.simple_spinner_item);
 		}
 		
-		mAPI = new StackAPI(mEndpoint, Const.APIKEY);
+		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		mAnswers = new ArrayList<Answer>();
 		mAdapter = new AnswersListAdapter<Answer>(mContext, 0, mAnswers);
 		mListView = (ListView) findViewById(R.id.answers);
@@ -123,32 +116,23 @@ public class Answers extends Activity {
     		View v = getLayoutInflater().inflate(R.layout.menu_sort, null);
     		final Spinner sort = (Spinner)v.findViewById(R.id.spinner_sort); 
     		sort.setAdapter(mSortAdapter);
-    		String[] validSortFields = AnswersQuery.validSortFields.get(mQueryType);
-    		for (int i=0; i < validSortFields.length; i++) {
-    			if (validSortFields[i].equals(mQuery.getSort())) {
-    				sort.setSelection(i);
-    				break;
-    			}
+    		if (mSort > -1) {
+    			sort.setSelection(mSort);
     		}
     		final Spinner order = (Spinner) v.findViewById(R.id.spinner_order);
     		order.setAdapter(mOrderAdapter);
-    		if (mQuery.getOrder().equals(AnswersQuery.ORDER_DESCENDING)) order.setSelection(0);
-    		if (mQuery.getOrder().equals(AnswersQuery.ORDER_ASCENDING)) order.setSelection(1);
+    		if (mOrder.equals(Order.DESC)) order.setSelection(0);
+    		else order.setSelection(1);
     		b.setView(v);
     		b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					mQuery.setSort(AnswersQuery.validSortFields.get(mQueryType)[sort.getSelectedItemPosition()]);
-					if (order.getSelectedItemPosition() == 0) {
-						mQuery.setOrder(QuestionsQuery.ORDER_DESCENDING);
-					}
-					else {
-						mQuery.setOrder(QuestionsQuery.ORDER_ASCENDING);
-					}
+					mSort = sort.getSelectedItemPosition();
+					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
+					else mOrder = Order.ASC;
 					mNoMoreAnswers = false;
 					mAnswers.clear();
 					mPage = 1;
-					mQuery.setPage(1);
 					getAnswers();
 				}
 			});
@@ -160,10 +144,10 @@ public class Answers extends Activity {
     }
 	
 	private void getAnswers() {
-		new GetAnswersTask().execute(mQuery);
+		new GetAnswersTask().execute();
 	}
 	
-	private class GetAnswersTask extends AsyncTask<AnswersQuery, Void, List<Answer>> {
+	private class GetAnswersTask extends AsyncTask<Void, Void, List<Answer>> {
 		
 		private Exception mException;
 		
@@ -174,9 +158,23 @@ public class Answers extends Activity {
 		}
 		
 		@Override
-		protected List<Answer> doInBackground(AnswersQuery... params) {
+		protected List<Answer> doInBackground(Void... params) {
 			try {
-				return mAPI.getAnswers(params[0]);
+				if (mQueryType.equals(TYPE_USER)) {
+					AnswerQuery query = new AnswerQuery();
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setIds(mUserID);
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(AnswerQuery.Sort.activity()); break;
+						case 1: query.setSort(AnswerQuery.Sort.views()); break;
+						case 2: query.setSort(AnswerQuery.Sort.creation()); break;
+						case 3: query.setSort(AnswerQuery.Sort.votes()); break;
+						}
+					}
+					return mAPI.getAnswersByUserId(query);
+				}
 			}
 			catch (Exception e) {
 				mException = e;
@@ -246,18 +244,18 @@ public class Answers extends Activity {
 				h = (ViewHolder) v.getTag();
 			}
 			
-			h.score.setText(String.valueOf(a.score));
-			h.title.setText(a.title);
+			h.score.setText(String.valueOf(a.getScore()));
+			h.title.setText(a.getTitle());
 			
-			if (a.accepted) {
+			if (a.isIsAccepted()) {
 				h.score.setBackgroundResource(R.color.score_max_bg);
 				h.score.setTextColor(mResources.getColor(R.color.score_max_text));
 			}
-			else if (a.score == 0) {
+			else if (a.getScore() == 0) {
 				h.score.setBackgroundResource(R.color.score_neutral_bg);
 				h.score.setTextColor(mResources.getColor(R.color.score_neutral_text));
 			}
-			else if (a.score > 0) {
+			else if (a.getScore() > 0) {
 				h.score.setBackgroundResource(R.color.score_high_bg);
 				h.score.setTextColor(mResources.getColor(R.color.score_high_text));
 			}
@@ -282,7 +280,7 @@ public class Answers extends Activity {
 		public void onScroll(AbsListView view, int firstVisibleItem,
 				int visibleItemCount, int totalItemCount) {
 			if (mIsRequestOngoing == false && mNoMoreAnswers == false && firstVisibleItem + visibleItemCount == totalItemCount) {
-				mQuery.setPage(++mPage);
+				mPage++;
 				getAnswers();
 			}
 		}

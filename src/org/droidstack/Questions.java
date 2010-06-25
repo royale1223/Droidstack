@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.droidstack.stackapi.Question;
-import org.droidstack.stackapi.QuestionsQuery;
-import org.droidstack.stackapi.StackAPI;
-
+import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Question;
+import net.sf.stackwrap4j.enums.Order;
+import net.sf.stackwrap4j.query.QuestionQuery;
+import net.sf.stackwrap4j.query.UnansweredQuery;
+import net.sf.stackwrap4j.query.UserQuestionQuery;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -37,9 +39,12 @@ import android.widget.AdapterView.OnItemClickListener;
 public class Questions extends Activity {
 	
 	public final static String INTENT_TYPE = "type";
+	public final static String TYPE_QUESTIONS = "questions";
+	public final static String TYPE_UNANSWERED = "unanswered";
+	public final static String TYPE_USER = "user";
+	public final static String TYPE_FAVORITES = "favorites";
 	
-	private QuestionsQuery mQuery;
-	private StackAPI mAPI;
+	private StackWrapper mAPI;
 	private SitesDatabase mSitesDatabase;
 	private int mSiteID;
 	private String mQueryType;
@@ -47,10 +52,12 @@ public class Questions extends Activity {
 	private String mSiteName;
 	private int mPage = 1;
 	private int mPageSize;
-	private long mUserID = 0;
+	private int mUserID = 0;
 	private String mUserName;
 	private boolean mNoMoreQuestions = false;
 	private boolean mIsRequestOngoing = true;
+	private int mSort = -1;
+	private Order mOrder = Order.DESC;
 	
 	private Resources mResources;
 	private Context mContext;
@@ -74,43 +81,34 @@ public class Questions extends Activity {
 		Intent launchParams = getIntent();
 		mQueryType = launchParams.getStringExtra(INTENT_TYPE);
 		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
-		mUserID = launchParams.getLongExtra(SitesDatabase.KEY_UID, 0);
+		mUserID = launchParams.getIntExtra(SitesDatabase.KEY_UID, 0);
 		mUserName = launchParams.getStringExtra(SitesDatabase.KEY_UNAME);
 		mSitesDatabase = new SitesDatabase(mContext);
 		mEndpoint = mSitesDatabase.getEndpoint(mSiteID);
 		mSiteName = mSitesDatabase.getName(mSiteID);
 		mSitesDatabase.dispose();
 		
-		try {
-			mQuery = new QuestionsQuery(mQueryType).setUser(mUserID);
-		}
-		catch (Exception e) {
-			Log.e(Const.TAG, "Invalid invocation", e);
-			finish();
-		}
-		
-		if (mQueryType.equals(QuestionsQuery.QUERY_ALL)) {
+		if (mQueryType.equals(TYPE_QUESTIONS)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_all_questions));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 		}
-		else if (mQueryType.equals(QuestionsQuery.QUERY_UNANSWERED)) {
+		else if (mQueryType.equals(TYPE_UNANSWERED)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_all_unanswered));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 		}
-		else if (mQueryType.equals(QuestionsQuery.QUERY_USER)) {
+		else if (mQueryType.equals(TYPE_USER)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_user_questions).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 		}
-		else if (mQueryType.equals(QuestionsQuery.QUERY_FAVORITES)) {
+		else if (mQueryType.equals(TYPE_FAVORITES)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_user_favorites).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 		}
 		
-		mAPI = new StackAPI(mEndpoint, Const.APIKEY);
+		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mQuery.setPageSize(mPageSize);
 		mQuestions = new ArrayList<Question>();
 		mAdapter = new QuestionsListAdapter<Question>(mContext, 0, mQuestions);
 		mListView = (ListView)findViewById(R.id.questions);
@@ -140,34 +138,21 @@ public class Questions extends Activity {
     		View v = getLayoutInflater().inflate(R.layout.menu_sort, null);
     		final Spinner sort = (Spinner)v.findViewById(R.id.spinner_sort); 
     		sort.setAdapter(mSortAdapter);
-    		String[] validSortFields = QuestionsQuery.validSortFields.get(mQueryType);
-    		for (int i=0; i < validSortFields.length; i++) {
-    			if (validSortFields[i].equals(mQuery.getSort())) {
-    				sort.setSelection(i);
-    				break;
-    			}
+    		if (mSort > -1) {
+    			sort.setSelection(mSort);
     		}
     		final Spinner order = (Spinner)v.findViewById(R.id.spinner_order);
     		order.setAdapter(mOrderAdapter);
-    		if (mQuery.getOrder().equals(QuestionsQuery.ORDER_DESCENDING)) order.setSelection(0);
-    		if (mQuery.getOrder().equals(QuestionsQuery.ORDER_ASCENDING)) order.setSelection(1);
     		b.setView(v);
     		b.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// UGLY!! But it's Java, what you gonna do
-					mQuery.setSort(QuestionsQuery.validSortFields.get(mQueryType)[sort.getSelectedItemPosition()]);
-					// a bit hard-coded, but fuck it
-					if (order.getSelectedItemPosition() == 0) {
-						mQuery.setOrder(QuestionsQuery.ORDER_DESCENDING);
-					}
-					else {
-						mQuery.setOrder(QuestionsQuery.ORDER_ASCENDING);
-					}
+					mSort = sort.getSelectedItemPosition();
+					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
+					else mOrder = Order.ASC;
 					mNoMoreQuestions = false;
 					mQuestions.clear();
 					mPage = 1;
-					mQuery.setPage(1);
 					getQuestions();
 				}
 			});
@@ -181,16 +166,73 @@ public class Questions extends Activity {
 	private void getQuestions() {
 		mIsRequestOngoing = true;
 		setProgressBarIndeterminateVisibility(true);
-		new GetQuestionsAsync().execute(mQuery);
+		new GetQuestionsAsync().execute();
 	}
 	
-	private class GetQuestionsAsync extends AsyncTask<QuestionsQuery, Void, List<Question>> {
+	private class GetQuestionsAsync extends AsyncTask<Void, Void, List<Question>> {
 		private Exception mException;
 		
 		@Override
-		protected List<Question> doInBackground(QuestionsQuery... queries) {
+		protected List<Question> doInBackground(Void... queries) {
 			try {
-				return mAPI.getQuestions(queries[0]);
+				if (mQueryType.equals(TYPE_QUESTIONS)) {
+					QuestionQuery query = new QuestionQuery();
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(QuestionQuery.Sort.activity()); break;
+						case 1: query.setSort(QuestionQuery.Sort.votes()); break;
+						case 2: query.setSort(QuestionQuery.Sort.creation()); break;
+						case 3: query.setSort(QuestionQuery.Sort.featured()); break;
+						case 4: query.setSort(QuestionQuery.Sort.hot()); break;
+						case 5: query.setSort(QuestionQuery.Sort.week()); break;
+						case 6: query.setSort(QuestionQuery.Sort.month()); break;
+						}
+					}
+					return mAPI.listQuestions(query);
+				}
+				else if (mQueryType.equals(TYPE_UNANSWERED)) {
+					UnansweredQuery query = new UnansweredQuery();
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(UnansweredQuery.Sort.creation()); break;
+						case 1: query.setSort(UnansweredQuery.Sort.votes()); break;
+						}
+					}
+					return mAPI.listUnansweredQuestions(query);
+				}
+				else if (mQueryType.equals(TYPE_USER)) {
+					UserQuestionQuery query = new UserQuestionQuery();
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setIds(mUserID);
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(UserQuestionQuery.Sort.activity()); break;
+						case 1: query.setSort(UserQuestionQuery.Sort.views()); break;
+						case 2: query.setSort(UserQuestionQuery.Sort.creation()); break;
+						case 3: query.setSort(UserQuestionQuery.Sort.votes()); break;
+						}
+					}
+					return mAPI.getQuestionsByUserId(query);
+				}
+				else if (mQueryType.equals(TYPE_FAVORITES)) {
+					QuestionQuery query = new QuestionQuery();
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setIds(mUserID);
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(QuestionQuery.Sort.activity()); break;
+						case 2: query.setSort(QuestionQuery.Sort.creation()); break;
+						case 3: query.setSort(QuestionQuery.Sort.votes()); break;
+						}
+					}
+					return mAPI.getFavoriteQuestionsByUserId(query);
+				}
 			}
 			catch (Exception e) {
 				mException = e;
@@ -274,26 +316,26 @@ public class Questions extends Activity {
 				h = (ViewHolder) convertView.getTag();
 			}
 			
-			h.title.setText(q.title);
-			h.score.setText(String.valueOf(q.score));
-			h.answers.setText(String.valueOf(q.answerCount));
-			h.views.setText(String.valueOf(q.viewCount));
+			h.title.setText(q.getTitle());
+			h.score.setText(String.valueOf(q.getScore()));
+			h.answers.setText(String.valueOf(q.getAnswerCount()));
+			h.views.setText(String.valueOf(q.getViewCount()));
 			
 			h.bounty.setVisibility(View.GONE);
-			if (q.bounty != 0 && q.bountyEnd.before(new Date())) {
-				h.bounty.setText("+" + String.valueOf(q.bounty));
+			if (q.getBountyAmount() > 0 && new Date(q.getBountyClosesDate()).before(new Date())) {
+				h.bounty.setText("+" + String.valueOf(q.getBountyAmount()));
 				h.bounty.setVisibility(View.VISIBLE);
 			}
 			
 			h.tags.removeAllViews();
-			for (String tag: q.tags){
+			for (String tag: q.getTags()){
 				tagView = (TextView) inflater.inflate(R.layout.tag, null);
 				tagView.setText(tag);
 				tagView.setOnClickListener(onTagClicked);
 				h.tags.addView(tagView, tagLayout);
 			}
 			
-			if (q.answerCount == 0) {
+			if (q.getAnswerCount() == 0) {
 				h.answers.setBackgroundResource(R.color.no_answers_bg);
 				h.answerLabel.setBackgroundResource(R.color.no_answers_bg);
 				h.answers.setTextColor(mResources.getColor(R.color.no_answers_text));
@@ -302,7 +344,7 @@ public class Questions extends Activity {
 			else {
 				h.answers.setBackgroundResource(R.color.some_answers_bg);
 				h.answerLabel.setBackgroundResource(R.color.some_answers_bg);
-				if (q.acceptedAnswerID != 0) {
+				if (q.getAcceptedAnswerId() != 0) {
 					h.answers.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 					h.answerLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 				}
@@ -329,7 +371,7 @@ public class Questions extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Log.d(Const.TAG, "Question clicked: " + mQuestions.get(position).title);
+			Log.d(Const.TAG, "Question clicked: " + mQuestions.get(position).getTitle());
 		}
 	};
 	
@@ -344,7 +386,7 @@ public class Questions extends Activity {
 		public void onScroll(AbsListView view, int firstVisibleItem,
 				int visibleItemCount, int totalItemCount) {
 			if (mIsRequestOngoing == false && mNoMoreQuestions == false && firstVisibleItem + visibleItemCount == totalItemCount) {
-				mQuery.setPage(++mPage);
+				mPage++;
 				getQuestions();
 			}
 		}

@@ -8,11 +8,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.droidstack.stackapi.Site;
-import org.droidstack.stackapi.StackAPI;
-import org.droidstack.stackapi.Stats;
-import org.droidstack.stackapi.User;
-
+import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Stats;
+import net.sf.stackwrap4j.entities.User;
+import net.sf.stackwrap4j.stackauth.StackAuth;
+import net.sf.stackwrap4j.stackauth.entities.Site;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -202,7 +202,7 @@ public class Sites extends Activity {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		mSites.moveToPosition(info.position);
 		final int id = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_ID));
-		long userID = mSites.getLong(mSites.getColumnIndex(SitesDatabase.KEY_UID));
+		int userID = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
 		String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 		switch(item.getItemId()) {
 		case R.id.menu_set_user:
@@ -218,7 +218,7 @@ public class Sites extends Activity {
 				.setPositiveButton(android.R.string.ok, new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						long userID = Long.parseLong(userEntry.getText().toString());
+						int userID = Integer.parseInt(userEntry.getText().toString());
 						new SetUserIDTask(id, userID).execute();
 					}
 				}).create().show();
@@ -263,9 +263,9 @@ public class Sites extends Activity {
 			List<String> endpoints = params[0];
 			try {
 				for (String endpoint: endpoints) {
-					StackAPI api = new StackAPI(endpoint, Const.APIKEY);
-					Stats site = api.getStats();
-					InputStream in = new URL(site.icon).openStream();
+					StackWrapper api = new StackWrapper(endpoint, Const.APIKEY);
+					Stats stats = api.getStats();
+					InputStream in = new URL(stats.getSite().getIconUrl()).openStream();
 					OutputStream out = new FileOutputStream(new File(mIcons, Uri.parse(endpoint).getHost()));
 					byte[] buf = new byte[1024];
 					int len;
@@ -310,12 +310,12 @@ public class Sites extends Activity {
     private class SetUserIDTask extends AsyncTask<Void, Void, User> {
     	
     	private final int mSiteID;
-    	private final long mUserID;
+    	private final int mUserID;
     	private final String mEndpoint;
     	private Exception mException;
     	private ProgressDialog progressDialog;
     	
-    	public SetUserIDTask(int id, long userID) {
+    	public SetUserIDTask(int id, int userID) {
     		super();
     		mSiteID = id;
     		mUserID = userID;
@@ -330,10 +330,10 @@ public class Sites extends Activity {
     	
 		@Override
 		protected User doInBackground(Void... params) {
-			StackAPI api = new StackAPI(mEndpoint);
+			StackWrapper api = new StackWrapper(mEndpoint, Const.APIKEY);
 			User result = null;
 			try {
-				result = api.getUser(mUserID);
+				result = api.getUserById(mUserID);
 			}
 			catch(Exception e) {
 				mException = e;
@@ -354,7 +354,7 @@ public class Sites extends Activity {
 					.create().show();
 			}
 			else {
-				mSitesDatabase.setUser(mSiteID, mUserID, result.name);
+				mSitesDatabase.setUser(mSiteID, mUserID, result.getDisplayName());
 			}
 		}
     }
@@ -388,7 +388,7 @@ public class Sites extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-				sites = StackAPI.getSites();
+				sites = StackAuth.getAllSites();
 			}
 			catch (Exception e) {
 				mException = e;
@@ -412,7 +412,7 @@ public class Sites extends Activity {
 				final CharSequence[] items = new CharSequence[sites.size()];
 				int i=0;
 				for (Site s: sites) {
-					items[i++] = s.name;
+					items[i++] = s.getName();
 				}
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.menu_add_site)
@@ -446,8 +446,8 @@ public class Sites extends Activity {
 		protected Void doInBackground(Site... params) {
 			site = params[0];
 			try {
-				InputStream in = new URL(site.icon_url).openStream();
-				OutputStream out = new FileOutputStream(new File(mIcons, Uri.parse(site.api_endpoint).getHost()));
+				InputStream in = new URL(site.getIconUrl()).openStream();
+				OutputStream out = new FileOutputStream(new File(mIcons, Uri.parse(site.getApiEndpoint()).getHost()));
 				byte[] buf = new byte[1024];
 				int len;
 				while ((len = in.read(buf)) > 0) {
@@ -476,7 +476,7 @@ public class Sites extends Activity {
 				Log.e(Const.TAG, "Unable to add site", mException);
 			}
 			else {
-				mSitesDatabase.addSite(site.api_endpoint, site.name, 0, null);
+				mSitesDatabase.addSite(site.getApiEndpoint(), site.getName(), 0, null);
 				mSites.requery();
 				mAdapter.notifyDataSetChanged();
 			}

@@ -47,13 +47,13 @@ public class SitesDatabase {
 		return query(null, null, null);
 	}
 	
-	public long getUserID(int id) {
+	public int getUserID(int id) {
 		Cursor c = query(KEY_ID + " = ?", new String[] { String.valueOf(id) }, new String[] { KEY_UID });
 		if (c.getCount() == 0) {
 			return 0;
 		}
 		c.moveToFirst();
-		long userID = c.getLong(0);
+		int userID = c.getInt(0);
 		c.close();
 		return userID;
 	}

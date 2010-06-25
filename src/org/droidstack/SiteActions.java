@@ -1,8 +1,5 @@
 package org.droidstack;
 
-import org.droidstack.stackapi.AnswersQuery;
-import org.droidstack.stackapi.QuestionsQuery;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +23,7 @@ public class SiteActions extends Activity {
 	private int mSiteID;
 	private String mSiteName;
 	private String mUserName;
-	private long mUserID;
+	private int mUserID;
 	private ListView mSiteActionsList;
 	
 	@Override
@@ -59,12 +56,12 @@ public class SiteActions extends Activity {
 			case POS_ALL:
 				whatToLaunch = new Intent(mContext, Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_ALL);
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_QUESTIONS);
 				break;
 			case POS_UNANSWERED:
 				whatToLaunch = new Intent(mContext, Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_UNANSWERED);
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_UNANSWERED);
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {
@@ -75,7 +72,7 @@ public class SiteActions extends Activity {
 				}
 				whatToLaunch = new Intent(mContext, Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_USER);
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_USER);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
 				break;
@@ -88,7 +85,7 @@ public class SiteActions extends Activity {
 				}
 				whatToLaunch = new Intent(mContext, Questions.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, QuestionsQuery.QUERY_FAVORITES);
+				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_FAVORITES);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
 				break;
@@ -101,7 +98,7 @@ public class SiteActions extends Activity {
 				}
 				whatToLaunch = new Intent(mContext, Answers.class);
 				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Answers.INTENT_TYPE, AnswersQuery.QUERY_USER);
+				whatToLaunch.putExtra(Answers.INTENT_TYPE, Answers.TYPE_USER);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
 				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
 				break;
