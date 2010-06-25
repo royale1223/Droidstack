@@ -25,7 +25,7 @@ public class StackAPI {
 	/**
 	 * Contains the supported version of the API. This is included in API calls
 	 */
-	public final static String API_VERSION = "0.8";
+	public final static String API_VERSION = "0.9";
 	
 	private final String mEndpoint;
 	private final String mKey;
