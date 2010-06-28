@@ -7,6 +7,7 @@ import java.util.List;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.enums.Order;
+import net.sf.stackwrap4j.query.FavoriteQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
@@ -194,7 +195,7 @@ public class Questions extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_UNANSWERED)) {
 					UnansweredQuery query = new UnansweredQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setGetsBody(false).setPageSize(mPageSize).setPage(mPage);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -220,15 +221,17 @@ public class Questions extends Activity {
 					return mAPI.getQuestionsByUserId(query);
 				}
 				else if (mQueryType.equals(TYPE_FAVORITES)) {
-					QuestionQuery query = new QuestionQuery();
+					FavoriteQuery query = new FavoriteQuery();
 					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
-						case 0: query.setSort(QuestionQuery.Sort.activity()); break;
-						case 2: query.setSort(QuestionQuery.Sort.creation()); break;
-						case 3: query.setSort(QuestionQuery.Sort.votes()); break;
+						case 0: query.setSort(FavoriteQuery.Sort.activity()); break;
+						case 1: query.setSort(FavoriteQuery.Sort.views()); break;
+						case 2: query.setSort(FavoriteQuery.Sort.creation()); break;
+						case 3: query.setSort(FavoriteQuery.Sort.added()); break;
+						case 4: query.setSort(FavoriteQuery.Sort.votes()); break;
 						}
 					}
 					return mAPI.getFavoriteQuestionsByUserId(query);

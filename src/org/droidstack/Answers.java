@@ -247,7 +247,7 @@ public class Answers extends Activity {
 			h.score.setText(String.valueOf(a.getScore()));
 			h.title.setText(a.getTitle());
 			
-			if (a.isIsAccepted()) {
+			if (a.isAccepted()) {
 				h.score.setBackgroundResource(R.color.score_max_bg);
 				h.score.setTextColor(mResources.getColor(R.color.score_max_text));
 			}

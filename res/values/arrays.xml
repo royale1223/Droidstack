@@ -33,9 +33,9 @@
     
     <string-array name="q_sort_favorites">
         <item>Activity</item>
-        <!-- <item>Views</item> -->
+        <item>Views</item>
         <item>Creation</item>
-        <!-- <item>Added</item> -->
+        <item>Added</item>
         <item>Votes</item>
     </string-array>
     
