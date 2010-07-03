@@ -14,6 +14,7 @@
     <string name="fetch_user_error">An error occurred while retrieving your profile information. Please try again in a few moments.</string>
     <string name="site_add_error">An error has occurred while adding this site. Make sure that you have spelled it correctly, that you are connected to the Internet and that the site you are trying to add has an API, and try again in a few moments.</string>
     <string name="questions_fetch_error">An error has occurred while retrieving the list of questions. Make sure that you have an Internet connection and that you have set up the site correctly and try again in a few moments.</string>
+    <string name="question_fetch_error">An error has occurred while retrieving this question. Make sure that you have an Internet connection and that you have set up the site correctly and try again in a few moments.</string>
     <string name="answers_fetch_error">An error has occurred while retrieving the list of answers. Make sure that you have an Internet connection and that you have set up the site correctly and try again in a few moments.</string>
     <string name="icons_refresh_error">Some site icons were missing from your SD card, so I tried to refresh them. I have failed. I will now exit because otherwise I would crash.</string>
     <string name="no_sd_error">You need a writable SD card in order to use this application.</string>

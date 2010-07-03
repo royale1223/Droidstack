@@ -374,7 +374,10 @@ public class Questions extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Log.d(Const.TAG, "Question clicked: " + mQuestions.get(position).getTitle());
+			Intent i = new Intent(mContext, ViewQuestion.class);
+			i.putExtra(SitesDatabase.KEY_ID, mSiteID);
+			i.putExtra(ViewQuestion.KEY_QID, mQuestions.get(position).getPostId());
+			startActivity(i);
 		}
 	};
 	
