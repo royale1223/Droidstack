@@ -2,7 +2,9 @@ package org.droidstack;
 
 import java.io.InputStream;
 
+import net.sf.jtpl.Template;
 import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Comment;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import android.app.Activity;
@@ -70,11 +72,27 @@ public class ViewQuestion extends Activity {
 	}
 	
 	private void updateView() {
-		setTitle(mQuestion.getTitle());
-		String html = mTemplate;
-		html = html.replace("<%QuestionBody%>", mQuestion.getBody());
+		Template tpl = new Template(mTemplate);
 		
-		mWebView.loadDataWithBaseURL("about:blank", html, "text/html", "utf-8", null);
+		try {
+			for (Comment c: mQuestion.getComments()) {
+				tpl.assign("CBODY", c.getBody());
+				tpl.assign("CAUTHOR", c.getOwner().getDisplayName());
+				tpl.assign("CSCORE", String.valueOf(c.getScore()));
+				if (c.getScore() > 0) tpl.parse("main.question.comment.score");
+				tpl.parse("main.question.comment");
+			}
+		}
+		catch (Exception e) {
+			Log.e(Const.TAG, "wtf Question.getComments() error", e);
+			finish();
+		}
+		tpl.assign("QBODY", mQuestion.getBody());
+		tpl.parse("main.question");
+		tpl.parse("main");
+		
+		setTitle(mQuestion.getTitle());
+		mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 	}
 	
 	private class FetchQuestionTask extends AsyncTask<Void, Void, Question> {
@@ -90,7 +108,7 @@ public class ViewQuestion extends Activity {
 		protected Question doInBackground(Void... params) {
 			try {
 				QuestionQuery query = new QuestionQuery();
-				query.setBody(true).setIds(mQuestionID);
+				query.setBody(true).setComments(true).setIds(mQuestionID);
 				return mAPI.getQuestions(query).get(0);
 			}
 			catch (Exception e) {

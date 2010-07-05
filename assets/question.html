@@ -1,18 +1,57 @@
+<!-- BEGIN: main -->
 <!DOCTYPE html>
 <html>
 	<head>
 		<style type="text/css">
-			pre, code {
+			* { margin: 0; padding: 0; }
+			code, blockquote {
 				background: #eaeaea;
 			}
 			pre code {
 				display: block;
 			}
+			span.author {
+				color: #07C;
+			}
+			a {
+				color: #07C;
+				text-decoration: none;
+			}
+			div.post {
+				font-size: 1em;
+				padding: 5px;
+			}
+			div.comments {
+				border-top: 1px solid #999;
+			}
+			div.comments div {
+				font-size: 0.9em;
+				border-bottom: 1px solid #CCC;
+				padding: 5px;
+			}
+			span.upvote {
+				font-weight: bold;
+				padding-right: 5px;
+				color: #040;
+			}
 		</style>
 	</head>
 	<body>
+		<!-- BEGIN: question -->
 		<div class="post">
-			<%QuestionBody%>
+			{QBODY}
 		</div>
+		<div class="comments">
+			<!-- BEGIN: comment -->
+			<div>
+				<!-- BEGIN: score -->
+				<span class="upvote">+{CSCORE}</span>
+				<!-- END: score -->
+				{CBODY} &ndash; <span class="author">{CAUTHOR}</span>
+			</div>
+			<!-- END: comment -->
+		</div>
+		<!-- END: question -->
 	</body>
 </html>
+<!-- END: main -->
