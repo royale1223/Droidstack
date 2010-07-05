@@ -10,6 +10,9 @@
 			pre code {
 				display: block;
 			}
+			ul, li {
+				list-style-position: inside;
+			}
 			span.author {
 				color: #07C;
 			}
@@ -34,12 +37,46 @@
 				padding-right: 5px;
 				color: #040;
 			}
+			div.post div.score {
+				float: right;
+				font-size: 2.5em;
+				font-weight: bold;
+				background: url("file:///android_asset/post_score.png") 0 50% no-repeat;
+				padding-left: 25px;
+				margin-right: 10px;
+			}
+			div.post div.author {
+				float: right;
+				padding: 5px 10px;
+				background-color: #E0EAF1;
+				background-position: 10px 50%;
+				background-repeat: no-repeat;
+			}
+			div.post div.author img {
+				float: left;
+			}
+			div.post div.author div.name {
+				font-size: 0.9em;
+				color: #07C;
+				margin-left: 46px;
+			}
+			div.post div.author div.rep {
+				font-weight: bold;
+				margin-left: 46px;
+			}
 		</style>
+		<meta name="viewport" content="target-densitydpi=device-dpi" />
 	</head>
 	<body>
 		<!-- BEGIN: question -->
 		<div class="post">
 			{QBODY}
+			<div class="author" style="background-image: url('http://www.gravatar.com/avatar/{QAHASH}?s=36&d=identicon&r=PG')">
+				<div class="name">{QANAME}</div>
+				<div class="rep">{QAREP}</div>
+			</div>
+			<div class="score">{QSCORE}</div>
+			<div style="clear: both"></div>
 		</div>
 		<div class="comments">
 			<!-- BEGIN: comment -->

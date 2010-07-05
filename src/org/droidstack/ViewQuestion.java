@@ -6,6 +6,7 @@ import net.sf.jtpl.Template;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Comment;
 import net.sf.stackwrap4j.entities.Question;
+import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -87,11 +88,17 @@ public class ViewQuestion extends Activity {
 			Log.e(Const.TAG, "wtf Question.getComments() error", e);
 			finish();
 		}
+		User author = mQuestion.getOwner();
 		tpl.assign("QBODY", mQuestion.getBody());
+		tpl.assign("QSCORE", String.valueOf(mQuestion.getScore()));
+		tpl.assign("QAHASH", author.getEmailHash());
+		tpl.assign("QANAME", author.getDisplayName());
+		tpl.assign("QAREP", String.valueOf(author.getReputation()));
 		tpl.parse("main.question");
 		tpl.parse("main");
 		
 		setTitle(mQuestion.getTitle());
+		Log.d(Const.TAG, tpl.out());
 		mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 	}
 	
