@@ -1,7 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<WebView
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:id="@+id/content"
-	/>
+	android:orientation="vertical"
+	>
+	<WebView
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_weight="1"
+		android:id="@+id/content"
+		/>
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:layout_alignParentBottom="true"
+		style="@android:style/ButtonBar"
+		>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_centerVertical="true"
+			style="@android:style/TextAppearance.Large"
+			android:textColor="@android:color/primary_text_dark"
+			android:textStyle="bold"
+			android:shadowColor="#000"
+			android:shadowRadius="2"
+			android:paddingLeft="5dip"
+			android:paddingRight="5dip"
+			android:id="@+id/answer_count"
+			/>
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:text="▶"
+			android:textAppearance="@android:style/TextAppearance.Large"
+			android:paddingLeft="20dip"
+			android:paddingRight="20dip"
+			android:id="@+id/next"
+			android:onClick="changePost"
+			/>
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/next"
+			android:text="◀"
+			android:textAppearance="@android:style/TextAppearance.Large"
+			android:paddingLeft="20dip"
+			android:paddingRight="20dip"
+			android:id="@+id/previous"
+			android:onClick="changePost"
+			/>
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_toLeftOf="@id/previous"
+			android:layout_centerVertical="true"
+			android:textAppearance="@android:style/TextAppearance.Medium"
+			android:textColor="@android:color/primary_text_dark"
+			android:shadowColor="#000"
+			android:shadowRadius="0.01"
+			android:shadowDy="1"
+			android:shadowDx="1"
+			/>
+	</RelativeLayout>
+</LinearLayout>

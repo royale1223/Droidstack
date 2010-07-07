@@ -23,11 +23,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class Answers extends Activity {
 	
@@ -90,6 +92,7 @@ public class Answers extends Activity {
 		mListView = (ListView) findViewById(R.id.answers);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnScrollListener(onAnswersScrolled);
+		mListView.setOnItemClickListener(onAnswerClicked);
 		
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
@@ -268,6 +271,19 @@ public class Answers extends Activity {
 		}
 		
 	}
+	
+	private OnItemClickListener onAnswerClicked = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			Intent i = new Intent(mContext, ViewQuestion.class);
+			i.putExtra(SitesDatabase.KEY_ID, mSiteID);
+			i.putExtra(ViewQuestion.KEY_QID, mAnswers.get(position).getQuestionId());
+			startActivity(i);
+		}
+		
+	};
 	
 	private OnScrollListener onAnswersScrolled = new OnScrollListener() {
 		

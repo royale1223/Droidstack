@@ -347,7 +347,7 @@ public class Questions extends Activity {
 			else {
 				h.answers.setBackgroundResource(R.color.some_answers_bg);
 				h.answerLabel.setBackgroundResource(R.color.some_answers_bg);
-				if (q.getAcceptedAnswerId() != 0) {
+				if (q.getAcceptedAnswerId() > 0) {
 					h.answers.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 					h.answerLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 				}
