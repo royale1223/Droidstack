@@ -133,7 +133,7 @@ public class ViewQuestion extends Activity {
 			try {
 				for (Comment c: answer.getComments()) {
 					tpl.assign("CBODY", c.getBody());
-					tpl.assign("CAUTHOR", c.getOwner().getDisplayName());
+					tpl.assign("CAUTHOR", String.valueOf(c.getOwner().getDisplayName()));
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
 					if (c.getScore() > 0) tpl.parse("main.question.comment.score");
 					tpl.parse("main.question.comment");
@@ -141,7 +141,6 @@ public class ViewQuestion extends Activity {
 			}
 			catch (Exception e) {
 				Log.e(Const.TAG, "wtf Answer.getComments() error", e);
-				finish();
 			}
 			User owner = answer.getOwner();
 			tpl.assign("QBODY", answer.getBody());
