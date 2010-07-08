@@ -104,21 +104,26 @@ public class ViewQuestion extends Activity {
 					tpl.assign("CBODY", c.getBody());
 					tpl.assign("CAUTHOR", c.getOwner().getDisplayName());
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
-					if (c.getScore() > 0) tpl.parse("main.question.comment.score");
-					tpl.parse("main.question.comment");
+					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
+					tpl.parse("main.post.comment");
 				}
 			}
 			catch (Exception e) {
 				Log.e(Const.TAG, "wtf Question.getComments() error", e);
 				finish();
 			}
+			for (String tag: mQuestion.getTags()) {
+				tpl.assign("TAG", tag);
+				tpl.parse("main.post.tags.tag");
+			}
+			tpl.parse("main.post.tags");
 			User owner = mQuestion.getOwner();
 			tpl.assign("QBODY", mQuestion.getBody());
 			tpl.assign("QSCORE", String.valueOf(mQuestion.getScore()));
 			tpl.assign("QAHASH", owner.getEmailHash());
 			tpl.assign("QANAME", owner.getDisplayName());
 			tpl.assign("QAREP", String.valueOf(owner.getReputation()));
-			tpl.parse("main.question");
+			tpl.parse("main.post");
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 			mAnswerCountView.setText(getString(R.string.number_of_answers).replace("%s", String.valueOf(mQuestion.getAnswerCount())));
@@ -135,8 +140,8 @@ public class ViewQuestion extends Activity {
 					tpl.assign("CBODY", c.getBody());
 					tpl.assign("CAUTHOR", String.valueOf(c.getOwner().getDisplayName()));
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
-					if (c.getScore() > 0) tpl.parse("main.question.comment.score");
-					tpl.parse("main.question.comment");
+					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
+					tpl.parse("main.post.comment");
 				}
 			}
 			catch (Exception e) {
@@ -149,7 +154,8 @@ public class ViewQuestion extends Activity {
 			tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
 			tpl.assign("QANAME", owner.getDisplayName());
 			tpl.assign("QAREP", String.valueOf(owner.getReputation()));
-			tpl.parse("main.question");
+			if (answer.isAccepted()) tpl.parse("main.post.accepted");
+			tpl.parse("main.post");
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 			

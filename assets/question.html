@@ -46,7 +46,7 @@
 				font-weight: bold;
 				background: url("file:///android_asset/post_score.png") 0 50% no-repeat;
 				padding-left: 25px;
-				margin-right: 10px;
+				margin: 5px 10px 5px 0;
 			}
 			div.post div.author {
 				float: right;
@@ -54,6 +54,7 @@
 				background-color: #E0EAF1;
 				background-position: 10px 50%;
 				background-repeat: no-repeat;
+				margin: 5px 0;
 			}
 			div.post div.author img {
 				float: left;
@@ -67,18 +68,47 @@
 				font-weight: bold;
 				margin-left: 46px;
 			}
+			div.tags {
+				margin: 5px 0;
+			}
+			div.tags span {
+				font-size: 0.9em;
+				background-color: #E0EAF1;
+				border-bottom: 1px solid #3E6D8E;
+				border-right: 1px solid #7F9FB6;
+				color: #3E6D8E;
+				margin-right: 2px;
+				padding: 3px 4px;
+			}
+			div.accepted {
+				float: right;
+				width: 38px;
+				height: 39px;
+				background: url("file:///android_asset/accepted.png") 0 0 no-repeat;
+				margin: 5px 10px 5px 0;
+			}
 		</style>
 		<meta name="viewport" content="target-densitydpi=device-dpi" />
 	</head>
 	<body>
-		<!-- BEGIN: question -->
+		<!-- BEGIN: post -->
 		<div class="post">
 			{QBODY}
+			<!-- BEGIN: tags -->
+			<div class="tags">
+				<!-- BEGIN: tag -->
+				<span>{TAG}</span>
+				<!-- END: tag -->
+			</div>
+			<!-- END: tags -->
 			<div class="author" style="background-image: url('http://www.gravatar.com/avatar/{QAHASH}?s=36&d=identicon&r=PG')">
 				<div class="name">{QANAME}</div>
 				<div class="rep">{QAREP}</div>
 			</div>
 			<div class="score">{QSCORE}</div>
+			<!-- BEGIN: accepted -->
+			<div class="accepted"></div>
+			<!-- END: accepted -->
 			<div style="clear: both"></div>
 		</div>
 		<div class="comments">
@@ -91,7 +121,7 @@
 			</div>
 			<!-- END: comment -->
 		</div>
-		<!-- END: question -->
+		<!-- END: post -->
 	</body>
 </html>
 <!-- END: main -->
