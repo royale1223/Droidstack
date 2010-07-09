@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
@@ -78,6 +79,13 @@ public class ViewQuestion extends Activity {
 		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
 		mQuestionID = launchParams.getIntExtra(KEY_QID, -1);
 		mWebView = (WebView) findViewById(R.id.content);
+		try {
+			mWebView.getSettings().setAppCacheEnabled(true);
+			mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+		}
+		catch(Exception e) {
+			// app cache not supported, must be < 2.1
+		}
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
 		mNextButton = (Button) findViewById(R.id.next);
 		mPreviousButton = (Button) findViewById(R.id.previous);
