@@ -195,7 +195,7 @@ public class Questions extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_UNANSWERED)) {
 					UnansweredQuery query = new UnansweredQuery();
-					query.setGetsBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
