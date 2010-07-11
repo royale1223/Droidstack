@@ -80,8 +80,8 @@ public class ViewQuestion extends Activity {
 		mQuestionID = launchParams.getIntExtra(KEY_QID, -1);
 		mWebView = (WebView) findViewById(R.id.content);
 		try {
-			mWebView.getSettings().setAppCacheEnabled(true);
-			mWebView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+			WebView.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView, true);
+			WebView.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView, WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		}
 		catch(Exception e) {
 			// app cache not supported, must be < 2.1

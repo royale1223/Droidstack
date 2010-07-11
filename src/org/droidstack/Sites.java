@@ -88,7 +88,7 @@ public class Sites extends Activity {
         		noMedia.createNewFile();
         	}
         	catch (Exception e) {
-        		Log.e(Const.TAG, "Exception: " + e.getMessage());
+        		Log.e(Const.TAG, ".nomedia creation error", e);
         		externalMediaError();
         	}
         }
