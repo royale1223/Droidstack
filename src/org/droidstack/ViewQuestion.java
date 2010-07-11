@@ -10,6 +10,7 @@ import net.sf.stackwrap4j.entities.Answer;
 import net.sf.stackwrap4j.entities.Comment;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.entities.User;
+import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import android.app.Activity;
@@ -60,6 +61,7 @@ public class ViewQuestion extends Activity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.question);
 		
+		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mContext = this;
 		try {
 			InputStream is = getAssets().open("question.html", AssetManager.ACCESS_BUFFER);

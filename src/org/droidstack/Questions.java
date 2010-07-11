@@ -7,6 +7,7 @@ import java.util.List;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.enums.Order;
+import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.FavoriteQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
@@ -75,6 +76,7 @@ public class Questions extends Activity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.questions);
 		
+		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mResources = getResources();
 		mContext = (Context) this;
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);

@@ -6,6 +6,7 @@ import java.util.List;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Answer;
 import net.sf.stackwrap4j.enums.Order;
+import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -67,6 +68,7 @@ public class Answers extends Activity {
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.answers);
 		
+		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mContext = this;
 		mResources = getResources();
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);

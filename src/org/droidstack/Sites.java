@@ -11,6 +11,7 @@ import java.util.List;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Stats;
 import net.sf.stackwrap4j.entities.User;
+import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 import android.app.Activity;
@@ -59,6 +60,8 @@ public class Sites extends Activity {
         super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sites);
+        
+        HttpClient.setTimeout(Const.NET_TIMEOUT);
         mContext = (Context) this;
         mSitesDatabase = new SitesDatabase(mContext);
         mSites = mSitesDatabase.getSites();
