@@ -221,8 +221,11 @@ public class Sites extends Activity {
 				.setPositiveButton(android.R.string.ok, new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						int userID = Integer.parseInt(userEntry.getText().toString());
-						new SetUserIDTask(id, userID).execute();
+						try {
+							int userID = Integer.parseInt(userEntry.getText().toString());
+							new SetUserIDTask(id, userID).execute();
+						}
+						catch (Exception e) { }
 					}
 				}).create().show();
 			return true;
