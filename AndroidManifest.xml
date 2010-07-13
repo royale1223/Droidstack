@@ -16,9 +16,46 @@
             </intent-filter>
         </activity>
         <activity android:name=".SiteActions" />
-        <activity android:name=".Questions" />
-        <activity android:name=".Answers" />
-        <activity android:name=".ViewQuestion" />
+        <activity android:name=".Questions">
+        	<intent-filter
+        		android:icon="@drawable/icon"
+        		android:label="@string/intent_questions">
+        		<action android:name="android.intent.action.VIEW" />
+        		<category android:name="android.intent.category.DEFAULT" />
+        		<data 
+        			android:scheme="droidstack"
+        			android:host="questions" />
+        		<data android:path="/all" />
+        		<data android:path="/search" />
+        		<data android:path="/unanswered" />
+        		<data android:path="/user" />
+        		<data android:path="/favorites" />
+        	</intent-filter>
+        </activity>
+        <activity android:name=".Answers">
+	        <intent-filter
+	        	android:icon="@drawable/icon"
+	        	android:label="@string/intent_answers">
+	        	<action android:name="android.intent.action.VIEW" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="answers" />
+	        	<data android:path="/user" />
+	        </intent-filter>
+	    </activity>
+        <activity android:name=".ViewQuestion">
+        	<intent-filter
+	        	android:icon="@drawable/icon"
+	        	android:label="@string/intent_answers">
+	        	<action android:name="android.intent.action.VIEW" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="question"
+	        		android:path="" />
+	        </intent-filter>
+	    </activity>
     </application>
     <uses-sdk android:minSdkVersion="4" />
 	<uses-permission android:name="android.permission.INTERNET" />

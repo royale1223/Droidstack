@@ -40,4 +40,6 @@
     <string name="search_tagged">Tagged with</string>
     <string name="search_nottagged">Not tagged with</string>
     <string name="search_separate_tags">Separate tags with a space</string>
+    <string name="intent_questions">View questions</string>
+    <string name="intent_answers">View answers</string>
 </resources>

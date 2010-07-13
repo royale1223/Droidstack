@@ -89,31 +89,35 @@ public class Questions extends Activity {
 		mEndpoint = data.getQueryParameter("endpoint");
 		mSiteName = data.getQueryParameter("name");
 		
+		String titlePrefix = "";
+		if (mSiteName != null) titlePrefix = mSiteName + ": ";
 		if (mQueryType.equals(TYPE_ALL)) {
-			setTitle(mSiteName + ": " + getString(R.string.title_all_questions));
+			setTitle(titlePrefix + getString(R.string.title_all_questions));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_UNANSWERED)) {
-			setTitle(mSiteName + ": " + getString(R.string.title_all_unanswered));
+			setTitle(titlePrefix + getString(R.string.title_all_unanswered));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_USER)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			mUserName = data.getQueryParameter("uname");
-			setTitle(mSiteName + ": " + getString(R.string.title_user_questions).replace("%s", mUserName));
+			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
+			setTitle(titlePrefix + getString(R.string.title_user_questions).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_FAVORITES)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			mUserName = data.getQueryParameter("uname");
-			setTitle(mSiteName + ": " + getString(R.string.title_user_favorites).replace("%s", mUserName));
+			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
+			setTitle(titlePrefix + getString(R.string.title_user_favorites).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_SEARCH)) {
 			mInTitle = data.getQueryParameter("intitle");
 			mTagged = data.getQueryParameter("tagged");
 			mNotTagged = data.getQueryParameter("nottagged");
-			setTitle(mSiteName + ": " + getString(R.string.title_search_results));
+			setTitle(titlePrefix + getString(R.string.title_search_results));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_search, android.R.layout.simple_spinner_item);
 		}
 		
@@ -403,7 +407,7 @@ public class Questions extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			Intent i = new Intent(mContext, ViewQuestion.class);
-			String uri = "droidstack://question/" +
+			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mQuestions.get(position).getPostId()));
 			i.setData(Uri.parse(uri));

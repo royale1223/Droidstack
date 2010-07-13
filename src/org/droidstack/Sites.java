@@ -9,12 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
-import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.entities.Stats;
 import net.sf.stackwrap4j.entities.User;
-import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
-import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 import android.app.Activity;
@@ -22,9 +19,9 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -33,21 +30,21 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class Sites extends Activity {
 	

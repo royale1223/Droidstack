@@ -73,16 +73,16 @@ public class Answers extends Activity {
 		
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
-		try {
-			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
-		}
-		catch (Exception e) { }
-		mUserName = data.getQueryParameter("uname");
 		mEndpoint = data.getQueryParameter("endpoint");
 		mSiteName = data.getQueryParameter("name");
 		
+		String titlePrefix = "";
+		if (mSiteName != null) titlePrefix = mSiteName + ": ";
 		if (mQueryType.equals(TYPE_USER)) {
-			setTitle(mSiteName + ": " + getString(R.string.title_user_answers).replace("%s", mUserName));
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+			mUserName = data.getQueryParameter("uname");
+			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
+			setTitle(titlePrefix + getString(R.string.title_user_answers).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.a_sort_user, android.R.layout.simple_spinner_item);
 		}
 		
@@ -278,7 +278,7 @@ public class Answers extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			Intent i = new Intent(mContext, ViewQuestion.class);
-			String uri = "droidstack://question/" +
+			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mAnswers.get(position).getQuestionId()));
 			i.setData(Uri.parse(uri));
