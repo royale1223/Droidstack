@@ -72,7 +72,7 @@ public class Answers extends Activity {
 		mResources = getResources();
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
 		
-		if (getIntent().getAction().equals(Intent.ACTION_PICK)) mIsStartedForResult = true; 
+		if (Intent.ACTION_PICK.equals(getIntent().getAction())) mIsStartedForResult = true; 
 		
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
