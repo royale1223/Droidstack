@@ -49,6 +49,7 @@ public class Answers extends Activity {
 	private boolean mIsRequestOngoing = true;
 	private int mSort = -1;
 	private Order mOrder = Order.DESC;
+	private boolean mIsStartedForResult = false;
 	
 	private List<Answer> mAnswers;
 	private ArrayAdapter<Answer> mAdapter;
@@ -70,6 +71,8 @@ public class Answers extends Activity {
 		mContext = this;
 		mResources = getResources();
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
+		
+		if (getIntent().getAction().equals(Intent.ACTION_PICK)) mIsStartedForResult = true; 
 		
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
@@ -277,12 +280,25 @@ public class Answers extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Intent i = new Intent(mContext, ViewQuestion.class);
-			String uri = "droidstack://question" +
-				"?endpoint=" + Uri.encode(mEndpoint) +
-				"&qid=" + Uri.encode(String.valueOf(mAnswers.get(position).getQuestionId()));
-			i.setData(Uri.parse(uri));
-			startActivity(i);
+			Answer a = mAnswers.get(position);
+			if (!mIsStartedForResult) {
+				Intent i = new Intent(mContext, ViewQuestion.class);
+				String uri = "droidstack://question" +
+					"?endpoint=" + Uri.encode(mEndpoint) +
+					"&qid=" + Uri.encode(String.valueOf(a.getQuestionId()));
+				i.setData(Uri.parse(uri));
+				startActivity(i);
+			}
+			else {
+				Intent i = new Intent();
+				i.putExtra("id", a.getPostId());
+				i.putExtra("qid", a.getQuestionId());
+				i.putExtra("title", a.getTitle());
+				i.putExtra("score", a.getScore());
+				i.putExtra("accepted", a.isAccepted());
+				setResult(RESULT_OK, i);
+				finish();
+			}
 		}
 		
 	};
