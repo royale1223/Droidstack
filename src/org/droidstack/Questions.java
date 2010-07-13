@@ -10,6 +10,7 @@ import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.FavoriteQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
+import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 import android.app.Activity;
@@ -45,6 +46,7 @@ public class Questions extends Activity {
 	public final static String TYPE_UNANSWERED = "unanswered";
 	public final static String TYPE_USER = "user";
 	public final static String TYPE_FAVORITES = "favorites";
+	public final static String TYPE_SEARCH = "search";
 	
 	private StackWrapper mAPI;
 	private String mQueryType;
@@ -54,6 +56,9 @@ public class Questions extends Activity {
 	private int mPageSize;
 	private int mUserID = 0;
 	private String mUserName;
+	private String mInTitle;
+	private String mTagged;
+	private String mNotTagged;
 	private boolean mNoMoreQuestions = false;
 	private boolean mIsRequestOngoing = true;
 	private int mSort = -1;
@@ -81,11 +86,6 @@ public class Questions extends Activity {
 		
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
-		try {
-			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
-		}
-		catch (Exception e) { }
-		mUserName = data.getQueryParameter("uname");
 		mEndpoint = data.getQueryParameter("endpoint");
 		mSiteName = data.getQueryParameter("name");
 		
@@ -98,12 +98,23 @@ public class Questions extends Activity {
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_USER)) {
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+			mUserName = data.getQueryParameter("uname");
 			setTitle(mSiteName + ": " + getString(R.string.title_user_questions).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_FAVORITES)) {
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+			mUserName = data.getQueryParameter("uname");
 			setTitle(mSiteName + ": " + getString(R.string.title_user_favorites).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
+		}
+		else if (mQueryType.equals(TYPE_SEARCH)) {
+			mInTitle = data.getQueryParameter("intitle");
+			mTagged = data.getQueryParameter("tagged");
+			mNotTagged = data.getQueryParameter("nottagged");
+			setTitle(mSiteName + ": " + getString(R.string.title_search_results));
+			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_search, android.R.layout.simple_spinner_item);
 		}
 		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
@@ -235,6 +246,23 @@ public class Questions extends Activity {
 						}
 					}
 					return mAPI.getFavoriteQuestionsByUserId(query);
+				}
+				else if (mQueryType.equals(TYPE_SEARCH)) {
+					SearchQuery query = new SearchQuery();
+					query.setPageSize(mPageSize).setPage(mPage);
+					if (mInTitle != null) query.setInTitle(mInTitle);
+					if (mTagged != null) query.setTags(mTagged.replace(' ', ';'));
+					if (mNotTagged != null) query.setNotTagged(mNotTagged.replace(' ', ';'));
+					query.setOrder(mOrder);
+					if (mSort > -1) {
+						switch(mSort) {
+						case 0: query.setSort(SearchQuery.Sort.activity()); break;
+						case 1: query.setSort(SearchQuery.Sort.views()); break;
+						case 2: query.setSort(SearchQuery.Sort.creation()); break;
+						case 3: query.setSort(SearchQuery.Sort.votes()); break;
+						}
+					}
+					return mAPI.search(query);
 				}
 			}
 			catch (Exception e) {

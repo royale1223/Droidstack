@@ -4,6 +4,7 @@
 	<string-array name="site_actions">
 		<item>All questions</item>
 		<item>Unanswered</item>
+		<item>Search</item>
 		<item>My questions</item>
 		<item>Favorite questions</item>
 		<item>My answers</item>
@@ -22,6 +23,13 @@
     <string-array name="q_sort_unanswered">
         <item>Creation</item>
         <item>Votes</item>
+    </string-array>
+    
+    <string-array name="q_sort_search">
+    	<item>Activity</item>
+    	<item>Views</item>
+    	<item>Creation</item>
+    	<item>Votes</item>
     </string-array>
     
     <string-array name="q_sort_user">

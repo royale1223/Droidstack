@@ -43,7 +43,6 @@ public class ViewQuestion extends Activity {
 	private int mPageSize;
 	
 	private Context mContext;
-	private SitesDatabase mSitesDatabase;
 	private StackWrapper mAPI;
 	private Question mQuestion;
 	private List<Answer> mAnswers;

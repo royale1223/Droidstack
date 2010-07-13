@@ -9,9 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.entities.Stats;
 import net.sf.stackwrap4j.entities.User;
+import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
+import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 import android.app.Activity;
@@ -58,6 +61,7 @@ public class Sites extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sites);
         

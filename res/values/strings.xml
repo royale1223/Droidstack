@@ -30,8 +30,14 @@
     <string name="loading">Loading...</string>
     <string name="title_all_questions">All Questions</string>
     <string name="title_all_unanswered">Unanswered Questions</string>
+    <string name="title_search_results">Search Results</string>
     <string name="title_user_questions">"%s's Questions"</string>
     <string name="title_user_favorites">"%s's Favorites"</string>
     <string name="title_user_answers">"%s's Answers"</string>
     <string name="number_of_answers">%s Answers</string>
+    <string name="search_title">Search</string>
+    <string name="search_intitle">Search in title</string>
+    <string name="search_tagged">Tagged with</string>
+    <string name="search_nottagged">Not tagged with</string>
+    <string name="search_separate_tags">Separate tags with a space</string>
 </resources>
