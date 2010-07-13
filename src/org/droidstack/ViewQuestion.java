@@ -18,8 +18,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,10 +34,8 @@ public class ViewQuestion extends Activity {
 	
 	public static final String KEY_QID = "question_id";
 	
-	private int mSiteID;
 	private int mQuestionID;
 	private String mEndpoint;
-	private String mSiteName;
 	private String mTemplate;
 	private int mAnswerCount;
 	private int mCurAnswer = -1;
@@ -76,10 +74,16 @@ public class ViewQuestion extends Activity {
 			Log.e(Const.TAG, "wtf asset load fail", e);
 			finish();
 		}
-		Intent launchParams = getIntent();
+		Uri data = getIntent().getData();
+		try {
+			mQuestionID = Integer.parseInt(data.getQueryParameter("qid"));
+		}
+		catch (Exception e) {
+			Log.e(Const.TAG, "ViewQuestion: qid could not be parsed into an integer: " + String.valueOf(data.getQueryParameter("qid")));
+			finish();
+		}
+		mEndpoint = data.getQueryParameter("endpoint");
 		
-		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
-		mQuestionID = launchParams.getIntExtra(KEY_QID, -1);
 		mWebView = (WebView) findViewById(R.id.content);
 		try {
 			WebView.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView, true);
@@ -93,11 +97,6 @@ public class ViewQuestion extends Activity {
 		mPreviousButton = (Button) findViewById(R.id.previous);
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
 		mAnswers = new ArrayList<Answer>();
-		
-		mSitesDatabase = new SitesDatabase(mContext);
-		mEndpoint = mSitesDatabase.getEndpoint(mSiteID);
-		mSiteName = mSitesDatabase.getName(mSiteID);
-		mSitesDatabase.dispose();
 		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		setTitle(R.string.loading);

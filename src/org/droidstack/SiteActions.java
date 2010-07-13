@@ -3,12 +3,13 @@ package org.droidstack;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class SiteActions extends Activity {
 	
@@ -19,8 +20,7 @@ public class SiteActions extends Activity {
 	private static final int POS_MY_ANSWERS = 4;
 	
 	private Context mContext;
-	private SitesDatabase mSitesDatabase;
-	private int mSiteID;
+	private String mEndpoint;
 	private String mSiteName;
 	private String mUserName;
 	private int mUserID;
@@ -33,13 +33,12 @@ public class SiteActions extends Activity {
 		
 		mContext = this;
 		
-		mSiteID = getIntent().getIntExtra(SitesDatabase.KEY_ID, -1);
+		Uri data = getIntent().getData();
 		
-		mSitesDatabase = new SitesDatabase(mContext);
-		mUserID = mSitesDatabase.getUserID(mSiteID);
-		mSiteName = mSitesDatabase.getName(mSiteID);
-		mUserName = mSitesDatabase.getUserName(mSiteID);
-		mSitesDatabase.dispose();
+		mEndpoint = data.getQueryParameter("endpoint");
+		mSiteName = data.getQueryParameter("name");
+		mUserName = data.getQueryParameter("uname");
+		mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 		
 		setTitle(mSiteName);
 		
@@ -51,17 +50,16 @@ public class SiteActions extends Activity {
 	private OnItemClickListener onItemClicked = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Intent whatToLaunch = null;
+			Class activity = null;
+			String uri = null;
 			switch(position) {
 			case POS_ALL:
-				whatToLaunch = new Intent(mContext, Questions.class);
-				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_QUESTIONS);
+				activity = Questions.class;
+				uri = "droidstack://questions/all?";
 				break;
 			case POS_UNANSWERED:
-				whatToLaunch = new Intent(mContext, Questions.class);
-				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_UNANSWERED);
+				activity = Questions.class;
+				uri = "droidstack://questions/unanswered?";
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {
@@ -70,11 +68,10 @@ public class SiteActions extends Activity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				whatToLaunch = new Intent(mContext, Questions.class);
-				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_USER);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
+				activity = Questions.class;
+				uri = "droidstack://questions/user" +
+					"&uid=" + mUserID +
+					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			case POS_FAVORITES:
 				if (mUserID == 0) {
@@ -83,11 +80,10 @@ public class SiteActions extends Activity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				whatToLaunch = new Intent(mContext, Questions.class);
-				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Questions.INTENT_TYPE, Questions.TYPE_FAVORITES);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
+				activity = Questions.class;
+				uri = "droidstack://questions/favorites" +
+					"&uid=" + mUserID +
+					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			case POS_MY_ANSWERS:
 				if (mUserID == 0) {
@@ -96,16 +92,17 @@ public class SiteActions extends Activity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				whatToLaunch = new Intent(mContext, Answers.class);
-				whatToLaunch.setAction(Intent.ACTION_VIEW);
-				whatToLaunch.putExtra(Answers.INTENT_TYPE, Answers.TYPE_USER);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UID, mUserID);
-				whatToLaunch.putExtra(SitesDatabase.KEY_UNAME, mUserName);
+				activity = Answers.class;
+				uri = "droidstack://answers/user" +
+					"&uid=" + mUserID +
+					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			}
-			if (whatToLaunch != null) {
-				whatToLaunch.putExtra(SitesDatabase.KEY_ID, mSiteID);
-				startActivity(whatToLaunch);
+			if (activity != null && uri != null) {
+				uri += "endpoint=" + Uri.encode(mEndpoint) + "&name=" + Uri.encode(mSiteName);
+				Intent i = new Intent(mContext, activity);
+				i.setData(Uri.parse(uri));
+				startActivity(i);
 			}
 		}
 	};

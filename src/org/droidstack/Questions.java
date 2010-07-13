@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,30 +26,27 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class Questions extends Activity {
 	
-	public final static String INTENT_TYPE = "type";
-	public final static String TYPE_QUESTIONS = "questions";
+	public final static String TYPE_ALL = "all";
 	public final static String TYPE_UNANSWERED = "unanswered";
 	public final static String TYPE_USER = "user";
 	public final static String TYPE_FAVORITES = "favorites";
 	
 	private StackWrapper mAPI;
-	private SitesDatabase mSitesDatabase;
-	private int mSiteID;
 	private String mQueryType;
 	private String mEndpoint;
 	private String mSiteName;
@@ -81,17 +79,17 @@ public class Questions extends Activity {
 		mContext = (Context) this;
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
 		
-		Intent launchParams = getIntent();
-		mQueryType = launchParams.getStringExtra(INTENT_TYPE);
-		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
-		mUserID = launchParams.getIntExtra(SitesDatabase.KEY_UID, 0);
-		mUserName = launchParams.getStringExtra(SitesDatabase.KEY_UNAME);
-		mSitesDatabase = new SitesDatabase(mContext);
-		mEndpoint = mSitesDatabase.getEndpoint(mSiteID);
-		mSiteName = mSitesDatabase.getName(mSiteID);
-		mSitesDatabase.dispose();
+		Uri data = getIntent().getData();
+		mQueryType = data.getPathSegments().get(0);
+		try {
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+		}
+		catch (Exception e) { }
+		mUserName = data.getQueryParameter("uname");
+		mEndpoint = data.getQueryParameter("endpoint");
+		mSiteName = data.getQueryParameter("name");
 		
-		if (mQueryType.equals(TYPE_QUESTIONS)) {
+		if (mQueryType.equals(TYPE_ALL)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_all_questions));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 		}
@@ -178,7 +176,7 @@ public class Questions extends Activity {
 		@Override
 		protected List<Question> doInBackground(Void... queries) {
 			try {
-				if (mQueryType.equals(TYPE_QUESTIONS)) {
+				if (mQueryType.equals(TYPE_ALL)) {
 					QuestionQuery query = new QuestionQuery();
 					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
 					query.setOrder(mOrder);
@@ -377,8 +375,10 @@ public class Questions extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			Intent i = new Intent(mContext, ViewQuestion.class);
-			i.putExtra(SitesDatabase.KEY_ID, mSiteID);
-			i.putExtra(ViewQuestion.KEY_QID, mQuestions.get(position).getPostId());
+			String uri = "droidstack://question/" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + Uri.encode(String.valueOf(mQuestions.get(position).getPostId()));
+			i.setData(Uri.parse(uri));
 			startActivity(i);
 		}
 	};

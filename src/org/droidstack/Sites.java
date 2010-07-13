@@ -180,10 +180,17 @@ public class Sites extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			mSites.moveToPosition(position);
-			int siteID = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_ID));
+			String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+			String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
+			int uid = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
+			String uname = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_UNAME));
 			Intent i = new Intent(mContext, SiteActions.class);
-			i.setAction(Intent.ACTION_VIEW);
-			i.putExtra(SitesDatabase.KEY_ID, siteID);
+			String uri = "droidstack://site/" +
+				"?endpoint=" + Uri.encode(endpoint) +
+				"&name=" + Uri.encode(name) +
+				"&uid=" + String.valueOf(uid) +
+				"&uname=" + Uri.encode(uname);
+			i.setData(Uri.parse(uri));
 			startActivity(i);
 		}
 	};
@@ -204,7 +211,7 @@ public class Sites extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		mSites.moveToPosition(info.position);
-		final int id = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_ID));
+		final String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
 		int userID = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
 		String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 		switch(item.getItemId()) {
@@ -223,14 +230,16 @@ public class Sites extends Activity {
 					public void onClick(DialogInterface dialog, int which) {
 						try {
 							int userID = Integer.parseInt(userEntry.getText().toString());
-							new SetUserIDTask(id, userID).execute();
+							new SetUserIDTask(endpoint, userID).execute();
 						}
-						catch (Exception e) { }
+						catch (Exception e) {
+							mSitesDatabase.setUser(endpoint, 0, "");
+						}
 					}
 				}).create().show();
 			return true;
 		case R.id.menu_remove:
-			mSitesDatabase.removeSite(id);
+			mSitesDatabase.removeSite(endpoint);
 			mSites.requery();
 			mAdapter.notifyDataSetChanged();
 			return true;
@@ -315,17 +324,15 @@ public class Sites extends Activity {
     
     private class SetUserIDTask extends AsyncTask<Void, Void, User> {
     	
-    	private final int mSiteID;
     	private final int mUserID;
     	private final String mEndpoint;
     	private Exception mException;
     	private ProgressDialog progressDialog;
     	
-    	public SetUserIDTask(int id, int userID) {
+    	public SetUserIDTask(String endpoint, int userID) {
     		super();
-    		mSiteID = id;
+    		mEndpoint = endpoint;
     		mUserID = userID;
-    		mEndpoint = mSitesDatabase.getEndpoint(id);
     	}
     	
     	@Override
@@ -360,7 +367,7 @@ public class Sites extends Activity {
 					.create().show();
 			}
 			else {
-				mSitesDatabase.setUser(mSiteID, mUserID, result.getDisplayName());
+				mSitesDatabase.setUser(mEndpoint, mUserID, result.getDisplayName());
 			}
 		}
     }

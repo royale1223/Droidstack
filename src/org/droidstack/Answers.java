@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,22 +25,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class Answers extends Activity {
 	
-	public final static String INTENT_TYPE = "type";
 	public final static String TYPE_USER = "user";
 	
 	private StackWrapper mAPI;
-	private SitesDatabase mSitesDatabase;
-	private int mSiteID;
 	private String mQueryType;
 	private String mEndpoint;
 	private String mSiteName;
@@ -73,15 +71,15 @@ public class Answers extends Activity {
 		mResources = getResources();
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
 		
-		Intent launchParams = getIntent();
-		mQueryType = launchParams.getStringExtra(INTENT_TYPE);
-		mSiteID = launchParams.getIntExtra(SitesDatabase.KEY_ID, -1);
-		mUserID = launchParams.getIntExtra(SitesDatabase.KEY_UID, 0);
-		mUserName = launchParams.getStringExtra(SitesDatabase.KEY_UNAME);
-		mSitesDatabase = new SitesDatabase(mContext);
-		mEndpoint = mSitesDatabase.getEndpoint(mSiteID);
-		mSiteName = mSitesDatabase.getName(mSiteID);
-		mSitesDatabase.dispose();
+		Uri data = getIntent().getData();
+		mQueryType = data.getPathSegments().get(0);
+		try {
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+		}
+		catch (Exception e) { }
+		mUserName = data.getQueryParameter("uname");
+		mEndpoint = data.getQueryParameter("endpoint");
+		mSiteName = data.getQueryParameter("name");
 		
 		if (mQueryType.equals(TYPE_USER)) {
 			setTitle(mSiteName + ": " + getString(R.string.title_user_answers).replace("%s", mUserName));
@@ -280,8 +278,10 @@ public class Answers extends Activity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			Intent i = new Intent(mContext, ViewQuestion.class);
-			i.putExtra(SitesDatabase.KEY_ID, mSiteID);
-			i.putExtra(ViewQuestion.KEY_QID, mAnswers.get(position).getQuestionId());
+			String uri = "droidstack://question/" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + Uri.encode(String.valueOf(mAnswers.get(position).getQuestionId()));
+			i.setData(Uri.parse(uri));
 			startActivity(i);
 		}
 		
