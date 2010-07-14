@@ -85,11 +85,12 @@ public class ViewQuestion extends Activity {
 		
 		mWebView = (WebView) findViewById(R.id.content);
 		try {
-			WebView.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView, true);
-			WebView.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView, WebSettings.LOAD_CACHE_ELSE_NETWORK);
+			WebSettings.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView.getSettings(), true);
+			WebSettings.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView.getSettings(), WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		}
 		catch(Exception e) {
 			// app cache not supported, must be < 2.1
+			Log.i(Const.TAG, "Unable to enable WebView caching", e);
 		}
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
 		mNextButton = (Button) findViewById(R.id.next);
