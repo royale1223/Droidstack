@@ -43,7 +43,10 @@ public class SiteActions extends Activity {
 		mEndpoint = data.getQueryParameter("endpoint");
 		mSiteName = data.getQueryParameter("name");
 		mUserName = data.getQueryParameter("uname");
-		mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+		try {
+			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+		}
+		catch (Exception e) { }
 		
 		setTitle(mSiteName);
 		
@@ -110,7 +113,7 @@ public class SiteActions extends Activity {
 				}
 				activity = Questions.class;
 				uri = "droidstack://questions/user" +
-					"&uid=" + mUserID +
+					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			case POS_FAVORITES:
@@ -122,7 +125,7 @@ public class SiteActions extends Activity {
 				}
 				activity = Questions.class;
 				uri = "droidstack://questions/favorites" +
-					"&uid=" + mUserID +
+					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			case POS_MY_ANSWERS:
@@ -134,7 +137,7 @@ public class SiteActions extends Activity {
 				}
 				activity = Answers.class;
 				uri = "droidstack://answers/user" +
-					"&uid=" + mUserID +
+					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
 				break;
 			}
