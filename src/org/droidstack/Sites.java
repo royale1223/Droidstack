@@ -369,6 +369,8 @@ public class Sites extends Activity {
 			}
 			else {
 				mSitesDatabase.setUser(mEndpoint, mUserID, result.getDisplayName());
+				mSites.requery();
+				mAdapter.notifyDataSetChanged();
 			}
 		}
     }
