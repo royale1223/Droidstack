@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Answer;
+import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
@@ -90,7 +91,16 @@ public class Answers extends Activity {
 		}
 		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-		mAnswers = new ArrayList<Answer>();
+		if (savedInstanceState == null) {
+			mAnswers = new ArrayList<Answer>();
+		}
+		else {
+			mAnswers = (ArrayList<Answer>) savedInstanceState.getSerializable("mAnswers");
+			mPage = savedInstanceState.getInt("mPage");
+			mSort = savedInstanceState.getInt("mSort");
+			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
+			mIsRequestOngoing = false;
+		}
 		mAdapter = new AnswersListAdapter<Answer>(mContext, 0, mAnswers);
 		mListView = (ListView) findViewById(R.id.answers);
 		mListView.setAdapter(mAdapter);
@@ -101,7 +111,17 @@ public class Answers extends Activity {
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		getAnswers();
+		if (savedInstanceState == null) getAnswers();
+		else mListView.setSelection(savedInstanceState.getInt("scroll"));
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("mAnswers", (ArrayList<Answer>) mAnswers);
+		outState.putInt("mPage", mPage);
+		outState.putInt("mSort", mSort);
+		outState.putBoolean("isAsc", mOrder.equals(Order.ASC));
+		outState.putInt("scroll", mListView.getFirstVisiblePosition());
 	}
 	
 	@Override
@@ -137,7 +157,6 @@ public class Answers extends Activity {
 					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
 					else mOrder = Order.ASC;
 					mNoMoreAnswers = false;
-					mAnswers.clear();
 					mPage = 1;
 					getAnswers();
 				}
@@ -205,6 +224,7 @@ public class Answers extends Activity {
 				Log.e(Const.TAG, "Failed to get answers", mException);
 			}
 			else {
+				if (mPage == 1) mAnswers.clear();
 				if (result.size() < mPageSize) mNoMoreAnswers = true;
 				mAnswers.addAll(result);
 				mAdapter.notifyDataSetChanged();

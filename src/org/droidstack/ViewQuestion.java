@@ -19,6 +19,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -70,7 +71,7 @@ public class ViewQuestion extends Activity {
 			mTemplate = builder.toString();
 		}
 		catch (Exception e) {
-			Log.e(Const.TAG, "wtf asset load fail", e);
+			Log.wtf(Const.TAG, "asset load fail", e);
 			finish();
 		}
 		Uri data = getIntent().getData();
@@ -78,13 +79,14 @@ public class ViewQuestion extends Activity {
 			mQuestionID = Integer.parseInt(data.getQueryParameter("qid"));
 		}
 		catch (Exception e) {
-			Log.e(Const.TAG, "ViewQuestion: qid could not be parsed into an integer: " + String.valueOf(data.getQueryParameter("qid")));
+			Log.e(Const.TAG, "ViewQuestion: qid could not be parsed into an integer: " + data.getQueryParameter("qid"));
 			finish();
 		}
 		mEndpoint = data.getQueryParameter("endpoint");
 		
 		mWebView = (WebView) findViewById(R.id.content);
 		try {
+			// try to enable caching, useful for avatars
 			WebSettings.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView.getSettings(), true);
 			WebSettings.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView.getSettings(), WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		}
@@ -96,11 +98,29 @@ public class ViewQuestion extends Activity {
 		mNextButton = (Button) findViewById(R.id.next);
 		mPreviousButton = (Button) findViewById(R.id.previous);
 		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
-		mAnswers = new ArrayList<Answer>();
-		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-		setTitle(R.string.loading);
-		new FetchQuestionTask().execute();
+		if (savedInstanceState == null) {
+			mAnswers = new ArrayList<Answer>();
+			setTitle(R.string.loading);
+			new FetchQuestionTask().execute();
+		}
+		else {
+			mQuestion = (Question) savedInstanceState.getSerializable("mQuestion");
+			mAnswers = (ArrayList<Answer>) savedInstanceState.getSerializable("mAnswers");
+			mCurAnswer = savedInstanceState.getInt("mCurAnswer");
+			mPage = savedInstanceState.getInt("mPage");
+			mAnswerCount = savedInstanceState.getInt("mAnswerCount");
+			updateView();
+		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("mQuestion", mQuestion);
+		outState.putSerializable("mAnswers", (ArrayList<Answer>) mAnswers);
+		outState.putInt("mCurAnswer", mCurAnswer);
+		outState.putInt("mPage", mPage);
+		outState.putInt("mAnswerCount", mAnswerCount);
 	}
 	
 	private void updateView() {
@@ -118,7 +138,7 @@ public class ViewQuestion extends Activity {
 				}
 			}
 			catch (Exception e) {
-				Log.e(Const.TAG, "wtf Question.getComments() error", e);
+				Log.wtf(Const.TAG, "Question.getComments() error", e);
 				finish();
 			}
 			for (String tag: mQuestion.getTags()) {
@@ -135,7 +155,12 @@ public class ViewQuestion extends Activity {
 			tpl.parse("main.post");
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
-			mAnswerCountView.setText(getString(R.string.number_of_answers).replace("%s", String.valueOf(mQuestion.getAnswerCount())));
+			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+				mAnswerCountView.setText(String.valueOf(mAnswerCount));
+			}
+			else {
+				mAnswerCountView.setText(getString(R.string.number_of_answers).replace("%s", String.valueOf(mAnswerCount)));
+			}
 			
 			mPreviousButton.setEnabled(false);
 			mNextButton.setEnabled(false);
@@ -172,7 +197,12 @@ public class ViewQuestion extends Activity {
 			mNextButton.setEnabled(false);
 			if (mCurAnswer > -1) mPreviousButton.setEnabled(true);
 			if (mCurAnswer < mAnswerCount-1) mNextButton.setEnabled(true);
-			mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
+			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+				mAnswerCountView.setText((mCurAnswer+1) + "\nof\n" + mAnswerCount);
+			}
+			else {
+				mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
+			}
 		}
 	}
 	
@@ -209,7 +239,7 @@ public class ViewQuestion extends Activity {
 		protected Void doInBackground(Void... params) {
 			try {
 				QuestionQuery query = new QuestionQuery();
-				query.setBody(true).setComments(true).setIds(mQuestionID);
+				query.setBody(true).setComments(true).setAnswers(false).setIds(mQuestionID);
 				mQuestion = mAPI.getQuestions(query).get(0);
 				mAnswerCount = mQuestion.getAnswerCount();
 			}

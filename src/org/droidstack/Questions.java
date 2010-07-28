@@ -18,6 +18,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -128,17 +129,38 @@ public class Questions extends Activity {
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mQuestions = new ArrayList<Question>();
+		if (savedInstanceState == null) {
+			Log.d(Const.TAG, ".Questions started");
+			mQuestions = new ArrayList<Question>();
+		}
+		else {
+			Log.d(Const.TAG, ".Questions restored");
+			mQuestions = (ArrayList<Question>) savedInstanceState.getSerializable("mQuestions");
+			mPage = savedInstanceState.getInt("mPage");
+			mSort = savedInstanceState.getInt("mSort");
+			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
+			mIsRequestOngoing = false;
+		}
 		mAdapter = new QuestionsListAdapter<Question>(mContext, 0, mQuestions);
 		mListView = (ListView)findViewById(R.id.questions);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(onQuestionClicked);
 		mListView.setOnScrollListener(onQuestionsScrolled);
 		
-		getQuestions();
+		if (savedInstanceState == null) getQuestions();
+		else mListView.setSelection(savedInstanceState.getInt("scroll"));
 		
 	}
 	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("mQuestions", (ArrayList<Question>) mQuestions);
+		outState.putInt("mPage", mPage);
+		outState.putInt("mSort", mSort);
+		outState.putBoolean("isAsc", mOrder.equals(Order.ASC));
+		outState.putInt("scroll", mListView.getFirstVisiblePosition());
+	}
+
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
 		if (mIsRequestOngoing == false) {
@@ -170,7 +192,6 @@ public class Questions extends Activity {
 					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
 					else mOrder = Order.ASC;
 					mNoMoreQuestions = false;
-					mQuestions.clear();
 					mPage = 1;
 					getQuestions();
 				}
@@ -196,7 +217,7 @@ public class Questions extends Activity {
 			try {
 				if (mQueryType.equals(TYPE_ALL)) {
 					QuestionQuery query = new QuestionQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -213,7 +234,7 @@ public class Questions extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_UNANSWERED)) {
 					UnansweredQuery query = new UnansweredQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -225,7 +246,7 @@ public class Questions extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_USER)) {
 					UserQuestionQuery query = new UserQuestionQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -240,7 +261,7 @@ public class Questions extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_FAVORITES)) {
 					FavoriteQuery query = new FavoriteQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -296,6 +317,7 @@ public class Questions extends Activity {
 				Log.e(Const.TAG, "Failed to get questions", mException);
 			}
 			else {
+				if (mPage == 1) mQuestions.clear();
 				if (result.size() < mPageSize) mNoMoreQuestions = true;
 				mQuestions.addAll(result);
 				mAdapter.notifyDataSetChanged();

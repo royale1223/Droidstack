@@ -45,6 +45,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Sites extends Activity {
 	
@@ -371,6 +372,7 @@ public class Sites extends Activity {
 				mSitesDatabase.setUser(mEndpoint, mUserID, result.getDisplayName());
 				mSites.requery();
 				mAdapter.notifyDataSetChanged();
+				Toast.makeText(mContext, "User " + result.getDisplayName() + " loaded", Toast.LENGTH_SHORT).show();
 			}
 		}
     }

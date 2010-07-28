@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	android:orientation="vertical"
+	android:orientation="horizontal"
 	>
 	<WebView
 		android:layout_width="fill_parent"
@@ -12,16 +12,17 @@
 		android:id="@+id/content"
 		/>
 	<RelativeLayout
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
 		android:layout_alignParentBottom="true"
-		android:background="@android:drawable/bottom_bar"
+		android:background="@drawable/rightside_bar"
 		>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_centerVertical="true"
+			android:layout_alignParentTop="true"
+			android:layout_centerHorizontal="true"
+			android:gravity="center_horizontal"
 			style="@android:style/TextAppearance.Large"
 			android:textColor="@android:color/primary_text_dark"
 			android:textStyle="bold"
@@ -31,11 +32,25 @@
 			android:paddingRight="5dip"
 			android:id="@+id/answer_count"
 			/>
+		<TextView
+			android:text="@string/answers"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:layout_below="@id/answer_count"
+			android:gravity="center_horizontal"
+			style="@android:style/TextAppearance.Small"
+			android:textColor="@android:color/primary_text_dark"
+			android:shadowColor="#000"
+			android:shadowRadius="2"
+			android:paddingLeft="5dip"
+			android:paddingRight="5dip"
+			/>
 		<Button
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentRight="true"
-			android:layout_centerVertical="true"
+			android:layout_centerHorizontal="true"
+			android:layout_alignParentBottom="true"
 			android:text="▶"
 			android:textAppearance="@android:style/TextAppearance.Large"
 			android:paddingLeft="20dip"
@@ -46,8 +61,8 @@
 		<Button
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_toLeftOf="@id/next"
-			android:layout_centerVertical="true"
+			android:layout_centerHorizontal="true"
+			android:layout_above="@id/next"
 			android:text="◀"
 			android:textAppearance="@android:style/TextAppearance.Large"
 			android:paddingLeft="20dip"
