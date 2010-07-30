@@ -13,6 +13,7 @@ import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
+import net.sf.stackwrap4j.utils.StackUtils;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -153,7 +154,8 @@ public class ViewQuestion extends Activity {
 			tpl.assign("QSCORE", String.valueOf(mQuestion.getScore()));
 			tpl.assign("QAHASH", owner.getEmailHash());
 			tpl.assign("QANAME", owner.getDisplayName());
-			tpl.assign("QAREP", String.valueOf(owner.getReputation()));
+			tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			tpl.assign("QWHEN", StackUtils.formatElapsedTime(mQuestion.getCreationDate()));
 			tpl.parse("main.post");
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
@@ -191,7 +193,8 @@ public class ViewQuestion extends Activity {
 			// String.valueOf is needed because getEmailHash() returns null sometimes 
 			tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
 			tpl.assign("QANAME", owner.getDisplayName());
-			tpl.assign("QAREP", String.valueOf(owner.getReputation()));
+			tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			tpl.assign("QWHEN", StackUtils.formatElapsedTime(answer.getCreationDate()));
 			if (answer.isAccepted()) tpl.parse("main.post.accepted");
 			tpl.parse("main.post");
 			tpl.parse("main");
