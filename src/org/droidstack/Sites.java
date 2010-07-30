@@ -260,6 +260,9 @@ public class Sites extends Activity {
     	case R.id.menu_add_site:
     		new SitePickerTask().execute();
     		break;
+    	case R.id.menu_settings:
+    		Intent i = new Intent(mContext, Preferences.class);
+    		startActivity(i);
     	}
     	return false;
     }

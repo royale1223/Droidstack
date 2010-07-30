@@ -84,7 +84,7 @@ public class Questions extends Activity {
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mResources = getResources();
 		mContext = (Context) this;
-		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
+		mPageSize = Const.getPageSize(mContext);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) mIsStartedForResult = true;
 		

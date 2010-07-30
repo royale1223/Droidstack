@@ -64,4 +64,18 @@
     	<item>Ascending</item>
     </string-array>
     
+    <string-array name="pagesizeLabels">
+    	<item>10 items</item>
+    	<item>20 items</item>
+    	<item>30 items</item>
+    	<item>50 items</item>
+    </string-array>
+    
+    <string-array name="pagesizeValues">
+    	<item>10</item>
+    	<item>20</item>
+    	<item>30</item>
+    	<item>50</item>
+    </string-array>
+    
 </resources>

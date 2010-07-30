@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -98,7 +99,17 @@ public class ViewQuestion extends Activity {
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
 		mNextButton = (Button) findViewById(R.id.next);
 		mPreviousButton = (Button) findViewById(R.id.previous);
-		mPageSize = getPreferences(Context.MODE_PRIVATE).getInt(Const.PREF_PAGESIZE, Const.DEF_PAGESIZE);
+		// make the title scroll!
+		// find the title TextView
+		TextView title = (TextView) findViewById(android.R.id.title);
+		// set the ellipsize mode to MARQUEE and make it scroll only once
+		title.setEllipsize(TruncateAt.MARQUEE);
+		title.setMarqueeRepeatLimit(1);
+		// in order to start strolling, it has to be focusable and focused
+		title.setFocusable(true);
+		title.setFocusableInTouchMode(true);
+		title.requestFocus();
+		mPageSize = Const.getPageSize(mContext);
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		if (savedInstanceState == null) {
 			mAnswers = new ArrayList<Answer>();

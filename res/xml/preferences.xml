@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="Application">
+	<ListPreference
+		android:title="Page Size"
+		android:summary="Number of items to be loaded at a time"
+		android:key="pagesize"
+		android:entries="@array/pagesizeLabels"
+		android:entryValues="@array/pagesizeValues"
+	/>
+</PreferenceCategory>
+</PreferenceScreen>
