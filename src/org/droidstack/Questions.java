@@ -130,11 +130,9 @@ public class Questions extends Activity {
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		if (savedInstanceState == null) {
-			Log.d(Const.TAG, ".Questions started");
 			mQuestions = new ArrayList<Question>();
 		}
 		else {
-			Log.d(Const.TAG, ".Questions restored");
 			mQuestions = (ArrayList<Question>) savedInstanceState.getSerializable("mQuestions");
 			mPage = savedInstanceState.getInt("mPage");
 			mSort = savedInstanceState.getInt("mSort");

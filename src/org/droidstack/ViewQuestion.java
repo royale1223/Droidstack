@@ -71,7 +71,7 @@ public class ViewQuestion extends Activity {
 			mTemplate = builder.toString();
 		}
 		catch (Exception e) {
-			Log.wtf(Const.TAG, "asset load fail", e);
+			Log.e(Const.TAG, "wtf asset load fail", e);
 			finish();
 		}
 		Uri data = getIntent().getData();
@@ -131,14 +131,16 @@ public class ViewQuestion extends Activity {
 			try {
 				for (Comment c: mQuestion.getComments()) {
 					tpl.assign("CBODY", c.getBody());
-					tpl.assign("CAUTHOR", c.getOwner().getDisplayName());
+					User owner = c.getOwner();
+					if (owner == null) tpl.assign("CAUTHOR", "?");
+					else tpl.assign("CAUTHOR", owner.getDisplayName());
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
 					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
 					tpl.parse("main.post.comment");
 				}
 			}
 			catch (Exception e) {
-				Log.wtf(Const.TAG, "Question.getComments() error", e);
+				Log.e(Const.TAG, "wtf Question.getComments() error", e);
 				finish();
 			}
 			for (String tag: mQuestion.getTags()) {
@@ -172,7 +174,9 @@ public class ViewQuestion extends Activity {
 			try {
 				for (Comment c: answer.getComments()) {
 					tpl.assign("CBODY", c.getBody());
-					tpl.assign("CAUTHOR", String.valueOf(c.getOwner().getDisplayName()));
+					User owner = c.getOwner();
+					if (owner == null) tpl.assign("CAUTHOR", "?");
+					else tpl.assign("CAUTHOR", owner.getDisplayName());
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
 					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
 					tpl.parse("main.post.comment");
