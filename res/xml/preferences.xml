@@ -5,8 +5,33 @@
 		android:title="Page Size"
 		android:summary="Number of items to be loaded at a time"
 		android:key="pagesize"
-		android:entries="@array/pagesizeLabels"
-		android:entryValues="@array/pagesizeValues"
+		android:entries="@array/pagesize_labels"
+		android:entryValues="@array/pagesize_values"
+		android:defaultValue="10"
+	/>
+	<ListPreference
+		android:title="Font Size"
+		android:summary="For displaying questions"
+		android:key="fontsize"
+		android:entries="@array/fontsize_labels"
+		android:entryValues="@array/fontsize_values"
+		android:defaultValue="1em"
+	/>
+</PreferenceCategory>
+<PreferenceCategory android:title="Notifications">
+	<ListPreference
+		android:title="Interval"
+		android:summary="How often to check for notifications"
+		android:key="notif_interval"
+		android:entries="@array/interval_labels"
+		android:entryValues="@array/interval_values"
+		android:defaultValue="0"
+	/>
+	<CheckBoxPreference
+		android:title="Reputation Changes"
+		android:summary="Get a notification whenever your reputation changes on any of the sites"
+		android:key="notif_rep"
+		android:defaultValue="true"
 	/>
 </PreferenceCategory>
 </PreferenceScreen>

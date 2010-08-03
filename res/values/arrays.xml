@@ -64,18 +64,48 @@
     	<item>Ascending</item>
     </string-array>
     
-    <string-array name="pagesizeLabels">
+    <string-array name="pagesize_labels">
     	<item>10 items</item>
     	<item>20 items</item>
     	<item>30 items</item>
     	<item>50 items</item>
     </string-array>
     
-    <string-array name="pagesizeValues">
+    <string-array name="pagesize_values">
     	<item>10</item>
     	<item>20</item>
     	<item>30</item>
     	<item>50</item>
+    </string-array>
+    
+    <string-array name="interval_labels">
+    	<item>1 minute</item>
+    	<item>15 minutes</item>
+    	<item>30 minutes</item>
+    	<item>1 hour</item>
+    	<item>6 hours</item>
+    	<item>Never</item>
+    </string-array>
+    
+    <string-array name="interval_values">
+    	<item>1</item>
+    	<item>15</item>
+    	<item>30</item>
+    	<item>60</item>
+    	<item>360</item>
+    	<item>0</item>
+    </string-array>
+    
+    <string-array name="fontsize_labels">
+    	<item>Small</item>
+    	<item>Medium</item>
+    	<item>Large</item>
+    </string-array>
+    
+    <string-array name="fontsize_values">
+    	<item>1em</item>
+    	<item>1.2em</item>
+    	<item>1.4em</item>
     </string-array>
     
 </resources>

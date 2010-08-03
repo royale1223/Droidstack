@@ -19,11 +19,13 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.View;
@@ -49,6 +51,7 @@ public class ViewQuestion extends Activity {
 	private StackWrapper mAPI;
 	private Question mQuestion;
 	private List<Answer> mAnswers;
+	private SharedPreferences mPreferences;
 	
 	private WebView mWebView;
 	private TextView mAnswerCountView;
@@ -62,7 +65,7 @@ public class ViewQuestion extends Activity {
 		setContentView(R.layout.question);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mContext = this;
+		mContext = (Context) this;
 		try {
 			InputStream is = getAssets().open("question.html", AssetManager.ACCESS_BUFFER);
 			StringBuilder builder = new StringBuilder();
@@ -109,6 +112,7 @@ public class ViewQuestion extends Activity {
 		title.setFocusable(true);
 		title.setFocusableInTouchMode(true);
 		title.requestFocus();
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 		mPageSize = Const.getPageSize(mContext);
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		if (savedInstanceState == null) {
@@ -163,11 +167,19 @@ public class ViewQuestion extends Activity {
 			User owner = mQuestion.getOwner();
 			tpl.assign("QBODY", mQuestion.getBody());
 			tpl.assign("QSCORE", String.valueOf(mQuestion.getScore()));
-			tpl.assign("QAHASH", owner.getEmailHash());
-			tpl.assign("QANAME", owner.getDisplayName());
-			tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			if (owner != null) {
+				tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
+				tpl.assign("QANAME", owner.getDisplayName());
+				tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			}
+			else {
+				tpl.assign("QAHASH", "unknown");
+				tpl.assign("QANAME", "[unregistered]");
+				tpl.assign("QAREP", "0");
+			}
 			tpl.assign("QWHEN", StackUtils.formatElapsedTime(mQuestion.getCreationDate()));
 			tpl.parse("main.post");
+			tpl.assign("FONTSIZE", mPreferences.getString(Const.PREF_FONTSIZE, Const.DEF_FONTSIZE));
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -202,12 +214,20 @@ public class ViewQuestion extends Activity {
 			tpl.assign("QBODY", answer.getBody());
 			tpl.assign("QSCORE", String.valueOf(answer.getScore()));
 			// String.valueOf is needed because getEmailHash() returns null sometimes 
-			tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
-			tpl.assign("QANAME", owner.getDisplayName());
-			tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			if (owner != null) {
+				tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
+				tpl.assign("QANAME", owner.getDisplayName());
+				tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+			}
+			else {
+				tpl.assign("QAHASH", "unknown");
+				tpl.assign("QANAME", "[unregistered]");
+				tpl.assign("QAREP", "0");
+			}
 			tpl.assign("QWHEN", StackUtils.formatElapsedTime(answer.getCreationDate()));
 			if (answer.isAccepted()) tpl.parse("main.post.accepted");
 			tpl.parse("main.post");
+			tpl.assign("FONTSIZE", mPreferences.getString(Const.PREF_FONTSIZE, Const.DEF_FONTSIZE));
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 			

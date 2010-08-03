@@ -22,12 +22,14 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -111,6 +113,9 @@ public class Sites extends Activity {
         if (missing.size() != 0) {
         	new FetchMissingIconsTask().execute(missing);
         }
+        
+        // make sure notifications start if needed
+        startService(new Intent(mContext, NotificationService.class));
         
     }
     
