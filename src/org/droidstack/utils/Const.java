@@ -1,4 +1,7 @@
-package org.droidstack;
+package org.droidstack.utils;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -28,6 +31,11 @@ public final class Const {
 	public static int getPageSize(Context ctx) {
 		String items = PreferenceManager.getDefaultSharedPreferences(ctx).getString(PREF_PAGESIZE, DEF_PAGESIZE);
 		return Integer.parseInt(items);
+	}
+	
+	public static String longFormatRep(int rep) {
+		NumberFormat formatter = new DecimalFormat(",000");
+		return formatter.format(rep);
 	}
 	
 }

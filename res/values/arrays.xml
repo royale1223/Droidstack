@@ -8,6 +8,7 @@
 		<item>My questions</item>
 		<item>Favorite questions</item>
 		<item>My answers</item>
+		<item>My profile</item>
 	</string-array>
 
     <string-array name="q_sort_all">

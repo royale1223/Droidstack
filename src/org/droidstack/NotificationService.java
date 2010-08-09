@@ -2,6 +2,9 @@ package org.droidstack;
 
 import java.util.List;
 
+import org.droidstack.utils.Const;
+import org.droidstack.utils.SitesDatabase;
+
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Reputation;
 import net.sf.stackwrap4j.entities.User;
@@ -30,6 +33,7 @@ public class NotificationService extends Service {
 	
 	private int mInterval;
 	private long mLastRun;
+	private SitesDatabase mDB;
 	private Cursor mSites;
 	private Context mContext;
 	private NotificationManager mNotifManager;
@@ -42,6 +46,10 @@ public class NotificationService extends Service {
 		mContext = (Context) this;
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 		mInterval = Integer.parseInt(mPreferences.getString(Const.PREF_NOTIF_INTERVAL, Const.DEF_NOTIF_INTERVAL));
+		if (mInterval == 0) {
+			stopSelf();
+			return;
+		}
 		if (mPreferences.getLong(Const.PREF_NOTIF_LASTRUN, -1) == -1) {
 			Log.d(Const.TAG, "NotificationService: no previous run");
 			mPreferences.edit().putLong(Const.PREF_NOTIF_LASTRUN, System.currentTimeMillis()/1000).commit();
@@ -49,14 +57,11 @@ public class NotificationService extends Service {
 			stopSelf();
 			return;
 		}
-		if (mInterval == 0) {
-			stopSelf();
-			return;
-		}
 		mLastRun = mPreferences.getLong(Const.PREF_NOTIF_LASTRUN, -1);
 		mPreferences.edit().putLong(Const.PREF_NOTIF_LASTRUN, System.currentTimeMillis()/1000).commit();
 		mNotifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mSites = new SitesDatabase(mContext).getSites();
+		mDB = new SitesDatabase(mContext);
+		mSites = mDB.getSites();
 		new WorkerTask().execute();
 	}
 	
@@ -113,7 +118,7 @@ public class NotificationService extends Service {
 							if (posRep > 0 && negRep > 0) contentText = "+" + posRep + " / -" + negRep;
 							else if (posRep > 0) contentText = "+" + posRep;
 							else contentText = "-" + negRep;
-							contentText += ", new total: " + StackUtils.formatRep(user.getReputation());
+							contentText += ", new total: " + Const.longFormatRep(user.getReputation());
 							notif.setLatestEventInfo(mContext, name, contentText, contentIntent);
 							notif.defaults |= Notification.DEFAULT_ALL;
 							notif.flags |= Notification.FLAG_AUTO_CANCEL;
@@ -132,6 +137,8 @@ public class NotificationService extends Service {
 		@Override
 		protected void onPostExecute(Void result) {
 			Log.d(Const.TAG, "NotificationService finished");
+			mSites.close();
+			mDB.dispose();
 			setupNextRun();
 			stopSelf();
 		}

@@ -58,6 +58,18 @@
 	        		android:path="" />
 	        </intent-filter>
 	    </activity>
+	    <activity android:name=".ViewUser" android:theme="@android:style/Theme.Light.NoTitleBar">
+	    	<intent-filter
+	    		android:icon="@drawable/icon"
+	    		android:label="@string/intent_user">
+	    		<action android:name="android.intent.action.VIEW" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="user"
+	        		android:path="" />
+	    	</intent-filter>
+	    </activity>
 	    <activity android:name=".Preferences" android:label="Preferences" />
 	    
 	    <receiver android:name=".BootReceiver">

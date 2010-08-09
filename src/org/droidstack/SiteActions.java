@@ -23,6 +23,7 @@ public class SiteActions extends Activity {
 	private static final int POS_MY_QUESTIONS = 3;
 	private static final int POS_FAVORITES = 4;
 	private static final int POS_MY_ANSWERS = 5;
+	private static final int POS_MY_PROFILE = 6;
 	
 	private Context mContext;
 	private String mEndpoint;
@@ -139,6 +140,16 @@ public class SiteActions extends Activity {
 				uri = "droidstack://answers/user" +
 					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
+				break;
+			case POS_MY_PROFILE:
+				if (mUserID == 0) {
+					Toast.makeText(mContext,
+							R.string.no_userid,
+							Toast.LENGTH_LONG).show();
+					break;
+				}
+				activity = ViewUser.class;
+				uri = "droidstack://user?uid=" + mUserID + "&";
 				break;
 			}
 			if (activity != null && uri != null) {
