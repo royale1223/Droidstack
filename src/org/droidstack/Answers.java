@@ -261,7 +261,7 @@ public class Answers extends Activity {
 			ViewHolder h;
 			
 			if (convertView == null) {
-				v = inflater.inflate(R.layout.answer_item, null);
+				v = inflater.inflate(R.layout.item_answer, null);
 				h = new ViewHolder();
 				h.score = (TextView) v.findViewById(R.id.score);
 				h.title = (TextView) v.findViewById(R.id.title);

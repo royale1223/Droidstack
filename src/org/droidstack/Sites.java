@@ -164,7 +164,7 @@ public class Sites extends Activity {
 			View v;
 			ViewHolder h;
 			if (convertView == null) {
-				v = inflater.inflate(R.layout.site_item, null);
+				v = inflater.inflate(R.layout.item_site, null);
 				h = new ViewHolder();
 				h.label = (TextView) v.findViewById(R.id.label);
 				h.icon = (ImageView) v.findViewById(R.id.icon);

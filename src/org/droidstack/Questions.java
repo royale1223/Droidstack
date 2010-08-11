@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.droidstack.utils.Const;
-
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.enums.Order;
@@ -15,12 +13,14 @@ import net.sf.stackwrap4j.query.QuestionQuery;
 import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
+
+import org.droidstack.utils.Const;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -360,7 +360,7 @@ public class Questions extends Activity {
 			ViewHolder h;
 			
 			if (convertView == null) {
-				v = inflater.inflate(R.layout.question_item, null);
+				v = inflater.inflate(R.layout.item_question, null);
 				h = new ViewHolder();
 				h.title = (TextView) v.findViewById(R.id.title);
 				h.score = (TextView) v.findViewById(R.id.votesN);

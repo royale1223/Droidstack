@@ -25,7 +25,7 @@ public class MultiHeader extends MultiItem {
 	
 	@Override
 	public int getLayoutResource() {
-		return R.layout.multi_header;
+		return R.layout.item_header;
 	}
 	
 	public boolean isEnabled() { return false; }
@@ -49,7 +49,7 @@ public class MultiHeader extends MultiItem {
 
 	@Override
 	public View newView(Context context, ViewGroup parent) {
-		View v = View.inflate(context, R.layout.multi_header, null);
+		View v = View.inflate(context, R.layout.item_header, null);
 		Tag tag = new Tag();
 		tag.title = (TextView) v.findViewById(R.id.title);
 		v.setTag(getLayoutResource(), tag);
