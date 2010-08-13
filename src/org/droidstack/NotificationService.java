@@ -2,15 +2,15 @@ package org.droidstack;
 
 import java.util.List;
 
-import org.droidstack.utils.Const;
-import org.droidstack.utils.SitesDatabase;
-
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Reputation;
 import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.ReputationQuery;
-import net.sf.stackwrap4j.utils.StackUtils;
+
+import org.droidstack.utils.Const;
+import org.droidstack.utils.SitesDatabase;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -105,8 +105,8 @@ public class NotificationService extends Service {
 								posRep += rep.getPositiveRep();
 								negRep += rep.getNegativeRep();
 							}
-							Intent notifIntent = new Intent(mContext, SiteActions.class);
-							String uri = "droidstack://site/" +
+							Intent notifIntent = new Intent(mContext, ReputationChanges.class);
+							String uri = "droidstack://reputation" +
 								"?endpoint=" + Uri.encode(endpoint) +
 								"&name=" + Uri.encode(name) +
 								"&uid=" + String.valueOf(uid) +

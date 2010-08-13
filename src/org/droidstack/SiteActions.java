@@ -1,7 +1,7 @@
 package org.droidstack;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -11,11 +11,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Toast;
 
-public class SiteActions extends Activity {
+public class SiteActions extends ListActivity {
 	
 	private static final int POS_ALL = 0;
 	private static final int POS_UNANSWERED = 1;
@@ -30,7 +30,7 @@ public class SiteActions extends Activity {
 	private String mSiteName;
 	private String mUserName;
 	private int mUserID;
-	private ListView mSiteActionsList;
+	private ArrayAdapter<String> mAdapter;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +51,11 @@ public class SiteActions extends Activity {
 		
 		setTitle(mSiteName);
 		
-		mSiteActionsList = (ListView) findViewById(R.id.SiteActionsList);
+		String[] items = getResources().getStringArray(R.array.site_actions);
+		mAdapter = new ArrayAdapter<String>(mContext, R.layout.item_siteaction, R.id.title, items);
+		setListAdapter(mAdapter);
 		
-		mSiteActionsList.setOnItemClickListener(onItemClicked);
+		getListView().setOnItemClickListener(onItemClicked);
 	}
 	
 	@Override

@@ -3,14 +3,14 @@ package org.droidstack;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.droidstack.utils.Const;
-
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Answer;
-import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
+
+import org.droidstack.utils.Const;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -189,7 +189,7 @@ public class Answers extends Activity {
 			try {
 				if (mQueryType.equals(TYPE_USER)) {
 					AnswerQuery query = new AnswerQuery();
-					query.setBody(false).setPageSize(mPageSize).setPage(mPage);
+					query.setComments(false).setBody(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {

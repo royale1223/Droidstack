@@ -16,12 +16,14 @@
     <string name="questions_fetch_error">An error has occurred while retrieving the list of questions. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="question_fetch_error">An error has occurred while retrieving this question. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="answers_fetch_error">An error has occurred while retrieving the list of answers. Make sure you are connected to the Internet and try again in a few moments.</string>
+    <string name="rep_fetch_error">An error has occurred while retrieving the list of reputation changes. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="user_fetch_error">An error has occurred while retrieving the profile data. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="more_answers_error">An error has occured while retrieving more answers. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="icons_refresh_error">Some site icons were missing from your SD card, so I tried to refresh them. I have failed. I will now exit because otherwise I would crash.</string>
     <string name="no_sd_error">You need a writable SD card in order to use this application.</string>
     <string name="no_questions">No questions here</string>
     <string name="no_answers">No answers here</string>
+    <string name="no_repchanges">No reputation changes</string>
     <string name="votes">votes</string>
     <string name="answers">answers</string>
     <string name="views">views</string>
@@ -44,5 +46,6 @@
     <string name="intent_questions">View questions</string>
     <string name="intent_answers">View answers</string>
     <string name="intent_user">View user profile</string>
+    <string name="intent_rep">View rep changes</string>
     <string name="menu_settings">Settings</string>
 </resources>

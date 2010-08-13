@@ -1,32 +1,40 @@
 package org.droidstack;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Answer;
 import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.entities.Reputation;
 import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
+import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.ReputationQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 
+import org.droidstack.adapter.MultiAdapter;
+import org.droidstack.adapter.MultiAdapter.MultiItem;
 import org.droidstack.utils.Const;
-import org.droidstack.utils.MultiAdapter;
-import org.droidstack.utils.MultiAdapter.MultiItem;
-import org.droidstack.utils.MultiHeader;
+import org.droidstack.utils.HeaderItem;
+import org.droidstack.utils.MoreItem;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,17 +44,19 @@ import android.widget.TextView;
 
 public class ViewUser extends ListActivity {
 	
-	private static final int ITEMS = 3; 
+	private static final int ITEMS = 5; 
 	
 	private String mEndpoint;
+	private String mSiteName;
 	private int mUserID;
-	private Drawable mAvatarDrawable;
+	private Bitmap mAvatarBitmap;
 	private StackWrapper mAPI;
 	private MultiAdapter mAdapter;
 	
 	private User mUser;
 	private List<Reputation> mRepChanges;
 	private List<Question> mQuestions;
+	private List<Answer> mAnswers;
 	
 	private ImageView mAvatar;
 	private TextView mName;
@@ -68,6 +78,7 @@ public class ViewUser extends ListActivity {
 		try {
 			mEndpoint = data.getQueryParameter("endpoint").toString();
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
+			mSiteName = data.getQueryParameter("name");
 		}
 		catch (Exception e) {
 			Log.e(Const.TAG, "User: error parsing launch parameters", e);
@@ -77,13 +88,35 @@ public class ViewUser extends ListActivity {
 		
 		mAdapter = new MultiAdapter(mContext);
 		setListAdapter(mAdapter);
+		getListView().setOnItemClickListener(mAdapter);
 		
 		mAvatar = (ImageView) findViewById(R.id.avatar);
 		mName = (TextView) findViewById(R.id.name);
 		mRep = (TextView) findViewById(R.id.rep);
 		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-		new FetchUserDataTask().execute();
+		if (savedInstanceState == null) {
+			new FetchUserDataTask().execute();
+		}
+		else {
+			mUserID = savedInstanceState.getInt("mUserID");
+			mAvatarBitmap = (Bitmap) savedInstanceState.getParcelable("mAvatarBitmap");
+			mUser = (User) savedInstanceState.getSerializable("mUser");
+			mRepChanges = (List<Reputation>) savedInstanceState.getSerializable("mRepChanges");
+			mQuestions = (List<Question>) savedInstanceState.getSerializable("mQuestions");
+			mAnswers = (List<Answer>) savedInstanceState.getSerializable("mAnswers");
+			updateView();
+		}
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putInt("mUserID", mUserID);
+		outState.putParcelable("mAvatarBitmap", mAvatarBitmap);
+		outState.putSerializable("mUser", mUser);
+		outState.putSerializable("mRepChanges", (ArrayList<Reputation>)mRepChanges);
+		outState.putSerializable("mQuestions", (ArrayList<Question>)mQuestions);
+		outState.putSerializable("mAnswers", (ArrayList<Answer>)mAnswers);
 	}
 	
 	private class FetchUserDataTask extends AsyncTask<Void, Void, Void> {
@@ -101,10 +134,14 @@ public class ViewUser extends ListActivity {
 			try {
 				// user info
 				mUser = mAPI.getUserById(mUserID);
-				URL avatarURL = new URL("http://www.gravatar.com/avatar/" + mUser.getEmailHash() + "?s=64&d=identicon&r=PG");
 				
 				// avatar
-				mAvatarDrawable = Drawable.createFromStream(avatarURL.openStream(), null);
+				int size = 64;
+				DisplayMetrics metrics = new DisplayMetrics();
+				getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				size *= metrics.density;
+				URL avatarURL = new URL("http://www.gravatar.com/avatar/" + mUser.getEmailHash() + "?s=" + size + "&d=identicon&r=PG");
+				mAvatarBitmap = BitmapFactory.decodeStream(avatarURL.openStream());
 				
 				// rep changes
 				ReputationQuery repQuery = new ReputationQuery();
@@ -113,8 +150,13 @@ public class ViewUser extends ListActivity {
 				
 				// questions
 				UserQuestionQuery qQuery = new UserQuestionQuery();
-				qQuery.setBody(false).setAnswers(false).setPageSize(ITEMS).setIds(mUserID);
+				qQuery.setBody(false).setAnswers(false).setComments(false).setPageSize(ITEMS).setIds(mUserID);
 				mQuestions = mAPI.getQuestionsByUserId(qQuery);
+				
+				// answers
+				AnswerQuery aQuery = new AnswerQuery();
+				aQuery.setBody(false).setComments(false).setPageSize(ITEMS).setIds(mUserID);
+				mAnswers = mAPI.getAnswersByUserId(aQuery);
 			}
 			catch (Exception e) {
 				mException = e;
@@ -146,23 +188,99 @@ public class ViewUser extends ListActivity {
 	}
 	
 	private void updateView() {
-		mAvatar.setImageDrawable(mAvatarDrawable);
+		mAvatar.setImageBitmap(mAvatarBitmap);
 		mName.setText(mUser.getDisplayName());
 		String rep = Const.longFormatRep(mUser.getReputation());
 		mRep.setText(rep);
+		/*
+		if (mUser.getAboutMe().length() > 0) {
+			mAdapter.addItem(new AboutItem(mUser.getAboutMe()));
+		}
+		*/
 		if (mQuestions.size() > 0) {
-			mAdapter.addItem(new MultiHeader("Recent Questions"));
+			mAdapter.addItem(new HeaderItem("Recent Questions"));
 			for (Question q: mQuestions) {
 				mAdapter.addItem(new QuestionItem(q, mContext));
 			}
+			Intent more = new Intent(mContext, Questions.class);
+			String uri = "droidstack://questions/user" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUser.getDisplayName()) +
+				"&endpoint=" + Uri.encode(mEndpoint);
+			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
+			more.setData(Uri.parse(uri));
+			mAdapter.addItem(new MoreItem(more, mContext));
+		}
+		if (mAnswers.size() > 0) {
+			mAdapter.addItem(new HeaderItem("Recent Answers"));
+			for (Answer a: mAnswers) {
+				mAdapter.addItem(new AnswerItem(a, mContext));
+			}
+			Intent more = new Intent(mContext, Answers.class);
+			String uri = "droidstack://answers/user" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUser.getDisplayName()) +
+				"&endpoint=" + Uri.encode(mEndpoint);
+			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
+			more.setData(Uri.parse(uri));
+			mAdapter.addItem(new MoreItem(more, mContext));
 		}
 		if (mRepChanges.size() > 0) {
-			mAdapter.addItem(new MultiHeader("Reputation Changes"));
+			mAdapter.addItem(new HeaderItem("Reputation Changes"));
 			for (Reputation r: mRepChanges) {
 				mAdapter.addItem(new RepItem(r));
 			}
+			Intent more = new Intent(mContext, ReputationChanges.class);
+			String uri = "droidstack://reputation" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUser.getDisplayName()) +
+				"&endpoint=" + Uri.encode(mEndpoint);
+			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
+			more.setData(Uri.parse(uri));
+			mAdapter.addItem(new MoreItem(more, mContext));
 		}
 		mAdapter.notifyDataSetChanged();
+	}
+	
+	private class AboutItem extends MultiItem {
+		
+		String mAbout;
+		
+		public AboutItem(String about) {
+			mAbout = about.trim();
+		}
+		
+		@Override
+		public boolean isEnabled() {
+			return false;
+		}
+
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_about;
+		}
+
+		@Override
+		public View bindView(View view, Context context) {
+			try {
+				Boolean b = (Boolean) view.getTag(R.layout.item_about);
+				if (b == null || b.booleanValue() == false) throw new NullPointerException();
+				((TextView)view).setText(Html.fromHtml(mAbout));
+				return view;
+			}
+			catch (Exception e) {
+				return newView(context, null);
+			}
+		}
+
+		@Override
+		public View newView(Context context, ViewGroup parent) {
+			TextView v = (TextView) View.inflate(context, R.layout.item_about, null);
+			v.setTag(R.layout.item_about, true);
+			v.setText(Html.fromHtml(mAbout));
+			return v;
+		}
+		
 	}
 	
 	private class RepItem extends MultiItem {
@@ -227,6 +345,24 @@ public class ViewUser extends ListActivity {
 			v.setTag(getLayoutResource(), tag);
 			prepareView(tag);
 			return v;
+		}
+		
+		@Override
+		public void onClick() {
+			Intent i = new Intent(mContext, ViewQuestion.class);
+			if (data.getPostType().equals("question")) {
+				String uri = "droidstack://question" +
+					"?endpoint=" + Uri.encode(mEndpoint) +
+					"&qid=" + Uri.encode(String.valueOf(data.getPostId()));
+				i.setData(Uri.parse(uri));
+			}
+			else {
+				String uri = "droidstack://question" +
+					"?endpoint=" + Uri.encode(mEndpoint) +
+					"&aid=" + Uri.encode(String.valueOf(data.getPostId()));
+				i.setData(Uri.parse(uri));
+			}
+			startActivity(i);
 		}
 		
 	}
@@ -334,6 +470,99 @@ public class ViewUser extends ListActivity {
 			v.setTag(R.layout.item_question, t);
 			prepareView(t);
 			return v;
+		}
+
+		@Override
+		public void onClick() {
+			Intent i = new Intent(mContext, ViewQuestion.class);
+			String uri = "droidstack://question" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + Uri.encode(String.valueOf(mQuestion.getPostId()));
+			i.setData(Uri.parse(uri));
+			startActivity(i);
+		}
+		
+	}
+	
+	private class AnswerItem extends MultiItem {
+		
+		private Answer mAnswer;
+		private Context context;
+		private Resources mResources;
+
+		private class Tag {
+			public TextView score;
+			public TextView title;
+			public Tag(View v) {
+				score = (TextView) v.findViewById(R.id.score);
+				title = (TextView) v.findViewById(R.id.title);
+			}
+		}
+		
+		public AnswerItem(Answer a, Context ctx) {
+			mAnswer = a;
+			context = ctx;
+			mResources = ctx.getResources();
+		}
+		
+		private void prepareView(Tag t) {
+			t.score.setText(String.valueOf(mAnswer.getScore()));
+			t.title.setText(mAnswer.getTitle());
+			
+			if (mAnswer.isAccepted()) {
+				t.score.setBackgroundResource(R.color.score_max_bg);
+				t.score.setTextColor(mResources.getColor(R.color.score_max_text));
+			}
+			else if (mAnswer.getScore() == 0) {
+				t.score.setBackgroundResource(R.color.score_neutral_bg);
+				t.score.setTextColor(mResources.getColor(R.color.score_neutral_text));
+			}
+			else if (mAnswer.getScore() > 0) {
+				t.score.setBackgroundResource(R.color.score_high_bg);
+				t.score.setTextColor(mResources.getColor(R.color.score_high_text));
+			}
+			else {
+				t.score.setBackgroundResource(R.color.score_low_bg);
+				t.score.setTextColor(mResources.getColor(R.color.score_low_text));
+			}
+		}
+		
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_answer;
+		}
+
+		@Override
+		public View bindView(View view, Context context) {
+			try {
+				Tag tag = (Tag) view.getTag(R.layout.item_question);
+				if (tag == null) throw new NullPointerException();
+				prepareView(tag);
+				return view;
+			}
+			catch (Exception e) {
+				return newView(context, null);
+			}
+		}
+
+		@Override
+		public View newView(Context context, ViewGroup parent) {
+			Tag t;
+			View v = View.inflate(context, R.layout.item_answer, null);
+			t = new Tag(v);
+			v.setTag(R.layout.item_answer, t);
+			prepareView(t);
+			return v;
+		}
+		
+		@Override
+		public void onClick() {
+			Intent i = new Intent(mContext, ViewQuestion.class);
+			String uri = "droidstack://question" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + Uri.encode(String.valueOf(mAnswer.getQuestionId()));
+			i.setData(Uri.parse(uri));
+			startActivity(i);
 		}
 		
 	}

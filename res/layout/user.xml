@@ -13,6 +13,7 @@
 	>
 		<ImageView
 			android:id="@+id/avatar"
+			android:src="@drawable/noavatar"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_alignParentLeft="true"
@@ -52,5 +53,7 @@
 		android:id="@android:id/list"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
+		android:fadeScrollbars="true"
+		android:scrollbarStyle="insideOverlay"
 	/>
 </LinearLayout>

@@ -9,14 +9,16 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Light">
         <activity android:name=".Sites"
-                  android:label="@string/app_name">
+        	android:label="@string/app_name"
+        	android:configChanges="orientation|keyboard|keyboardHidden"
+        >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SiteActions" />
-        <activity android:name=".Questions">
+        <activity android:name=".SiteActions" android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity android:name=".Questions" android:configChanges="orientation|keyboard|keyboardHidden">
         	<intent-filter
         		android:icon="@drawable/icon"
         		android:label="@string/intent_questions">
@@ -33,7 +35,7 @@
         		<data android:path="/favorites" />
         	</intent-filter>
         </activity>
-        <activity android:name=".Answers">
+        <activity android:name=".Answers" android:configChanges="orientation|keyboard|keyboardHidden">
 	        <intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="@string/intent_answers">
@@ -46,7 +48,7 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
-        <activity android:name=".ViewQuestion">
+        <activity android:name=".ViewQuestion" android:configChanges="orientation|keyboard|keyboardHidden">
         	<intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="@string/intent_answers">
@@ -58,7 +60,10 @@
 	        		android:path="" />
 	        </intent-filter>
 	    </activity>
-	    <activity android:name=".ViewUser" android:theme="@android:style/Theme.Light.NoTitleBar">
+	    <activity android:name=".ViewUser"
+	    	android:theme="@android:style/Theme.Light.NoTitleBar"
+	    	android:configChanges="orientation|keyboard|keyboardHidden"
+	    >
 	    	<intent-filter
 	    		android:icon="@drawable/icon"
 	    		android:label="@string/intent_user">
@@ -67,6 +72,18 @@
 	        	<data 
 	        		android:scheme="droidstack"
 	        		android:host="user"
+	        		android:path="" />
+	    	</intent-filter>
+	    </activity>
+	    <activity android:name=".ReputationChanges" android:configChanges="orientation|keyboard|keyboardHidden">
+	    	<intent-filter
+	    		android:icon="@drawable/icon"
+	    		android:label="@string/intent_rep">
+	    		<action android:name="android.intent.action.VIEW" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="reputation"
 	        		android:path="" />
 	    	</intent-filter>
 	    </activity>

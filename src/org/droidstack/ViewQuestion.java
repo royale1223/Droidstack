@@ -42,6 +42,7 @@ public class ViewQuestion extends Activity {
 	public static final String KEY_QID = "question_id";
 	
 	private int mQuestionID;
+	private int mAnswerID;
 	private String mEndpoint;
 	private String mTemplate;
 	private int mAnswerCount;
@@ -59,6 +60,8 @@ public class ViewQuestion extends Activity {
 	private TextView mAnswerCountView;
 	private Button mNextButton;
 	private Button mPreviousButton;
+	
+	private boolean isRequestOngoing = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,25 +88,25 @@ public class ViewQuestion extends Activity {
 		try {
 			mQuestionID = Integer.parseInt(data.getQueryParameter("qid"));
 		}
-		catch (Exception e) {
-			Log.e(Const.TAG, "ViewQuestion: qid could not be parsed into an integer: " + data.getQueryParameter("qid"));
+		catch (Exception e) { }
+		try {
+			mAnswerID = Integer.parseInt(data.getQueryParameter("aid"));
+		}
+		catch (Exception e) { }
+		if (mQuestionID == 0 && mAnswerID == 0) {
+			Log.e(Const.TAG, "ViewQuestion: qid/aid not specified");
 			finish();
+			return;
 		}
 		mEndpoint = data.getQueryParameter("endpoint");
+		if (mEndpoint == null) {
+			Log.e(Const.TAG, "ViewQuestion: endpoint not specified");
+			finish();
+			return;
+		}
 		
-		mWebView = (WebView) findViewById(R.id.content);
-		try {
-			// try to enable caching, useful for avatars
-			WebSettings.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView.getSettings(), true);
-			WebSettings.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView.getSettings(), WebSettings.LOAD_CACHE_ELSE_NETWORK);
-		}
-		catch(Exception e) {
-			// app cache not supported, must be < 2.1
-			Log.i(Const.TAG, "Unable to enable WebView caching", e);
-		}
-		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
-		mNextButton = (Button) findViewById(R.id.next);
-		mPreviousButton = (Button) findViewById(R.id.previous);
+		prepareViews();
+		
 		// make the title scroll!
 		// find the title TextView
 		TextView title = (TextView) findViewById(android.R.id.title);
@@ -141,6 +144,30 @@ public class ViewQuestion extends Activity {
 		outState.putInt("mAnswerCount", mAnswerCount);
 	}
 	
+	private void prepareViews() {
+		mWebView = (WebView) findViewById(R.id.content);
+		try {
+			// try to enable caching, useful for avatars
+			WebSettings.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView.getSettings(), true);
+			WebSettings.class.getMethod("setCacheMode", new Class[] { int.class }).invoke(mWebView.getSettings(), WebSettings.LOAD_CACHE_ELSE_NETWORK);
+		}
+		catch(Exception e) {
+			// app cache not supported, must be < 2.1
+			Log.i(Const.TAG, "Unable to enable WebView caching", e);
+		}
+		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
+		mNextButton = (Button) findViewById(R.id.next);
+		mPreviousButton = (Button) findViewById(R.id.previous);
+	}
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		super.onConfigurationChanged(newConfig);
+		setContentView(R.layout.question);
+		prepareViews();
+		if (!isRequestOngoing) updateView();
+	}
+
 	private void updateView() {
 		setTitle(mQuestion.getTitle());
 		
@@ -271,6 +298,7 @@ public class ViewQuestion extends Activity {
 		
 		@Override
 		protected void onPreExecute() {
+			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
 			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
 		}
@@ -278,6 +306,12 @@ public class ViewQuestion extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
+				if (mQuestionID == 0) {
+					AnswerQuery aq = new AnswerQuery();
+					aq.setBody(false).setComments(false).setIds(mAnswerID);
+					Answer a = mAPI.getAnswers(aq).get(0);
+					mQuestionID = a.getQuestionId();
+				}
 				QuestionQuery query = new QuestionQuery();
 				query.setBody(true).setComments(true).setAnswers(false).setIds(mQuestionID);
 				mQuestion = mAPI.getQuestions(query).get(0);
@@ -291,6 +325,7 @@ public class ViewQuestion extends Activity {
 		
 		@Override
 		protected void onPostExecute(Void result) {
+			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
 			progressDialog.dismiss();
 			if (mException != null) {
@@ -320,6 +355,7 @@ public class ViewQuestion extends Activity {
 		
 		@Override
 		protected void onPreExecute() {
+			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
 			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
 		}
@@ -341,6 +377,7 @@ public class ViewQuestion extends Activity {
 		
 		@Override
 		protected void onPostExecute(List<Answer> result) {
+			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
 			progressDialog.dismiss();
 			if (mException != null) {

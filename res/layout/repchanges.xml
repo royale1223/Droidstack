@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
@@ -10,14 +9,14 @@
 		android:id="@+id/empty"
 		style="@style/EmptyList"
 		android:layout_centerInParent="true"
-		android:text="@string/no_questions"
+		android:text="@string/no_repchanges"
 		android:visibility="gone"
 	/>
 	<ListView
+		android:id="@android:id/list"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:id="@+id/questions"
 		android:fadeScrollbars="true"
 		android:scrollbarStyle="insideOverlay"
 	/>
-</RelativeLayout>
+</FrameLayout>

@@ -1,4 +1,4 @@
-package org.droidstack.utils;
+package org.droidstack.adapter;
 
 import java.util.ArrayList;
 

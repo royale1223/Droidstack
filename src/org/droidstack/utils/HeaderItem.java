@@ -1,7 +1,7 @@
 package org.droidstack.utils;
 
 import org.droidstack.R;
-import org.droidstack.utils.MultiAdapter.MultiItem;
+import org.droidstack.adapter.MultiAdapter.MultiItem;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class MultiHeader extends MultiItem {
+public class HeaderItem extends MultiItem {
 	
 	private String mTitle;
 	
@@ -18,7 +18,7 @@ public class MultiHeader extends MultiItem {
 		public TextView title;
 	}
 	
-	public MultiHeader(String title) throws NullPointerException {
+	public HeaderItem(String title) throws NullPointerException {
 		if (title == null) throw new NullPointerException("No title supplied");
 		mTitle = title;
 	}

@@ -20,7 +20,8 @@
 		android:numColumns="auto_fit"
 		android:stretchMode="columnWidth"
 		android:gravity="center"
-		android:scrollbarStyle="insideInset"
 		android:id="@+id/sites"
+		android:fadeScrollbars="true"
+		android:scrollbarStyle="insideOverlay"
 	/>
 </RelativeLayout>
