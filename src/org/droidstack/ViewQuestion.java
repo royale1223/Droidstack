@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.droidstack.utils.Const;
-
 import net.sf.jtpl.Template;
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Answer;
@@ -16,12 +14,17 @@ import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import net.sf.stackwrap4j.utils.StackUtils;
+
+import org.droidstack.util.Const;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -34,6 +37,7 @@ import android.view.View;
 import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -44,6 +48,7 @@ public class ViewQuestion extends Activity {
 	private int mQuestionID;
 	private int mAnswerID;
 	private String mEndpoint;
+	private String mSiteName;
 	private String mTemplate;
 	private int mAnswerCount;
 	private int mCurAnswer = -1;
@@ -144,8 +149,21 @@ public class ViewQuestion extends Activity {
 		outState.putInt("mAnswerCount", mAnswerCount);
 	}
 	
+	private class DWebViewClient extends WebViewClient {
+		
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+			startActivity(i);
+			return true;
+		}
+		
+	}
+	
 	private void prepareViews() {
 		mWebView = (WebView) findViewById(R.id.content);
+		mWebView.getSettings().setJavaScriptEnabled(true);
+		mWebView.setWebViewClient(new DWebViewClient());
 		try {
 			// try to enable caching, useful for avatars
 			WebSettings.class.getMethod("setAppCacheEnabled", new Class[] { boolean.class }).invoke(mWebView.getSettings(), true);
@@ -173,12 +191,19 @@ public class ViewQuestion extends Activity {
 		
 		if (mCurAnswer == -1) {
 			Template tpl = new Template(mTemplate);
+			tpl.assign("ENDPOINT", mEndpoint);
 			try {
 				for (Comment c: mQuestion.getComments()) {
 					tpl.assign("CBODY", c.getBody());
 					User owner = c.getOwner();
-					if (owner == null) tpl.assign("CAUTHOR", "?");
-					else tpl.assign("CAUTHOR", owner.getDisplayName());
+					if (owner == null) {
+						tpl.assign("CAUTHOR", "?");
+						tpl.assign("CAID", "0");
+					}
+					else {
+						tpl.assign("CAUTHOR", owner.getDisplayName());
+						tpl.assign("CAID", String.valueOf(owner.getId()));
+					}
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
 					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
 					tpl.parse("main.post.comment");
@@ -200,11 +225,13 @@ public class ViewQuestion extends Activity {
 				tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
 				tpl.assign("QANAME", owner.getDisplayName());
 				tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+				tpl.assign("QAID", String.valueOf(owner.getId()));
 			}
 			else {
 				tpl.assign("QAHASH", "unknown");
 				tpl.assign("QANAME", "[unregistered]");
 				tpl.assign("QAREP", "0");
+				tpl.assign("QAID", "0");
 			}
 			tpl.assign("QWHEN", StackUtils.formatElapsedTime(mQuestion.getCreationDate()));
 			tpl.parse("main.post");
@@ -224,13 +251,20 @@ public class ViewQuestion extends Activity {
 		}
 		else {
 			Template tpl = new Template(mTemplate);
+			tpl.assign("ENDPOINT", mEndpoint);
 			Answer answer = mAnswers.get(mCurAnswer);
 			try {
 				for (Comment c: answer.getComments()) {
 					tpl.assign("CBODY", c.getBody());
 					User owner = c.getOwner();
-					if (owner == null) tpl.assign("CAUTHOR", "?");
-					else tpl.assign("CAUTHOR", owner.getDisplayName());
+					if (owner == null) {
+						tpl.assign("CAUTHOR", "?");
+						tpl.assign("CAID", "0");
+					}
+					else {
+						tpl.assign("CAUTHOR", owner.getDisplayName());
+						tpl.assign("CAID", String.valueOf(owner.getId()));
+					}
 					tpl.assign("CSCORE", String.valueOf(c.getScore()));
 					if (c.getScore() > 0) tpl.parse("main.post.comment.score");
 					tpl.parse("main.post.comment");
@@ -247,11 +281,13 @@ public class ViewQuestion extends Activity {
 				tpl.assign("QAHASH", String.valueOf(owner.getEmailHash()));
 				tpl.assign("QANAME", owner.getDisplayName());
 				tpl.assign("QAREP", StackUtils.formatRep(owner.getReputation()));
+				tpl.assign("QAID", String.valueOf(owner.getId()));
 			}
 			else {
 				tpl.assign("QAHASH", "unknown");
 				tpl.assign("QANAME", "[unregistered]");
 				tpl.assign("QAREP", "0");
+				tpl.assign("QAID", "0");
 			}
 			tpl.assign("QWHEN", StackUtils.formatElapsedTime(answer.getCreationDate()));
 			if (answer.isAccepted()) tpl.parse("main.post.accepted");
@@ -300,7 +336,13 @@ public class ViewQuestion extends Activity {
 		protected void onPreExecute() {
 			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
+					new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							finish();
+						}
+					});
 		}
 		
 		@Override
@@ -357,7 +399,13 @@ public class ViewQuestion extends Activity {
 		protected void onPreExecute() {
 			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
+					new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							finish();
+						}
+					});
 		}
 		
 		@Override

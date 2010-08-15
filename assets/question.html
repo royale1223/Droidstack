@@ -22,6 +22,10 @@
 			span.author {
 				color: #07C;
 			}
+			span.author:hover {
+				text-decoration: underline;
+				color: #003C66;
+			}
 			a {
 				color: #07C;
 				text-decoration: none;
@@ -57,7 +61,10 @@
 				background-color: #E0EAF1;
 				background-position: 10px 50%;
 				background-repeat: no-repeat;
-				margin: 5px 0;
+				margin: 5px;
+			}
+			div.post div.author:hover {
+				outline: solid 5px #FF8000;
 			}
 			div.post div.author img {
 				float: left;
@@ -111,7 +118,9 @@
 				<!-- END: tag -->
 			</div>
 			<!-- END: tags -->
-			<div class="author" style="background-image: url('http://www.gravatar.com/avatar/{QAHASH}?s=36&d=identicon&r=PG')">
+			<div class="author"
+			     style="background-image: url('http://www.gravatar.com/avatar/{QAHASH}?s=36&d=identicon&r=PG')"
+			     onclick="window.location.replace('droidstack://user?endpoint={ENDPOINT}&uid={QAID}')">
 				<div class="name">{QANAME}</div>
 				<div class="rep">{QAREP}</div>
 			</div>
@@ -127,7 +136,7 @@
 				<!-- BEGIN: score -->
 				<span class="upvote">+{CSCORE}</span>
 				<!-- END: score -->
-				{CBODY} &ndash; <span class="author">{CAUTHOR}</span>
+				{CBODY} &ndash; <span class="author" onclick="window.location.replace('droidstack://user?endpoint={ENDPOINT}&uid={CAID}')">{CAUTHOR}</span>
 			</div>
 			<!-- END: comment -->
 		</div>

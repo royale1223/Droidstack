@@ -10,7 +10,7 @@ import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.query.ReputationQuery;
 
 import org.droidstack.adapter.ReputationAdapter;
-import org.droidstack.utils.Const;
+import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -154,7 +154,7 @@ public class ReputationChanges extends ListActivity {
 		protected List<Reputation> doInBackground(Void... params) {
 			try {
 				ReputationQuery query = new ReputationQuery();
-				query.setPageSize(mPageSize).setPage(mPage).setIds(mUserID);
+				query.setFromDate(0).setPageSize(mPageSize).setPage(mPage).setIds(mUserID);
 				List<Reputation> changes = mAPI.getReputationByUserId(query);
 				return changes;
 			}

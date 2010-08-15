@@ -17,9 +17,9 @@ import net.sf.stackwrap4j.query.UserQuestionQuery;
 
 import org.droidstack.adapter.MultiAdapter;
 import org.droidstack.adapter.MultiAdapter.MultiItem;
-import org.droidstack.utils.Const;
-import org.droidstack.utils.HeaderItem;
-import org.droidstack.utils.MoreItem;
+import org.droidstack.util.Const;
+import org.droidstack.util.HeaderItem;
+import org.droidstack.util.MoreItem;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -27,6 +27,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -126,7 +127,13 @@ public class ViewUser extends ListActivity {
 		
 		@Override
 		protected void onPreExecute() {
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true, 
+					new OnCancelListener() {
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							finish();
+						}
+					});
 		}
 		
 		@Override
@@ -145,7 +152,7 @@ public class ViewUser extends ListActivity {
 				
 				// rep changes
 				ReputationQuery repQuery = new ReputationQuery();
-				repQuery.setPageSize(ITEMS).setIds(mUserID);
+				repQuery.setFromDate(0).setPageSize(ITEMS).setIds(mUserID);
 				mRepChanges = mAPI.getReputationByUserId(repQuery);
 				
 				// questions

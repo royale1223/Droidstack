@@ -1,4 +1,4 @@
-package org.droidstack.utils;
+package org.droidstack.util;
 
 import org.droidstack.R;
 import org.droidstack.adapter.MultiAdapter.MultiItem;

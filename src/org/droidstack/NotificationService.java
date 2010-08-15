@@ -8,8 +8,8 @@ import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.ReputationQuery;
 
-import org.droidstack.utils.Const;
-import org.droidstack.utils.SitesDatabase;
+import org.droidstack.util.Const;
+import org.droidstack.util.SitesDatabase;
 
 import android.app.AlarmManager;
 import android.app.Notification;

@@ -9,7 +9,7 @@ import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 
-import org.droidstack.utils.Const;
+import org.droidstack.util.Const;
 
 import android.app.Activity;
 import android.app.AlertDialog;

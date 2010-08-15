@@ -1,4 +1,4 @@
-package org.droidstack.utils;
+package org.droidstack.util;
 
 import android.content.ContentValues;
 import android.content.Context;

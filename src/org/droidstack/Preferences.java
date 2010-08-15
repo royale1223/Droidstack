@@ -1,6 +1,6 @@
 package org.droidstack;
 
-import org.droidstack.utils.Const;
+import org.droidstack.util.Const;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

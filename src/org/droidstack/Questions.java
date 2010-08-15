@@ -14,7 +14,7 @@ import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 
-import org.droidstack.utils.Const;
+import org.droidstack.util.Const;
 
 import android.app.Activity;
 import android.app.AlertDialog;
