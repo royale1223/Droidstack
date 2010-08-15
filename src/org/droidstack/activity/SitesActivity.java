@@ -16,7 +16,7 @@ import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 
 import org.droidstack.R;
-import org.droidstack.service.Notifications;
+import org.droidstack.service.NotificationsService;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
@@ -54,7 +54,7 @@ import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class Sites extends Activity {
+public class SitesActivity extends Activity {
 	
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
@@ -121,7 +121,7 @@ public class Sites extends Activity {
         
         // start notification service on app update
         if (Const.getOldVersion(mContext) != Const.getNewVersion(mContext)) {
-        	startService(new Intent(mContext, Notifications.class));
+        	startService(new Intent(mContext, NotificationsService.class));
         	PreferenceManager.getDefaultSharedPreferences(mContext).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(mContext)).commit();
         }
         
@@ -199,7 +199,7 @@ public class Sites extends Activity {
 			String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 			int uid = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
 			String uname = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_UNAME));
-			Intent i = new Intent(mContext, SiteActions.class);
+			Intent i = new Intent(mContext, SiteActivity.class);
 			String uri = "droidstack://site/" +
 				"?endpoint=" + Uri.encode(endpoint) +
 				"&name=" + Uri.encode(name) +
@@ -274,7 +274,7 @@ public class Sites extends Activity {
     		new SitePickerTask().execute();
     		break;
     	case R.id.menu_settings:
-    		Intent i = new Intent(mContext, Preferences.class);
+    		Intent i = new Intent(mContext, PreferencesActivity.class);
     		startActivity(i);
     	}
     	return false;

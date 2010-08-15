@@ -27,7 +27,7 @@ import android.widget.AdapterView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class ReputationChanges extends ListActivity {
+public class ReputationActivity extends ListActivity {
 	
 	private String mEndpoint;
 	private String mSiteName;
@@ -122,7 +122,7 @@ public class ReputationChanges extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			Reputation r = mRepChanges.get(position);
-			Intent i = new Intent(mContext, ViewQuestion.class);
+			Intent i = new Intent(mContext, QuestionActivity.class);
 			if (r.getPostType().equals("question")) {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +

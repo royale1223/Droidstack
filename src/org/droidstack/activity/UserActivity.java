@@ -44,7 +44,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class ViewUser extends ListActivity {
+public class UserActivity extends ListActivity {
 	
 	private static final int ITEMS = 5; 
 	
@@ -210,7 +210,7 @@ public class ViewUser extends ListActivity {
 			for (Question q: mQuestions) {
 				mAdapter.addItem(new QuestionItem(q, mContext));
 			}
-			Intent more = new Intent(mContext, Questions.class);
+			Intent more = new Intent(mContext, QuestionsActivity.class);
 			String uri = "droidstack://questions/user" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
@@ -224,7 +224,7 @@ public class ViewUser extends ListActivity {
 			for (Answer a: mAnswers) {
 				mAdapter.addItem(new AnswerItem(a, mContext));
 			}
-			Intent more = new Intent(mContext, Answers.class);
+			Intent more = new Intent(mContext, AnswersActivity.class);
 			String uri = "droidstack://answers/user" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
@@ -238,7 +238,7 @@ public class ViewUser extends ListActivity {
 			for (Reputation r: mRepChanges) {
 				mAdapter.addItem(new RepItem(r));
 			}
-			Intent more = new Intent(mContext, ReputationChanges.class);
+			Intent more = new Intent(mContext, ReputationActivity.class);
 			String uri = "droidstack://reputation" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
@@ -357,7 +357,7 @@ public class ViewUser extends ListActivity {
 		
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, ViewQuestion.class);
+			Intent i = new Intent(mContext, QuestionActivity.class);
 			if (data.getPostType().equals("question")) {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
@@ -482,7 +482,7 @@ public class ViewUser extends ListActivity {
 
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, ViewQuestion.class);
+			Intent i = new Intent(mContext, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mQuestion.getPostId()));
@@ -565,7 +565,7 @@ public class ViewUser extends ListActivity {
 		
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, ViewQuestion.class);
+			Intent i = new Intent(mContext, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mAnswer.getQuestionId()));

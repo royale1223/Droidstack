@@ -9,7 +9,7 @@ import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.ReputationQuery;
 
 import org.droidstack.R;
-import org.droidstack.activity.ReputationChanges;
+import org.droidstack.activity.ReputationActivity;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
@@ -29,7 +29,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-public class Notifications extends Service {
+public class NotificationsService extends Service {
 	
 	private static final int REP_ID = 1;
 	
@@ -70,7 +70,7 @@ public class Notifications extends Service {
 	private void setupNextRun() {
 		if (mInterval == 0) return;
 		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(mContext, Notifications.class);
+		Intent i = new Intent(mContext, NotificationsService.class);
 		PendingIntent pi = PendingIntent.getService(mContext, 0, i, 0);
 		Log.d(Const.TAG, "NotificationService: starting again in " + mInterval + " minutes");
 		am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + mInterval*60*1000, pi);
@@ -107,7 +107,7 @@ public class Notifications extends Service {
 								posRep += rep.getPositiveRep();
 								negRep += rep.getNegativeRep();
 							}
-							Intent notifIntent = new Intent(mContext, ReputationChanges.class);
+							Intent notifIntent = new Intent(mContext, ReputationActivity.class);
 							String uri = "droidstack://reputation" +
 								"?endpoint=" + Uri.encode(endpoint) +
 								"&name=" + Uri.encode(name) +

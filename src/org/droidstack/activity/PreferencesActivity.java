@@ -1,7 +1,7 @@
 package org.droidstack.activity;
 
 import org.droidstack.R;
-import org.droidstack.service.Notifications;
+import org.droidstack.service.NotificationsService;
 import org.droidstack.util.Const;
 
 import android.app.AlarmManager;
@@ -16,7 +16,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 
-public class Preferences extends PreferenceActivity {
+public class PreferencesActivity extends PreferenceActivity {
 	
 	private Context mContext;
 	private SharedPreferences mPreferences;
@@ -36,7 +36,7 @@ public class Preferences extends PreferenceActivity {
 				mPreferences.edit().putString(Const.PREF_NOTIF_INTERVAL, (String)newValue).commit();
 				int minutes = Integer.parseInt((String)newValue);
 				AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-				Intent i = new Intent(mContext, Notifications.class);
+				Intent i = new Intent(mContext, NotificationsService.class);
 				PendingIntent pi = PendingIntent.getService(mContext, 0, i, 0);
 				am.cancel(pi);
 				if (minutes > 0) {

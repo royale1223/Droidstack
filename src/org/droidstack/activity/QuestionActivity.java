@@ -42,7 +42,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class ViewQuestion extends Activity {
+public class QuestionActivity extends Activity {
 	
 	public static final String KEY_QID = "question_id";
 	

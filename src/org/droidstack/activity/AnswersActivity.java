@@ -37,7 +37,7 @@ import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class Answers extends Activity {
+public class AnswersActivity extends Activity {
 	
 	public final static String TYPE_USER = "user";
 	
@@ -305,7 +305,7 @@ public class Answers extends Activity {
 				long id) {
 			Answer a = mAnswers.get(position);
 			if (!mIsStartedForResult) {
-				Intent i = new Intent(mContext, ViewQuestion.class);
+				Intent i = new Intent(mContext, QuestionActivity.class);
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
 					"&qid=" + Uri.encode(String.valueOf(a.getQuestionId()));

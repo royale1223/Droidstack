@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class SiteActions extends ListActivity {
+public class SiteActivity extends ListActivity {
 	
 	private static final int POS_ALL = 0;
 	private static final int POS_UNANSWERED = 1;
@@ -77,7 +77,7 @@ public class SiteActions extends ListActivity {
 					String tagged = taggedEdit.getText().toString();
 					String nottagged = nottaggedEdit.getText().toString();
 					if (intitle.length() > 0 || tagged.length() > 0 || nottagged.length() > 0) {
-						Intent i = new Intent(mContext, Questions.class);
+						Intent i = new Intent(mContext, QuestionsActivity.class);
 						String uri = "droidstack://questions/search" +
 							"?endpoint=" + Uri.encode(mEndpoint) +
 							"&name=" + Uri.encode(mSiteName);
@@ -99,11 +99,11 @@ public class SiteActions extends ListActivity {
 			String uri = null;
 			switch(position) {
 			case POS_ALL:
-				activity = Questions.class;
+				activity = QuestionsActivity.class;
 				uri = "droidstack://questions/all?";
 				break;
 			case POS_UNANSWERED:
-				activity = Questions.class;
+				activity = QuestionsActivity.class;
 				uri = "droidstack://questions/unanswered?";
 				break;
 			case POS_SEARCH:
@@ -116,7 +116,7 @@ public class SiteActions extends ListActivity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				activity = Questions.class;
+				activity = QuestionsActivity.class;
 				uri = "droidstack://questions/user" +
 					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
@@ -128,7 +128,7 @@ public class SiteActions extends ListActivity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				activity = Questions.class;
+				activity = QuestionsActivity.class;
 				uri = "droidstack://questions/favorites" +
 					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
@@ -140,7 +140,7 @@ public class SiteActions extends ListActivity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				activity = Answers.class;
+				activity = AnswersActivity.class;
 				uri = "droidstack://answers/user" +
 					"?uid=" + mUserID +
 					"&uname=" + Uri.encode(mUserName) + "&";
@@ -152,7 +152,7 @@ public class SiteActions extends ListActivity {
 							Toast.LENGTH_LONG).show();
 					break;
 				}
-				activity = ViewUser.class;
+				activity = UserActivity.class;
 				uri = "droidstack://user?uid=" + mUserID + "&";
 				break;
 			}

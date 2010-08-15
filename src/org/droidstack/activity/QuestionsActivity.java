@@ -44,7 +44,7 @@ import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class Questions extends Activity {
+public class QuestionsActivity extends Activity {
 	
 	public final static String TYPE_ALL = "all";
 	public final static String TYPE_UNANSWERED = "unanswered";
@@ -434,7 +434,7 @@ public class Questions extends Activity {
 				long id) {
 			Question q = mQuestions.get(position);
 			if (!mIsStartedForResult) {
-				Intent i = new Intent(mContext, ViewQuestion.class);
+				Intent i = new Intent(mContext, QuestionActivity.class);
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
 					"&qid=" + Uri.encode(String.valueOf(q.getPostId()));
