@@ -1,7 +1,6 @@
 package org.droidstack.activity;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
@@ -15,6 +14,7 @@ import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 
 import org.droidstack.R;
+import org.droidstack.adapter.QuestionsAdapter;
 import org.droidstack.util.Const;
 
 import android.app.Activity;
@@ -27,17 +27,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -69,11 +66,10 @@ public class QuestionsActivity extends Activity {
 	private Order mOrder = Order.DESC;
 	private boolean mIsStartedForResult = false;
 	
-	private Resources mResources;
 	private Context mContext;
 	
 	private List<Question> mQuestions;
-	private ArrayAdapter<Question> mAdapter;
+	private QuestionsAdapter mAdapter;
 	private ListView mListView;
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
@@ -85,7 +81,6 @@ public class QuestionsActivity extends Activity {
 		setContentView(R.layout.questions);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mResources = getResources();
 		mContext = (Context) this;
 		mPageSize = Const.getPageSize(mContext);
 		
@@ -142,7 +137,7 @@ public class QuestionsActivity extends Activity {
 			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
-		mAdapter = new QuestionsListAdapter<Question>(mContext, 0, mQuestions);
+		mAdapter = new QuestionsAdapter(mContext, mQuestions, onTagClicked);
 		mListView = (ListView)findViewById(R.id.questions);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnItemClickListener(onQuestionClicked);
@@ -330,96 +325,6 @@ public class QuestionsActivity extends Activity {
 		}
 	}
 	
-	private class QuestionsListAdapter<E> extends ArrayAdapter<E> {
-		
-		LayoutInflater inflater;
-		private LinearLayout.LayoutParams tagLayout;
-		
-		private class ViewHolder {
-			public TextView title;
-			public TextView score;
-			public TextView answers;
-			public TextView answerLabel;
-			public TextView views;
-			public TextView bounty;
-			public LinearLayout tags;
-		}
-		
-		public QuestionsListAdapter(Context context, int textViewResourceId,
-				List<E> objects) {
-			super(context, textViewResourceId, objects);
-			inflater = getLayoutInflater();
-			tagLayout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-			tagLayout.setMargins(0, 0, 5, 0);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			Question q = (Question) getItem(position);
-			View v;
-			TextView tagView;
-			ViewHolder h;
-			
-			if (convertView == null) {
-				v = inflater.inflate(R.layout.item_question, null);
-				h = new ViewHolder();
-				h.title = (TextView) v.findViewById(R.id.title);
-				h.score = (TextView) v.findViewById(R.id.votesN);
-				h.answers = (TextView) v.findViewById(R.id.answersN);
-				h.answerLabel = (TextView) v.findViewById(R.id.answersL);
-				h.views = (TextView) v.findViewById(R.id.viewsN);
-				h.bounty = (TextView) v.findViewById(R.id.bounty);
-				h.tags = (LinearLayout) v.findViewById(R.id.tags);
-				v.setTag(h);
-			}
-			else {
-				v = convertView;
-				h = (ViewHolder) convertView.getTag();
-			}
-			
-			h.title.setText(q.getTitle());
-			h.score.setText(String.valueOf(q.getScore()));
-			h.answers.setText(String.valueOf(q.getAnswerCount()));
-			h.views.setText(String.valueOf(q.getViewCount()));
-			
-			h.bounty.setVisibility(View.GONE);
-			if (q.getBountyAmount() > 0 && new Date(q.getBountyClosesDate()).before(new Date())) {
-				h.bounty.setText("+" + String.valueOf(q.getBountyAmount()));
-				h.bounty.setVisibility(View.VISIBLE);
-			}
-			
-			h.tags.removeAllViews();
-			for (String tag: q.getTags()){
-				tagView = (TextView) inflater.inflate(R.layout.tag, null);
-				tagView.setText(tag);
-				tagView.setOnClickListener(onTagClicked);
-				h.tags.addView(tagView, tagLayout);
-			}
-			
-			if (q.getAnswerCount() == 0) {
-				h.answers.setBackgroundResource(R.color.no_answers_bg);
-				h.answerLabel.setBackgroundResource(R.color.no_answers_bg);
-				h.answers.setTextColor(mResources.getColor(R.color.no_answers_text));
-				h.answerLabel.setTextColor(mResources.getColor(R.color.no_answers_text));
-			}
-			else {
-				h.answers.setBackgroundResource(R.color.some_answers_bg);
-				h.answerLabel.setBackgroundResource(R.color.some_answers_bg);
-				if (q.getAcceptedAnswerId() > 0) {
-					h.answers.setTextColor(mResources.getColor(R.color.answer_accepted_text));
-					h.answerLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));
-				}
-				else {
-					h.answers.setTextColor(mResources.getColor(R.color.some_answers_text));
-					h.answerLabel.setTextColor(mResources.getColor(R.color.some_answers_text));
-				}
-			}
-			
-			return v;
-		}
-		
-	}
-	
 	private OnClickListener onTagClicked = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -432,16 +337,16 @@ public class QuestionsActivity extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Question q = mQuestions.get(position);
 			if (!mIsStartedForResult) {
 				Intent i = new Intent(mContext, QuestionActivity.class);
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&qid=" + Uri.encode(String.valueOf(q.getPostId()));
+					"&qid=" + id;
 				i.setData(Uri.parse(uri));
 				startActivity(i);
 			}
 			else {
+				Question q = mQuestions.get(position);
 				Intent i = new Intent();
 				i.putExtra("id", q.getPostId());
 				i.putExtra("title", q.getTitle());

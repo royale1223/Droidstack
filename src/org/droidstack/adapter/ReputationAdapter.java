@@ -14,8 +14,8 @@ import android.widget.TextView;
 
 public class ReputationAdapter extends BaseAdapter {
 
-	private Context ctx;
-	private List<Reputation> data;
+	private Context context;
+	private List<Reputation> changes;
 	
 	private class Tag {
 		TextView rep_pos;
@@ -28,19 +28,19 @@ public class ReputationAdapter extends BaseAdapter {
 		}
 	}
 	
-	public ReputationAdapter(Context context, List<Reputation> changes) {
-		ctx = context;
-		data = changes;
+	public ReputationAdapter(Context ctx, List<Reputation> data) {
+		context = ctx;
+		changes = data;
 	}
 	
 	@Override
 	public int getCount() {
-		return data.size();
+		return changes.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return data.get(position);
+		return changes.get(position);
 	}
 
 	@Override
@@ -50,12 +50,12 @@ public class ReputationAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		Reputation r = data.get(position);
+		Reputation r = changes.get(position);
 		View v;
 		Tag t;
 		
 		if (convertView == null) {
-			v = View.inflate(ctx, R.layout.item_rep, null);
+			v = View.inflate(context, R.layout.item_rep, null);
 			t = new Tag(v);
 			v.setTag(t);
 		}

@@ -16,6 +16,7 @@ import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 
 import org.droidstack.R;
+import org.droidstack.adapter.SitesAdapter;
 import org.droidstack.service.NotificationsService;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
@@ -29,7 +30,6 @@ import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,19 +37,14 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -59,7 +54,7 @@ public class SitesActivity extends Activity {
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
 	private GridView mGridView;
-	private SimpleCursorAdapter mAdapter;
+	private SitesAdapter mAdapter;
 	private Context mContext;
 	private File mIcons;
 	
@@ -76,19 +71,6 @@ public class SitesActivity extends Activity {
         mSites = mSitesDatabase.getSites();
         startManagingCursor(mSites);
         
-        mGridView = (GridView) findViewById(R.id.sites);
-        mGridView.setEmptyView(findViewById(R.id.NoSitesText));
-        mAdapter = new SitesAdapter(
-        	this,
-        	android.R.layout.simple_list_item_1,
-        	mSites,
-        	new String[] { SitesDatabase.KEY_NAME },
-        	new int[] { android.R.id.text1 }
-        );
-        mGridView.setAdapter(mAdapter);
-        mGridView.setOnItemClickListener(onSiteClicked);
-        registerForContextMenu(mGridView);
-        
         if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
         	externalMediaError();
         }
@@ -104,6 +86,13 @@ public class SitesActivity extends Activity {
         		externalMediaError();
         	}
         }
+
+        mGridView = (GridView) findViewById(R.id.sites);
+        mGridView.setEmptyView(findViewById(R.id.NoSitesText));
+        mAdapter = new SitesAdapter(mContext, mSites, mIcons);
+        mGridView.setAdapter(mAdapter);
+        mGridView.setOnItemClickListener(onSiteClicked);
+        registerForContextMenu(mGridView);
         
         ArrayList<String> missing = new ArrayList<String>();
         mSites.moveToFirst();
@@ -147,47 +136,6 @@ public class SitesActivity extends Activity {
 		mSites.close();
 		mSitesDatabase.dispose();
 	}
-    
-    private class SitesAdapter extends SimpleCursorAdapter {
-    	
-    	private final LayoutInflater inflater;
-    	
-    	private class ViewHolder {
-    		public TextView label;
-    		public ImageView icon;
-    	}
-    	
-		public SitesAdapter(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
-			inflater = getLayoutInflater();
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			mSites.moveToPosition(position);
-			String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
-			String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
-			View v;
-			ViewHolder h;
-			if (convertView == null) {
-				v = inflater.inflate(R.layout.item_site, null);
-				h = new ViewHolder();
-				h.label = (TextView) v.findViewById(R.id.label);
-				h.icon = (ImageView) v.findViewById(R.id.icon);
-				v.setTag(h);
-			}
-			else {
-				v = convertView;
-				h = (ViewHolder) convertView.getTag();
-			}
-			h.label.setText(name);
-			
-			h.icon.setImageDrawable(Drawable.createFromPath(new File(mIcons, Uri.parse(endpoint).getHost()).getAbsolutePath()));
-			return v;
-		}
-    	
-    }
 
 	private OnItemClickListener onSiteClicked = new OnItemClickListener() {
 

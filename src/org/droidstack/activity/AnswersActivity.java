@@ -10,6 +10,7 @@ import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.AnswerQuery;
 
 import org.droidstack.R;
+import org.droidstack.adapter.AnswersAdapter;
 import org.droidstack.util.Const;
 
 import android.app.Activity;
@@ -17,23 +18,19 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -56,11 +53,10 @@ public class AnswersActivity extends Activity {
 	private boolean mIsStartedForResult = false;
 	
 	private List<Answer> mAnswers;
-	private ArrayAdapter<Answer> mAdapter;
+	private AnswersAdapter mAdapter;
 	private ListView mListView;
 	
 	private Context mContext;
-	private Resources mResources;
 
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
@@ -73,7 +69,6 @@ public class AnswersActivity extends Activity {
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mContext = this;
-		mResources = getResources();
 		mPageSize = Const.getPageSize(mContext);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) mIsStartedForResult = true; 
@@ -104,7 +99,7 @@ public class AnswersActivity extends Activity {
 			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
-		mAdapter = new AnswersListAdapter<Answer>(mContext, 0, mAnswers);
+		mAdapter = new AnswersAdapter(mContext, mAnswers);
 		mListView = (ListView) findViewById(R.id.answers);
 		mListView.setAdapter(mAdapter);
 		mListView.setOnScrollListener(onAnswersScrolled);
@@ -236,64 +231,6 @@ public class AnswersActivity extends Activity {
 					mListView.setVisibility(View.GONE);
 				}
 			}
-		}
-		
-	}
-	
-	private class AnswersListAdapter<E> extends ArrayAdapter<E> {
-		
-		private LayoutInflater inflater;
-		
-		private class ViewHolder {
-			public TextView score;
-			public TextView title;
-		}
-		
-		public AnswersListAdapter(Context context, int textViewResourceId,
-				List<E> objects) {
-			super(context, textViewResourceId, objects);
-			inflater = getLayoutInflater();
-		}
-		
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			Answer a = (Answer) getItem(position);
-			View v;
-			ViewHolder h;
-			
-			if (convertView == null) {
-				v = inflater.inflate(R.layout.item_answer, null);
-				h = new ViewHolder();
-				h.score = (TextView) v.findViewById(R.id.score);
-				h.title = (TextView) v.findViewById(R.id.title);
-				v.setTag(h);
-			}
-			else {
-				v = convertView;
-				h = (ViewHolder) v.getTag();
-			}
-			
-			h.score.setText(String.valueOf(a.getScore()));
-			h.title.setText(a.getTitle());
-			
-			if (a.isAccepted()) {
-				h.score.setBackgroundResource(R.color.score_max_bg);
-				h.score.setTextColor(mResources.getColor(R.color.score_max_text));
-			}
-			else if (a.getScore() == 0) {
-				h.score.setBackgroundResource(R.color.score_neutral_bg);
-				h.score.setTextColor(mResources.getColor(R.color.score_neutral_text));
-			}
-			else if (a.getScore() > 0) {
-				h.score.setBackgroundResource(R.color.score_high_bg);
-				h.score.setTextColor(mResources.getColor(R.color.score_high_text));
-			}
-			else {
-				h.score.setBackgroundResource(R.color.score_low_bg);
-				h.score.setTextColor(mResources.getColor(R.color.score_low_text));
-			}
-			
-			return v;
 		}
 		
 	}
