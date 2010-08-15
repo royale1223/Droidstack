@@ -1,4 +1,4 @@
-package org.droidstack;
+package org.droidstack.activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +15,8 @@ import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.stackauth.StackAuth;
 import net.sf.stackwrap4j.stackauth.entities.Site;
 
+import org.droidstack.R;
+import org.droidstack.service.Notifications;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
@@ -26,7 +28,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
-import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -120,7 +121,7 @@ public class Sites extends Activity {
         
         // start notification service on app update
         if (Const.getOldVersion(mContext) != Const.getNewVersion(mContext)) {
-        	startService(new Intent(mContext, NotificationService.class));
+        	startService(new Intent(mContext, Notifications.class));
         	PreferenceManager.getDefaultSharedPreferences(mContext).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(mContext)).commit();
         }
         

@@ -8,7 +8,7 @@
         android:icon="@drawable/icon"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Light">
-        <activity android:name=".Sites"
+        <activity android:name=".activity.Sites"
         	android:label="@string/app_name"
         	android:configChanges="orientation|keyboard|keyboardHidden"
         >
@@ -17,8 +17,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SiteActions" android:configChanges="orientation|keyboard|keyboardHidden" />
-        <activity android:name=".Questions" android:configChanges="orientation|keyboard|keyboardHidden">
+        <activity android:name=".activity.SiteActions" android:configChanges="orientation|keyboard|keyboardHidden" />
+        <activity android:name=".activity.Questions" android:configChanges="orientation|keyboard|keyboardHidden">
         	<intent-filter
         		android:icon="@drawable/icon"
         		android:label="@string/intent_questions">
@@ -35,7 +35,7 @@
         		<data android:path="/favorites" />
         	</intent-filter>
         </activity>
-        <activity android:name=".Answers" android:configChanges="orientation|keyboard|keyboardHidden">
+        <activity android:name=".activity.Answers" android:configChanges="orientation|keyboard|keyboardHidden">
 	        <intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="@string/intent_answers">
@@ -48,7 +48,7 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
-        <activity android:name=".ViewQuestion" android:configChanges="orientation|keyboard|keyboardHidden">
+        <activity android:name=".activity.ViewQuestion" android:configChanges="orientation|keyboard|keyboardHidden">
         	<intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="@string/intent_answers">
@@ -60,7 +60,7 @@
 	        		android:path="" />
 	        </intent-filter>
 	    </activity>
-	    <activity android:name=".ViewUser"
+	    <activity android:name=".activity.ViewUser"
 	    	android:theme="@android:style/Theme.Light.NoTitleBar"
 	    	android:configChanges="orientation|keyboard|keyboardHidden"
 	    >
@@ -75,7 +75,7 @@
 	        		android:path="" />
 	    	</intent-filter>
 	    </activity>
-	    <activity android:name=".ReputationChanges" android:configChanges="orientation|keyboard|keyboardHidden">
+	    <activity android:name=".activity.ReputationChanges" android:configChanges="orientation|keyboard|keyboardHidden">
 	    	<intent-filter
 	    		android:icon="@drawable/icon"
 	    		android:label="@string/intent_rep">
@@ -87,15 +87,15 @@
 	        		android:path="" />
 	    	</intent-filter>
 	    </activity>
-	    <activity android:name=".Preferences" android:label="Preferences" />
+	    <activity android:name=".activity.Preferences" android:label="Preferences" />
 	    
-	    <receiver android:name=".BootReceiver">
+	    <receiver android:name=".receiver.Boot">
 	    	<intent-filter>
 	    		<action android:name="android.intent.action.BOOT_COMPLETED" />
 	    	</intent-filter>
 	    </receiver>
 	    
-	    <service android:name=".NotificationService">
+	    <service android:name=".service.Notifications">
 	    	<intent-filter>
 	    		<action android:name="org.droidstack.NotificationService" />
 	    	</intent-filter>

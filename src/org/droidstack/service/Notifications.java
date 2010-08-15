@@ -1,4 +1,4 @@
-package org.droidstack;
+package org.droidstack.service;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
 import net.sf.stackwrap4j.query.ReputationQuery;
 
+import org.droidstack.R;
+import org.droidstack.activity.ReputationChanges;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
@@ -27,7 +29,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-public class NotificationService extends Service {
+public class Notifications extends Service {
 	
 	private static final int REP_ID = 1;
 	
@@ -68,7 +70,7 @@ public class NotificationService extends Service {
 	private void setupNextRun() {
 		if (mInterval == 0) return;
 		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(mContext, NotificationService.class);
+		Intent i = new Intent(mContext, Notifications.class);
 		PendingIntent pi = PendingIntent.getService(mContext, 0, i, 0);
 		Log.d(Const.TAG, "NotificationService: starting again in " + mInterval + " minutes");
 		am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + mInterval*60*1000, pi);

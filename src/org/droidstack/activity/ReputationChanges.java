@@ -1,14 +1,13 @@
-package org.droidstack;
+package org.droidstack.activity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
-import net.sf.stackwrap4j.entities.Question;
 import net.sf.stackwrap4j.entities.Reputation;
-import net.sf.stackwrap4j.enums.Order;
 import net.sf.stackwrap4j.query.ReputationQuery;
 
+import org.droidstack.R;
 import org.droidstack.adapter.ReputationAdapter;
 import org.droidstack.util.Const;
 
@@ -24,8 +23,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class ReputationChanges extends ListActivity {

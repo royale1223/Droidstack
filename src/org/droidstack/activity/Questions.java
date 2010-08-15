@@ -1,4 +1,4 @@
-package org.droidstack;
+package org.droidstack.activity;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,6 +14,7 @@ import net.sf.stackwrap4j.query.SearchQuery;
 import net.sf.stackwrap4j.query.UnansweredQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 
+import org.droidstack.R;
 import org.droidstack.util.Const;
 
 import android.app.Activity;
@@ -30,18 +31,18 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.View.OnClickListener;
 import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class Questions extends Activity {
 	

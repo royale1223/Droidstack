@@ -1,4 +1,4 @@
-package org.droidstack;
+package org.droidstack.activity;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.QuestionQuery;
 import net.sf.stackwrap4j.utils.StackUtils;
 
+import org.droidstack.R;
 import org.droidstack.util.Const;
 
 import android.app.Activity;
@@ -48,7 +49,6 @@ public class ViewQuestion extends Activity {
 	private int mQuestionID;
 	private int mAnswerID;
 	private String mEndpoint;
-	private String mSiteName;
 	private String mTemplate;
 	private int mAnswerCount;
 	private int mCurAnswer = -1;

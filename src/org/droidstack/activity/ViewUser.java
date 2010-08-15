@@ -1,4 +1,4 @@
-package org.droidstack;
+package org.droidstack.activity;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,6 +15,7 @@ import net.sf.stackwrap4j.query.AnswerQuery;
 import net.sf.stackwrap4j.query.ReputationQuery;
 import net.sf.stackwrap4j.query.UserQuestionQuery;
 
+import org.droidstack.R;
 import org.droidstack.adapter.MultiAdapter;
 import org.droidstack.adapter.MultiAdapter.MultiItem;
 import org.droidstack.util.Const;
