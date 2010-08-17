@@ -10,6 +10,7 @@
     <string name="user_actions">User-specific actions</string>
     <string name="no_userid">You need to set a user ID for this site in order to use this feature</string>
     <string name="title_error">Error</string>
+    <string name="title_menu_tag">Show questions tagged:</string>
     <string name="fetch_sites_error">An error occurred while retrieving the list of StackExchange sites. Please try again in a few moments.</string>
     <string name="fetch_user_error">An error occurred while retrieving your profile information. Please try again in a few moments.</string>
     <string name="site_add_error">An error has occurred while adding this site. Make sure you are connected to the Internet and try again in a few moments.</string>

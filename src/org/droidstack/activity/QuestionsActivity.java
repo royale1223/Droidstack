@@ -1,6 +1,7 @@
 package org.droidstack.activity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
@@ -22,7 +23,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -58,7 +58,7 @@ public class QuestionsActivity extends Activity {
 	private int mUserID = 0;
 	private String mUserName;
 	private String mInTitle;
-	private String mTagged;
+	private ArrayList<String> mTagged;
 	private String mNotTagged;
 	private boolean mNoMoreQuestions = false;
 	private boolean mIsRequestOngoing = true;
@@ -75,8 +75,8 @@ public class QuestionsActivity extends Activity {
 	private ArrayAdapter<CharSequence> mOrderAdapter;
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onCreate(Bundle inState) {
+		super.onCreate(inState);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.questions);
 		
@@ -117,7 +117,9 @@ public class QuestionsActivity extends Activity {
 		}
 		else if (mQueryType.equals(TYPE_SEARCH)) {
 			mInTitle = data.getQueryParameter("intitle");
-			mTagged = data.getQueryParameter("tagged");
+			if (data.getQueryParameter("tagged") != null) {
+				mTagged = new ArrayList<String>(Arrays.asList(data.getQueryParameter("tagged").split(" ")));
+			}
 			mNotTagged = data.getQueryParameter("nottagged");
 			setTitle(titlePrefix + getString(R.string.title_search_results));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_search, android.R.layout.simple_spinner_item);
@@ -127,14 +129,15 @@ public class QuestionsActivity extends Activity {
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		if (savedInstanceState == null) {
+		if (inState == null) {
 			mQuestions = new ArrayList<Question>();
 		}
 		else {
-			mQuestions = (ArrayList<Question>) savedInstanceState.getSerializable("mQuestions");
-			mPage = savedInstanceState.getInt("mPage");
-			mSort = savedInstanceState.getInt("mSort");
-			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
+			mQuestions = (ArrayList<Question>) inState.getSerializable("mQuestions");
+			if (inState.get("mTagged") != null) mTagged = (ArrayList<String>) inState.get("mTagged");
+			mPage = inState.getInt("mPage");
+			mSort = inState.getInt("mSort");
+			if (inState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new QuestionsAdapter(mContext, mQuestions, onTagClicked);
@@ -143,14 +146,15 @@ public class QuestionsActivity extends Activity {
 		mListView.setOnItemClickListener(onQuestionClicked);
 		mListView.setOnScrollListener(onQuestionsScrolled);
 		
-		if (savedInstanceState == null) getQuestions();
-		else mListView.setSelection(savedInstanceState.getInt("scroll"));
+		if (inState == null) getQuestions();
+		else mListView.setSelection(inState.getInt("scroll"));
 		
 	}
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putSerializable("mQuestions", (ArrayList<Question>) mQuestions);
+		if (mTagged != null && mTagged.size() != 0) outState.putSerializable("mTagged", mTagged);
 		outState.putInt("mPage", mPage);
 		outState.putInt("mSort", mSort);
 		outState.putBoolean("isAsc", mOrder.equals(Order.ASC));
@@ -214,6 +218,7 @@ public class QuestionsActivity extends Activity {
 				if (mQueryType.equals(TYPE_ALL)) {
 					QuestionQuery query = new QuestionQuery();
 					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					if (mTagged != null) query.setTags(mTagged);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -231,6 +236,7 @@ public class QuestionsActivity extends Activity {
 				else if (mQueryType.equals(TYPE_UNANSWERED)) {
 					UnansweredQuery query = new UnansweredQuery();
 					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					if (mTagged != null) query.setTags(mTagged);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -275,8 +281,8 @@ public class QuestionsActivity extends Activity {
 					SearchQuery query = new SearchQuery();
 					query.setPageSize(mPageSize).setPage(mPage);
 					if (mInTitle != null) query.setInTitle(mInTitle);
-					if (mTagged != null) query.setTags(mTagged.replace(' ', ';'));
-					if (mNotTagged != null) query.setNotTagged(mNotTagged.replace(' ', ';'));
+					if (mTagged != null) query.setTags(mTagged);
+					if (mNotTagged != null) query.setNotTagged(mNotTagged);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
 						switch(mSort) {
@@ -328,8 +334,46 @@ public class QuestionsActivity extends Activity {
 	private OnClickListener onTagClicked = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			String tag = ((TextView)v).getText().toString();
-			Log.d(Const.TAG, "Tag clicked: " + tag);
+			// these query types do not support tags
+			if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES)) {
+				Log.i(Const.TAG, "Tags not supported by API for this query type");
+				return;
+			}
+			final String tag = ((TextView) v).getText().toString();
+			String[] items;
+			if (mTagged == null || mTagged.size() == 0) {
+				items = new String[1];
+				items[0] = tag;
+			}
+			else {
+				items = new String[2];
+				items[0] = tag;
+				StringBuffer buf = new StringBuffer(tag);
+				for (String t: mTagged) {
+					buf.append(", ").append(t);
+				}
+				items[1] = buf.toString();
+			}
+			AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+			b.setTitle(R.string.title_menu_tag);
+			b.setItems(items, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					switch(which) {
+					case 0:
+						if (mTagged == null) mTagged = new ArrayList<String>();
+						mTagged.clear();
+						mTagged.add(tag);
+						break;
+					case 1:
+						mTagged.add(tag);
+						break;
+					}
+					mPage = 1;
+					getQuestions();
+				}
+			});
+			b.create().show();
 		}
 	};
 	
