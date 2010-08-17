@@ -117,9 +117,6 @@ public class QuestionsActivity extends Activity {
 		}
 		else if (mQueryType.equals(TYPE_SEARCH)) {
 			mInTitle = data.getQueryParameter("intitle");
-			if (data.getQueryParameter("tagged") != null) {
-				mTagged = new ArrayList<String>(Arrays.asList(data.getQueryParameter("tagged").split(" ")));
-			}
 			mNotTagged = data.getQueryParameter("nottagged");
 			setTitle(titlePrefix + getString(R.string.title_search_results));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_search, android.R.layout.simple_spinner_item);
@@ -131,6 +128,9 @@ public class QuestionsActivity extends Activity {
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		if (inState == null) {
 			mQuestions = new ArrayList<Question>();
+			if (data.getQueryParameter("tagged") != null) {
+				mTagged = new ArrayList<String>(Arrays.asList(data.getQueryParameter("tagged").split(" ")));
+			}
 		}
 		else {
 			mQuestions = (ArrayList<Question>) inState.getSerializable("mQuestions");

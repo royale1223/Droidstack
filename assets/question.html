@@ -88,6 +88,9 @@
 				margin: 5px 2px 5px 0;
 				padding: 3px 4px;
 			}
+			div.tags span:hover {
+				outline: solid 5px #FF8000;
+			}
 			div.accepted {
 				float: right;
 				width: 38px;
@@ -114,7 +117,7 @@
 			<!-- BEGIN: tags -->
 			<div class="tags">
 				<!-- BEGIN: tag -->
-				<span>{TAG}</span>
+				<span onclick="window.location.replace('droidstack://questions/all?endpoint={ENDPOINT}&tagged={TAG}')">{TAG}</span>
 				<!-- END: tag -->
 			</div>
 			<!-- END: tags -->
