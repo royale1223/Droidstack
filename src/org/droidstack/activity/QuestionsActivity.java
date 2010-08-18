@@ -361,6 +361,9 @@ public class QuestionsActivity extends ListActivity {
 						break;
 					}
 					mPage = 1;
+					mQuestions.clear();
+					mAdapter.notifyDataSetChanged();
+					mAdapter.setLoading(true);
 					getQuestions();
 				}
 			});
