@@ -326,7 +326,7 @@ public class QuestionsActivity extends ListActivity {
 		@Override
 		public void onClick(View v) {
 			// these query types do not support tags
-			if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES)) {
+			if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES) || mQueryType.equals(TYPE_SEARCH)) {
 				Log.i(Const.TAG, "Tags not supported by API for this query type");
 				return;
 			}

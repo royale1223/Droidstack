@@ -48,7 +48,7 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
-	    <activity android:name=".activity.TagsActivity">
+	    <activity android:name=".activity.TagsActivity" android:configChanges="orientation|keyboard|keyboardHidden">
 	        <intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="View tags">

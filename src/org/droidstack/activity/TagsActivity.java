@@ -52,11 +52,10 @@ public class TagsActivity extends ListActivity {
 		Uri data = getIntent().getData();
 		mEndpoint = data.getQueryParameter("endpoint");
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-		
-		mFilter = (EditText) findViewById(R.id.filter);
-		mFilter.addTextChangedListener(onTextChanged);
-		mHandler = new Handler();
 
+		mFilter = (EditText) findViewById(R.id.filter);
+		mHandler = new Handler();
+		
 		mPageSize = Const.getPageSize(this);
 		mPage = 1;
 		
@@ -66,7 +65,24 @@ public class TagsActivity extends ListActivity {
 		getListView().setOnScrollListener(onScroll);
 		getListView().setOnItemClickListener(onClick);
 		
-		new GetTags().execute();
+		if (inState != null) {
+			mTags.addAll((ArrayList<Tag>) inState.getSerializable("mTags"));
+			mFilter.setText(inState.getString("filter"));
+			mPage = inState.getInt("mPage");
+			mAdapter.notifyDataSetChanged();
+			getListView().setSelection(inState.getInt("scroll"));
+		}
+		mFilter.addTextChangedListener(onTextChanged);
+		
+		if (inState == null) new GetTags().execute();
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("mTags", mTags);
+		outState.putString("filter", mFilter.getText().toString());
+		outState.putInt("mPage", mPage);
+		outState.putInt("scroll", getListView().getFirstVisiblePosition());
 	}
 	
 	private TextWatcher onTextChanged = new TextWatcher() {
