@@ -1,6 +1,7 @@
 package org.droidstack.activity;
 
 import org.droidstack.R;
+import org.droidstack.adapter.TagAutocompleteAdapter;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -17,8 +18,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 
 public class SiteActivity extends ListActivity {
 	
@@ -81,17 +84,36 @@ public class SiteActivity extends ListActivity {
 		
 		diag.show();
 
+		TagAutocompleteAdapter tagAdapter = new TagAutocompleteAdapter(this, mEndpoint);
 		final EditText intitleEdit = (EditText) diag.findViewById(R.id.intitle);
-		final EditText taggedEdit = (EditText) diag.findViewById(R.id.tagged);
-		final EditText nottaggedEdit = (EditText) diag.findViewById(R.id.nottagged);
+		final MultiAutoCompleteTextView taggedEdit = (MultiAutoCompleteTextView) diag.findViewById(R.id.tagged);
+		taggedEdit.setTokenizer(new CommaTokenizer());
+		taggedEdit.setAdapter(tagAdapter);
+		final MultiAutoCompleteTextView nottaggedEdit = (MultiAutoCompleteTextView) diag.findViewById(R.id.nottagged);
+		nottaggedEdit.setTokenizer(new CommaTokenizer());
+		nottaggedEdit.setAdapter(tagAdapter);
 		final ImageButton searchButton = (ImageButton) diag.findViewById(R.id.search);
 		
 		searchButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				StringBuffer buf;
 				String intitle = intitleEdit.getText().toString();
 				String tagged = taggedEdit.getText().toString();
 				String nottagged = nottaggedEdit.getText().toString();
+				
+				buf = new StringBuffer();
+				for (String tag: tagged.split(",")) {
+					buf.append(tag.trim()).append(" ");
+				}
+				tagged = buf.toString().trim();
+				
+				buf = new StringBuffer();
+				for (String tag: nottagged.split(",")) {
+					buf.append(tag.trim()).append(" ");
+				}
+				nottagged = buf.toString().trim();
+				
 				if (intitle.length() > 0 || tagged.length() > 0 || nottagged.length() > 0) {
 					Intent i = new Intent(mContext, QuestionsActivity.class);
 					String uri = "droidstack://questions/search" +

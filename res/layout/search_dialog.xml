@@ -14,19 +14,21 @@
 		android:singleLine="true"
 		android:id="@+id/intitle"
 	/>
-	<EditText
+	<MultiAutoCompleteTextView
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:hint="@string/search_tagged"
 		android:singleLine="true"
 		android:id="@+id/tagged"
+		android:completionThreshold="2"
 	/>
-	<EditText
+	<MultiAutoCompleteTextView
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:hint="@string/search_nottagged"
 		android:singleLine="true"
 		android:id="@+id/nottagged"
+		android:completionThreshold="2"
 	/>
 	<RelativeLayout
 		android:layout_width="fill_parent"
