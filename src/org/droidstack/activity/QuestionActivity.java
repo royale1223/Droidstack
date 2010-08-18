@@ -20,12 +20,10 @@ import org.droidstack.util.Const;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -330,19 +328,11 @@ public class QuestionActivity extends Activity {
 	private class FetchQuestionTask extends AsyncTask<Void, Void, Void> {
 		
 		private Exception mException;
-		private ProgressDialog progressDialog;
 		
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
-					new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface dialog) {
-							finish();
-						}
-					});
 		}
 		
 		@Override
@@ -369,7 +359,6 @@ public class QuestionActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
-			progressDialog.dismiss();
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.title_error)
@@ -393,19 +382,11 @@ public class QuestionActivity extends Activity {
 	private class FetchMoreAnswers extends AsyncTask<Void, Void, List<Answer>> {
 		
 		private Exception mException;
-		private ProgressDialog progressDialog;
 		
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
 			setProgressBarIndeterminateVisibility(true);
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
-					new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface dialog) {
-							finish();
-						}
-					});
 		}
 		
 		@Override
@@ -427,7 +408,6 @@ public class QuestionActivity extends Activity {
 		protected void onPostExecute(List<Answer> result) {
 			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
-			progressDialog.dismiss();
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.title_error)

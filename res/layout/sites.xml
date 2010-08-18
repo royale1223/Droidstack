@@ -6,21 +6,16 @@
 >
 	<TextView
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:id="@+id/NoSitesText"
+		android:layout_height="wrap_content"
+		android:id="@android:id/empty"
 		style="@style/EmptyList"
-		android:layout_centerInParent="true"
 		android:text="@string/no_sites"
+		android:visibility="gone"
 	/>
-	<GridView
+	<ListView
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:verticalSpacing="10dip"
-		android:horizontalSpacing="10dip"
-		android:numColumns="auto_fit"
-		android:stretchMode="columnWidth"
-		android:gravity="center"
-		android:id="@+id/sites"
+		android:id="@android:id/list"
 		android:fadeScrollbars="true"
 		android:scrollbarStyle="insideOverlay"
 	/>

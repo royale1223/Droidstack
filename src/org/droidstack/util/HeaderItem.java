@@ -4,8 +4,6 @@ import org.droidstack.R;
 import org.droidstack.adapter.MultiAdapter.MultiItem;
 
 import android.content.Context;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -23,11 +21,6 @@ public class HeaderItem extends MultiItem {
 		mTitle = title;
 	}
 	
-	@Override
-	public int getLayoutResource() {
-		return R.layout.item_header;
-	}
-	
 	public boolean isEnabled() { return false; }
 	
 	private void prepareView(Tag tag) {
@@ -37,7 +30,7 @@ public class HeaderItem extends MultiItem {
 	@Override
 	public View bindView(View view, Context context) {
 		try {
-			Tag tag = (Tag) view.getTag(getLayoutResource());
+			Tag tag = (Tag) view.getTag(R.layout.item_header);
 			if (tag == null) throw new NullPointerException();
 			prepareView(tag);
 			return view;
@@ -52,7 +45,7 @@ public class HeaderItem extends MultiItem {
 		View v = View.inflate(context, R.layout.item_header, null);
 		Tag tag = new Tag();
 		tag.title = (TextView) v.findViewById(R.id.title);
-		v.setTag(getLayoutResource(), tag);
+		v.setTag(R.layout.item_header, tag);
 		prepareView(tag);
 		return v;
 	}

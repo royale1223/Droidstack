@@ -3,25 +3,19 @@ package org.droidstack.adapter;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
-	private static final int NO_SUCH_ITEM = -1;
 	
 	private Context context;
 	
 	private ArrayList<MultiItem> listItems;
-	private SparseIntArray viewTypes;
-	
-	private int viewTypesCount = 0;
 	
 	public static abstract class MultiItem {
-		public abstract int getLayoutResource();
 		
 		public boolean isEnabled() { return true; }
 		
@@ -35,39 +29,19 @@ public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
 		this.context = context;
 		
 		listItems = new ArrayList<MultiAdapter.MultiItem>();
-		viewTypes = new SparseIntArray();
 	}
 	
 	public void addItem(MultiItem item) {
-		int resource = item.getLayoutResource();
-		
-		if (resource != IGNORE_ITEM_VIEW_TYPE) {
-			if (viewTypes.get(resource, NO_SUCH_ITEM) == NO_SUCH_ITEM) {
-				// Resource not already added, add it
-				viewTypes.append(resource, viewTypesCount++);
-			}
-		}
-		
 		listItems.add(item);
+	}
+	
+	public void clear() {
+		listItems.clear();
 	}
 	
 	@Override
 	public boolean areAllItemsEnabled() {
 		return false;
-	}
-
-	@Override
-	public int getItemViewType(int position) {
-		final MultiItem item = listItems.get(position);
-		
-		int resource = item.getLayoutResource();
-		
-		return resource != IGNORE_ITEM_VIEW_TYPE ? viewTypes.get(resource) : IGNORE_ITEM_VIEW_TYPE;
-	}
-
-	@Override
-	public int getViewTypeCount() {
-		return viewTypesCount != 0 ? viewTypesCount : 1;
 	}
 
 	@Override
@@ -77,9 +51,7 @@ public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
 
 	@Override
 	public boolean isEnabled(int position) {
-		final MultiItem item = listItems.get(position);
-		
-		return item.isEnabled();
+		return listItems.get(position).isEnabled();
 	}
 	
 	@Override
@@ -113,8 +85,6 @@ public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-		final MultiItem item = listItems.get(position);
-		
-		item.onClick();
+		listItems.get(position).onClick();
 	}
 }

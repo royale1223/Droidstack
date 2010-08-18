@@ -18,8 +18,8 @@ import org.droidstack.R;
 import org.droidstack.adapter.QuestionsAdapter;
 import org.droidstack.util.Const;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,18 +30,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class QuestionsActivity extends Activity {
+public class QuestionsActivity extends ListActivity {
 	
 	public final static String TYPE_ALL = "all";
 	public final static String TYPE_UNANSWERED = "unanswered";
@@ -52,7 +50,6 @@ public class QuestionsActivity extends Activity {
 	private StackWrapper mAPI;
 	private String mQueryType;
 	private String mEndpoint;
-	private String mSiteName;
 	private int mPage = 1;
 	private int mPageSize;
 	private int mUserID = 0;
@@ -70,14 +67,12 @@ public class QuestionsActivity extends Activity {
 	
 	private List<Question> mQuestions;
 	private QuestionsAdapter mAdapter;
-	private ListView mListView;
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
 	
 	@Override
 	protected void onCreate(Bundle inState) {
 		super.onCreate(inState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.questions);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -89,36 +84,28 @@ public class QuestionsActivity extends Activity {
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
 		mEndpoint = data.getQueryParameter("endpoint");
-		mSiteName = data.getQueryParameter("name");
 		
-		String titlePrefix = "";
-		if (mSiteName != null) titlePrefix = mSiteName + ": ";
 		if (mQueryType.equals(TYPE_ALL)) {
-			setTitle(titlePrefix + getString(R.string.title_all_questions));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_UNANSWERED)) {
-			setTitle(titlePrefix + getString(R.string.title_all_unanswered));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_unanswered, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_USER)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			mUserName = data.getQueryParameter("uname");
 			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
-			setTitle(titlePrefix + getString(R.string.title_user_questions).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_FAVORITES)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			mUserName = data.getQueryParameter("uname");
 			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
-			setTitle(titlePrefix + getString(R.string.title_user_favorites).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_SEARCH)) {
 			mInTitle = data.getQueryParameter("intitle");
 			mNotTagged = data.getQueryParameter("nottagged");
-			setTitle(titlePrefix + getString(R.string.title_search_results));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_search, android.R.layout.simple_spinner_item);
 		}
 		
@@ -141,13 +128,12 @@ public class QuestionsActivity extends Activity {
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new QuestionsAdapter(mContext, mQuestions, onTagClicked);
-		mListView = (ListView)findViewById(R.id.questions);
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(onQuestionClicked);
-		mListView.setOnScrollListener(onQuestionsScrolled);
+		setListAdapter(mAdapter);
+		getListView().setOnItemClickListener(onQuestionClicked);
+		getListView().setOnScrollListener(onQuestionsScrolled);
 		
 		if (inState == null) getQuestions();
-		else mListView.setSelection(inState.getInt("scroll"));
+		else getListView().setSelection(inState.getInt("scroll"));
 		
 	}
 	
@@ -158,7 +144,7 @@ public class QuestionsActivity extends Activity {
 		outState.putInt("mPage", mPage);
 		outState.putInt("mSort", mSort);
 		outState.putBoolean("isAsc", mOrder.equals(Order.ASC));
-		outState.putInt("scroll", mListView.getFirstVisiblePosition());
+		outState.putInt("scroll", getListView().getFirstVisiblePosition());
 	}
 
 	@Override
@@ -191,6 +177,8 @@ public class QuestionsActivity extends Activity {
 					mSort = sort.getSelectedItemPosition();
 					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
 					else mOrder = Order.ASC;
+					mQuestions.clear();
+					mAdapter.notifyDataSetChanged();
 					mNoMoreQuestions = false;
 					mPage = 1;
 					getQuestions();
@@ -205,7 +193,7 @@ public class QuestionsActivity extends Activity {
 	
 	private void getQuestions() {
 		mIsRequestOngoing = true;
-		setProgressBarIndeterminateVisibility(true);
+		mAdapter.setLoading(true);
 		new GetQuestionsAsync().execute();
 	}
 	
@@ -217,7 +205,7 @@ public class QuestionsActivity extends Activity {
 			try {
 				if (mQueryType.equals(TYPE_ALL)) {
 					QuestionQuery query = new QuestionQuery();
-					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					query.setComments(false).setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					if (mTagged != null) query.setTags(mTagged);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -235,7 +223,7 @@ public class QuestionsActivity extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_UNANSWERED)) {
 					UnansweredQuery query = new UnansweredQuery();
-					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					query.setComments(false).setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					if (mTagged != null) query.setTags(mTagged);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -248,7 +236,7 @@ public class QuestionsActivity extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_USER)) {
 					UserQuestionQuery query = new UserQuestionQuery();
-					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					query.setComments(false).setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -263,7 +251,7 @@ public class QuestionsActivity extends Activity {
 				}
 				else if (mQueryType.equals(TYPE_FAVORITES)) {
 					FavoriteQuery query = new FavoriteQuery();
-					query.setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
+					query.setComments(false).setBody(false).setAnswers(false).setPageSize(mPageSize).setPage(mPage);
 					query.setIds(mUserID);
 					query.setOrder(mOrder);
 					if (mSort > -1) {
@@ -320,12 +308,15 @@ public class QuestionsActivity extends Activity {
 			}
 			else {
 				if (mPage == 1) mQuestions.clear();
-				if (result.size() < mPageSize) mNoMoreQuestions = true;
+				if (result.size() < mPageSize) {
+					mNoMoreQuestions = true;
+					mAdapter.setLoading(false);
+				}
 				mQuestions.addAll(result);
 				mAdapter.notifyDataSetChanged();
 				if (mQuestions.size() == 0) {
 					findViewById(R.id.empty).setVisibility(View.VISIBLE);
-					mListView.setVisibility(View.GONE);
+					getListView().setVisibility(View.GONE);
 				}
 			}
 		}

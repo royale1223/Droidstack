@@ -7,7 +7,7 @@
     <application
         android:icon="@drawable/icon"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Light">
+        android:theme="@android:style/Theme.Light.NoTitleBar">
         <activity android:name=".activity.SitesActivity"
         	android:label="@string/app_name"
         	android:configChanges="orientation|keyboard|keyboardHidden"
@@ -48,7 +48,10 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
-        <activity android:name=".activity.QuestionActivity" android:configChanges="orientation|keyboard|keyboardHidden">
+        <activity android:name=".activity.QuestionActivity"
+        	android:theme="@android:style/Theme.Light"
+        	android:configChanges="orientation|keyboard|keyboardHidden"
+        >
         	<intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="@string/intent_answers">
@@ -60,10 +63,7 @@
 	        		android:path="" />
 	        </intent-filter>
 	    </activity>
-	    <activity android:name=".activity.UserActivity"
-	    	android:theme="@android:style/Theme.Light.NoTitleBar"
-	    	android:configChanges="orientation|keyboard|keyboardHidden"
-	    >
+	    <activity android:name=".activity.UserActivity" android:configChanges="orientation|keyboard|keyboardHidden">
 	    	<intent-filter
 	    		android:icon="@drawable/icon"
 	    		android:label="@string/intent_user">

@@ -17,11 +17,6 @@ public class MoreItem extends MultiItem {
 		mIntent = i;
 		mContext = ctx;
 	}
-	
-	@Override
-	public int getLayoutResource() {
-		return R.layout.item_more;
-	}
 
 	@Override
 	public View bindView(View view, Context context) {

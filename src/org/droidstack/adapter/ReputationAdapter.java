@@ -16,6 +16,7 @@ public class ReputationAdapter extends BaseAdapter {
 
 	private Context context;
 	private List<Reputation> changes;
+	private boolean loading;
 	
 	private class Tag {
 		TextView rep_pos;
@@ -32,29 +33,54 @@ public class ReputationAdapter extends BaseAdapter {
 		context = ctx;
 		changes = data;
 	}
+
+	public void setLoading(boolean isLoading) {
+		if (loading == isLoading) return;
+		loading = isLoading;
+		notifyDataSetChanged();
+	}
 	
 	@Override
 	public int getCount() {
-		return changes.size();
+		if (loading) return changes.size()+1;
+		else return changes.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return changes.get(position);
+		try {
+			return changes.get(position);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	@Override
 	public long getItemId(int position) {
 		return position;
 	}
+	
+	@Override
+	public boolean areAllItemsEnabled() {
+		if (loading) return false;
+		else return true;
+	}
 
 	@Override
+	public boolean isEnabled(int position) {
+		if (position == changes.size()) return false;
+		return true;
+	}
+	
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		if (position == changes.size()) return View.inflate(context, R.layout.item_loading, null);
 		Reputation r = changes.get(position);
 		View v;
 		Tag t;
 		
-		if (convertView == null) {
+		if (convertView == null || convertView.getTag() == null) {
 			v = View.inflate(context, R.layout.item_rep, null);
 			t = new Tag(v);
 			v.setTag(t);

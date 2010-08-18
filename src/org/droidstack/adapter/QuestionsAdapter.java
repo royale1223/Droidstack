@@ -21,6 +21,7 @@ public class QuestionsAdapter extends BaseAdapter {
 	private Context context;
 	private List<Question> questions;
 	private Resources resources;
+	private boolean loading;
 	private LinearLayout.LayoutParams tagLayout;
 	private OnClickListener tagClickListener;
 	
@@ -53,29 +54,59 @@ public class QuestionsAdapter extends BaseAdapter {
 		tagClickListener = onTagClicked;
 	}
 	
+	public void setLoading(boolean isLoading) {
+		if (loading == isLoading) return;
+		loading = isLoading;
+		notifyDataSetChanged();
+	}
+	
 	@Override
 	public int getCount() {
-		return questions.size();
+		if (loading) return questions.size()+1;
+		else return questions.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return questions.get(position);
+		try {
+			return questions.get(position);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return questions.get(position).getPostId();
+		try {
+			return questions.get(position).getPostId();
+		}
+		catch (IndexOutOfBoundsException e) {
+			return -1;
+		}
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		if (loading) return false;
+		else return true;
+	}
+
+	@Override
+	public boolean isEnabled(int position) {
+		if (position == questions.size()) return false;
+		return true;
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		if (position == questions.size()) return View.inflate(context, R.layout.item_loading, null); 
 		Question q = (Question) getItem(position);
 		View v;
 		TextView tagView;
 		Tag h;
 		
-		if (convertView == null) {
+		if (convertView == null || convertView.getTag() == null) {
 			v = View.inflate(context, R.layout.item_question, null);
 			h = new Tag(v);
 			v.setTag(h);

@@ -20,15 +20,14 @@ import org.droidstack.adapter.MultiAdapter;
 import org.droidstack.adapter.MultiAdapter.MultiItem;
 import org.droidstack.util.Const;
 import org.droidstack.util.HeaderItem;
+import org.droidstack.util.LoadingItem;
 import org.droidstack.util.MoreItem;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -124,17 +123,10 @@ public class UserActivity extends ListActivity {
 	private class FetchUserDataTask extends AsyncTask<Void, Void, Void> {
 
 		private Exception mException;
-		private ProgressDialog progressDialog;
 		
 		@Override
 		protected void onPreExecute() {
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true, 
-					new OnCancelListener() {
-						@Override
-						public void onCancel(DialogInterface dialog) {
-							finish();
-						}
-					});
+			mAdapter.addItem(new LoadingItem());
 		}
 		
 		@Override
@@ -174,7 +166,7 @@ public class UserActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			progressDialog.dismiss();
+			mAdapter.clear();
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.title_error)
@@ -264,11 +256,6 @@ public class UserActivity extends ListActivity {
 		}
 
 		@Override
-		public int getLayoutResource() {
-			return R.layout.item_about;
-		}
-
-		@Override
 		public View bindView(View view, Context context) {
 			try {
 				Boolean b = (Boolean) view.getTag(R.layout.item_about);
@@ -324,16 +311,11 @@ public class UserActivity extends ListActivity {
 		public RepItem(Reputation rep) {
 			data = rep;
 		}
-		
-		@Override
-		public int getLayoutResource() {
-			return R.layout.item_rep;
-		}
 
 		@Override
 		public View bindView(View view, Context context) {
 			try {
-				Tag tag = (Tag) view.getTag(getLayoutResource());
+				Tag tag = (Tag) view.getTag(R.layout.item_rep);
 				if (tag == null) throw new NullPointerException();
 				prepareView(tag);
 				return view;
@@ -350,7 +332,7 @@ public class UserActivity extends ListActivity {
 			tag.title = (TextView) v.findViewById(R.id.title);
 			tag.rep_pos = (TextView) v.findViewById(R.id.rep_pos);
 			tag.rep_neg = (TextView) v.findViewById(R.id.rep_neg);
-			v.setTag(getLayoutResource(), tag);
+			v.setTag(R.layout.item_rep, tag);
 			prepareView(tag);
 			return v;
 		}
@@ -452,11 +434,6 @@ public class UserActivity extends ListActivity {
 				}
 			}
 		}
-		
-		@Override
-		public int getLayoutResource() {
-			return R.layout.item_question;
-		}
 
 		@Override
 		public View bindView(View view, Context context) {
@@ -534,16 +511,11 @@ public class UserActivity extends ListActivity {
 				t.score.setTextColor(mResources.getColor(R.color.score_low_text));
 			}
 		}
-		
-		@Override
-		public int getLayoutResource() {
-			return R.layout.item_answer;
-		}
 
 		@Override
 		public View bindView(View view, Context context) {
 			try {
-				Tag tag = (Tag) view.getTag(R.layout.item_question);
+				Tag tag = (Tag) view.getTag(R.layout.item_answer);
 				if (tag == null) throw new NullPointerException();
 				prepareView(tag);
 				return view;

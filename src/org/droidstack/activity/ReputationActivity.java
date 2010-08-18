@@ -21,7 +21,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AbsListView.OnScrollListener;
@@ -30,9 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class ReputationActivity extends ListActivity {
 	
 	private String mEndpoint;
-	private String mSiteName;
 	private int mUserID;
-	private String mUserName;
 	
 	private Context mContext;
 	private int mPageSize;
@@ -48,14 +45,11 @@ public class ReputationActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle inState) {
 		super.onCreate(inState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		mContext = (Context) this;
 		setContentView(R.layout.repchanges);
 		
 		Uri data = getIntent().getData();
 		mEndpoint = data.getQueryParameter("endpoint");
-		mSiteName = data.getQueryParameter("name");
-		mUserName = data.getQueryParameter("uname");
 		
 		try {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
@@ -66,13 +60,6 @@ public class ReputationActivity extends ListActivity {
 			finish();
 			return;
 		}
-		
-		String title = "";
-		if (mSiteName != null) title += mSiteName + ": ";
-		if (mUserName != null) title += mUserName;
-		else title += "#" + mUserID;
-		title += "'s rep changes";
-		setTitle(title);
 		
 		mAPI = new StackWrapper(mEndpoint);
 		mPageSize = Const.getPageSize(mContext);
@@ -146,7 +133,7 @@ public class ReputationActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
-			setProgressBarIndeterminateVisibility(true);
+			mAdapter.setLoading(true);
 		}
 		
 		@Override
@@ -183,7 +170,10 @@ public class ReputationActivity extends ListActivity {
 			else {
 				if (mPage == 1) mRepChanges.clear();
 				mRepChanges.addAll(result);
-				if (result.size() < mPageSize) noMoreChanges = true;
+				if (result.size() < mPageSize) {
+					noMoreChanges = true;
+					mAdapter.setLoading(false);
+				}
 				if (mRepChanges.size() == 0) {
 					findViewById(R.id.empty).setVisibility(View.VISIBLE);
 					getListView().setVisibility(View.GONE);

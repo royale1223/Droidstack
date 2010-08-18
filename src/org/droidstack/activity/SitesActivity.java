@@ -21,8 +21,8 @@ import org.droidstack.service.NotificationsService;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,20 +40,17 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class SitesActivity extends Activity {
+public class SitesActivity extends ListActivity {
 	
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
-	private GridView mGridView;
 	private SitesAdapter mAdapter;
 	private Context mContext;
 	private File mIcons;
@@ -61,8 +58,7 @@ public class SitesActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sites);
         
         HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -87,12 +83,10 @@ public class SitesActivity extends Activity {
         	}
         }
 
-        mGridView = (GridView) findViewById(R.id.sites);
-        mGridView.setEmptyView(findViewById(R.id.NoSitesText));
         mAdapter = new SitesAdapter(mContext, mSites, mIcons);
-        mGridView.setAdapter(mAdapter);
-        mGridView.setOnItemClickListener(onSiteClicked);
-        registerForContextMenu(mGridView);
+        setListAdapter(mAdapter);
+        getListView().setOnItemClickListener(onSiteClicked);
+        registerForContextMenu(getListView());
         
         ArrayList<String> missing = new ArrayList<String>();
         mSites.moveToFirst();
@@ -161,7 +155,7 @@ public class SitesActivity extends Activity {
     @Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-    	if (v.getId() == R.id.sites) {
+    	if (v.getId() == android.R.id.list) {
     		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
     		mSites.moveToPosition(info.position);
     		String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
@@ -235,7 +229,6 @@ public class SitesActivity extends Activity {
     	
     	@Override
     	protected void onPreExecute() {
-    		setProgressBarIndeterminateVisibility(true);
 			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
     	}
 
@@ -265,7 +258,6 @@ public class SitesActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(Void params) {
-			setProgressBarIndeterminateVisibility(false);
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error refreshing site icons", mException);
@@ -303,7 +295,6 @@ public class SitesActivity extends Activity {
     	
     	@Override
 		protected void onPreExecute() {
-			setProgressBarIndeterminateVisibility(true);
 			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
 		}
     	
@@ -322,7 +313,6 @@ public class SitesActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(User result) {
-			setProgressBarIndeterminateVisibility(false);
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error retrieving user info", mException);
@@ -350,7 +340,6 @@ public class SitesActivity extends Activity {
     	
 		@Override
 		protected void onPreExecute() {
-			setProgressBarIndeterminateVisibility(true);
 			mInstance = this;
 			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
 				new OnCancelListener() {
@@ -364,7 +353,6 @@ public class SitesActivity extends Activity {
 		@Override
 		protected void onCancelled() {
 			progressDialog.dismiss();
-			setProgressBarIndeterminateVisibility(false);
 		}
 
 		@Override
@@ -380,7 +368,6 @@ public class SitesActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			setProgressBarIndeterminateVisibility(false);
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error retrieving sites", mException);
@@ -413,15 +400,12 @@ public class SitesActivity extends Activity {
     
     
     private class AddSiteTask extends AsyncTask<Site, Void, Void> {
-    	
-    	private ProgressDialog progressDialog;
     	private Exception mException;
     	private Site site;
     	
     	@Override
 		protected void onPreExecute() {
-			setProgressBarIndeterminateVisibility(true);
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			mAdapter.setLoading(true);
 		}
 
 		@Override
@@ -447,8 +431,7 @@ public class SitesActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			setProgressBarIndeterminateVisibility(false);
-			progressDialog.dismiss();
+			mAdapter.setLoading(false);
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 				.setTitle(R.string.title_error)

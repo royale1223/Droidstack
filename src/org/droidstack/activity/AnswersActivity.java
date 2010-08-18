@@ -13,8 +13,8 @@ import org.droidstack.R;
 import org.droidstack.adapter.AnswersAdapter;
 import org.droidstack.util.Const;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -34,14 +33,13 @@ import android.widget.Spinner;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class AnswersActivity extends Activity {
+public class AnswersActivity extends ListActivity {
 	
 	public final static String TYPE_USER = "user";
 	
 	private StackWrapper mAPI;
 	private String mQueryType;
 	private String mEndpoint;
-	private String mSiteName;
 	private int mPage = 1;
 	private int mPageSize;
 	private int mUserID = 0;
@@ -54,7 +52,6 @@ public class AnswersActivity extends Activity {
 	
 	private List<Answer> mAnswers;
 	private AnswersAdapter mAdapter;
-	private ListView mListView;
 	
 	private Context mContext;
 
@@ -64,7 +61,6 @@ public class AnswersActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.answers);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -76,15 +72,11 @@ public class AnswersActivity extends Activity {
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
 		mEndpoint = data.getQueryParameter("endpoint");
-		mSiteName = data.getQueryParameter("name");
 		
-		String titlePrefix = "";
-		if (mSiteName != null) titlePrefix = mSiteName + ": ";
 		if (mQueryType.equals(TYPE_USER)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			mUserName = data.getQueryParameter("uname");
 			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
-			setTitle(titlePrefix + getString(R.string.title_user_answers).replace("%s", mUserName));
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.a_sort_user, android.R.layout.simple_spinner_item);
 		}
 		
@@ -100,17 +92,16 @@ public class AnswersActivity extends Activity {
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new AnswersAdapter(mContext, mAnswers);
-		mListView = (ListView) findViewById(R.id.answers);
-		mListView.setAdapter(mAdapter);
-		mListView.setOnScrollListener(onAnswersScrolled);
-		mListView.setOnItemClickListener(onAnswerClicked);
+		setListAdapter(mAdapter);
+		getListView().setOnScrollListener(onAnswersScrolled);
+		getListView().setOnItemClickListener(onAnswerClicked);
 		
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
 		if (savedInstanceState == null) getAnswers();
-		else mListView.setSelection(savedInstanceState.getInt("scroll"));
+		else getListView().setSelection(savedInstanceState.getInt("scroll"));
 	}
 	
 	@Override
@@ -119,7 +110,7 @@ public class AnswersActivity extends Activity {
 		outState.putInt("mPage", mPage);
 		outState.putInt("mSort", mSort);
 		outState.putBoolean("isAsc", mOrder.equals(Order.ASC));
-		outState.putInt("scroll", mListView.getFirstVisiblePosition());
+		outState.putInt("scroll", getListView().getFirstVisiblePosition());
 	}
 	
 	@Override
@@ -154,6 +145,8 @@ public class AnswersActivity extends Activity {
 					mSort = sort.getSelectedItemPosition();
 					if (order.getSelectedItemPosition() == 0) mOrder = Order.DESC;
 					else mOrder = Order.ASC;
+					mAnswers.clear();
+					mAdapter.notifyDataSetChanged();
 					mNoMoreAnswers = false;
 					mPage = 1;
 					getAnswers();
@@ -176,7 +169,7 @@ public class AnswersActivity extends Activity {
 		
 		@Override
 		protected void onPreExecute() {
-			setProgressBarIndeterminateVisibility(true);
+			mAdapter.setLoading(true);
 			mIsRequestOngoing = true;
 		}
 		
@@ -206,7 +199,6 @@ public class AnswersActivity extends Activity {
 		}
 		@Override
 		protected void onPostExecute(List<Answer> result) {
-			setProgressBarIndeterminateVisibility(false);
 			mIsRequestOngoing = false;
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
@@ -223,12 +215,15 @@ public class AnswersActivity extends Activity {
 			}
 			else {
 				if (mPage == 1) mAnswers.clear();
-				if (result.size() < mPageSize) mNoMoreAnswers = true;
+				if (result.size() < mPageSize) {
+					mNoMoreAnswers = true;
+					mAdapter.setLoading(false);
+				}
 				mAnswers.addAll(result);
 				mAdapter.notifyDataSetChanged();
 				if (mAnswers.size() == 0) {
 					findViewById(R.id.empty).setVisibility(View.VISIBLE);
-					mListView.setVisibility(View.GONE);
+					getListView().setVisibility(View.GONE);
 				}
 			}
 		}

@@ -18,6 +18,7 @@ public class AnswersAdapter extends BaseAdapter {
 	private Context context;
 	private List<Answer> answers;
 	private Resources resources;
+	private boolean loading;
 	
 	private class Tag {
 		public TextView score;
@@ -35,28 +36,58 @@ public class AnswersAdapter extends BaseAdapter {
 		resources = context.getResources();
 	}
 	
+	public void setLoading(boolean isLoading) {
+		if (loading == isLoading) return;
+		loading = isLoading;
+		notifyDataSetChanged();
+	}
+	
 	@Override
 	public int getCount() {
-		return answers.size();
+		if (loading) return answers.size()+1;
+		else return answers.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return answers.get(position);
+		try {
+			return answers.get(position);
+		}
+		catch (IndexOutOfBoundsException e) {
+			return null;
+		}
 	}
 
 	@Override
 	public long getItemId(int position) {
-		return answers.get(position).getPostId();
+		try {
+			return answers.get(position).getPostId();
+		}
+		catch (IndexOutOfBoundsException e) {
+			return -1;
+		}
+	}
+	
+	@Override
+	public boolean areAllItemsEnabled() {
+		if (loading) return false;
+		else return true;
 	}
 
 	@Override
+	public boolean isEnabled(int position) {
+		if (position == answers.size()) return false;
+		return true;
+	}
+	
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		if (position == answers.size()) return View.inflate(context, R.layout.item_loading, null);
 		Answer a = (Answer) getItem(position);
 		View v;
 		Tag t;
 		
-		if (convertView == null) {
+		if (convertView == null || convertView.getTag() == null) {
 			v = View.inflate(context, R.layout.item_answer, null);
 			t = new Tag(v);
 			v.setTag(t);
