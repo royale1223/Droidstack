@@ -2,18 +2,21 @@ package org.droidstack.activity;
 
 import org.droidstack.R;
 
-import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -62,33 +65,46 @@ public class SiteActivity extends ListActivity {
 	
 	@Override
 	public boolean onSearchRequested() {
-		View dialogView = getLayoutInflater().inflate(R.layout.search_dialog, null);
-		final EditText intitleEdit = (EditText) dialogView.findViewById(R.id.intitle);
-		final EditText taggedEdit = (EditText) dialogView.findViewById(R.id.tagged);
-		final EditText nottaggedEdit = (EditText) dialogView.findViewById(R.id.nottagged);
-		new AlertDialog.Builder(mContext)
-			.setTitle(R.string.search_title)
-			.setView(dialogView)
-			.setNegativeButton(android.R.string.cancel, null)
-			.setPositiveButton(android.R.string.ok, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					String intitle = intitleEdit.getText().toString();
-					String tagged = taggedEdit.getText().toString();
-					String nottagged = nottaggedEdit.getText().toString();
-					if (intitle.length() > 0 || tagged.length() > 0 || nottagged.length() > 0) {
-						Intent i = new Intent(mContext, QuestionsActivity.class);
-						String uri = "droidstack://questions/search" +
-							"?endpoint=" + Uri.encode(mEndpoint) +
-							"&name=" + Uri.encode(mSiteName);
-						if (intitle.length() > 0) uri += "&intitle=" + Uri.encode(intitle);
-						if (tagged.length() > 0) uri += "&tagged=" + Uri.encode(tagged);
-						if (nottagged.length() > 0) uri += "&nottagged=" + Uri.encode(nottagged);
-						i.setData(Uri.parse(uri));
-						startActivity(i);
-					}
+		// bits stolen from the Android source code ;)
+		Dialog diag = new Dialog(this, android.R.style.Theme_Panel);
+		diag.setContentView(R.layout.search_dialog);
+		
+		WindowManager.LayoutParams lp = diag.getWindow().getAttributes();
+		lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+		lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+		lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+		lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+		
+		diag.getWindow().setAttributes(lp);
+		
+		diag.setCanceledOnTouchOutside(true);
+		
+		diag.show();
+
+		final EditText intitleEdit = (EditText) diag.findViewById(R.id.intitle);
+		final EditText taggedEdit = (EditText) diag.findViewById(R.id.tagged);
+		final EditText nottaggedEdit = (EditText) diag.findViewById(R.id.nottagged);
+		final ImageButton searchButton = (ImageButton) diag.findViewById(R.id.search);
+		
+		searchButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String intitle = intitleEdit.getText().toString();
+				String tagged = taggedEdit.getText().toString();
+				String nottagged = nottaggedEdit.getText().toString();
+				if (intitle.length() > 0 || tagged.length() > 0 || nottagged.length() > 0) {
+					Intent i = new Intent(mContext, QuestionsActivity.class);
+					String uri = "droidstack://questions/search" +
+						"?endpoint=" + Uri.encode(mEndpoint) +
+						"&name=" + Uri.encode(mSiteName);
+					if (intitle.length() > 0) uri += "&intitle=" + Uri.encode(intitle);
+					if (tagged.length() > 0) uri += "&tagged=" + Uri.encode(tagged);
+					if (nottagged.length() > 0) uri += "&nottagged=" + Uri.encode(nottagged);
+					i.setData(Uri.parse(uri));
+					startActivity(i);
 				}
-			}).create().show();
+			}
+		});
 		return false;
 	}
 

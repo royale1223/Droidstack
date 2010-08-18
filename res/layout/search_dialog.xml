@@ -1,43 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent"
-	>
-	<LinearLayout
+	android:orientation="vertical"
+	android:padding="5dp"
+	android:background="@drawable/search_bg"
+>
+	<EditText
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:orientation="vertical"
-		android:padding="5dip"
+		android:layout_height="wrap_content"
+		android:hint="@string/search_intitle"
+		android:singleLine="true"
+		android:id="@+id/intitle"
+	/>
+	<EditText
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:hint="@string/search_tagged"
+		android:singleLine="true"
+		android:id="@+id/tagged"
+	/>
+	<EditText
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:hint="@string/search_nottagged"
+		android:singleLine="true"
+		android:id="@+id/nottagged"
+	/>
+	<RelativeLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="10dp"
+		android:paddingLeft="5dp"
 	>
-		<EditText
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:hint="@string/search_intitle"
-			android:singleLine="true"
-			android:id="@+id/intitle"
-		/>
-		<EditText
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:hint="@string/search_tagged"
-			android:singleLine="true"
-			android:id="@+id/tagged"
-		/>
-		<EditText
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content"
-			android:hint="@string/search_nottagged"
-			android:singleLine="true"
-			android:id="@+id/nottagged"
-		/>
 		<TextView
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:gravity="center_horizontal"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_centerVertical="true"
 			android:text="@string/search_separate_tags"
-			style="@android:style/TextAppearance.Medium"
-			android:textColor="@android:color/primary_text_dark"
+			android:textAppearance="@android:style/TextAppearance.Medium.Inverse"
+			android:textStyle="bold"
 		/>
-	</LinearLayout>
-</ScrollView>
+		<ImageButton
+			android:id="@+id/search"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_centerVertical="true"
+			android:src="@drawable/ic_btn_search"
+		/>
+	</RelativeLayout>
+</LinearLayout>
