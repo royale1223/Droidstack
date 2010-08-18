@@ -1,7 +1,7 @@
 package org.droidstack.activity;
 
 import org.droidstack.R;
-import org.droidstack.adapter.TagAutocompleteAdapter;
+import org.droidstack.adapter.TagAutoCompleteAdapter;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -28,10 +28,11 @@ public class SiteActivity extends ListActivity {
 	private static final int POS_ALL = 0;
 	private static final int POS_UNANSWERED = 1;
 	private static final int POS_SEARCH = 2;
-	private static final int POS_MY_QUESTIONS = 3;
-	private static final int POS_FAVORITES = 4;
-	private static final int POS_MY_ANSWERS = 5;
-	private static final int POS_MY_PROFILE = 6;
+	private static final int POS_TAGS = 3;
+	private static final int POS_MY_QUESTIONS = 4;
+	private static final int POS_FAVORITES = 5;
+	private static final int POS_MY_ANSWERS = 6;
+	private static final int POS_MY_PROFILE = 7;
 	
 	private Context mContext;
 	private String mEndpoint;
@@ -84,7 +85,7 @@ public class SiteActivity extends ListActivity {
 		
 		diag.show();
 
-		TagAutocompleteAdapter tagAdapter = new TagAutocompleteAdapter(this, mEndpoint);
+		TagAutoCompleteAdapter tagAdapter = new TagAutoCompleteAdapter(this, mEndpoint);
 		final EditText intitleEdit = (EditText) diag.findViewById(R.id.intitle);
 		final MultiAutoCompleteTextView taggedEdit = (MultiAutoCompleteTextView) diag.findViewById(R.id.tagged);
 		taggedEdit.setTokenizer(new CommaTokenizer());
@@ -146,6 +147,10 @@ public class SiteActivity extends ListActivity {
 				break;
 			case POS_SEARCH:
 				onSearchRequested();
+				break;
+			case POS_TAGS:
+				activity = TagsActivity.class;
+				uri = "droidstack://tags?";
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {

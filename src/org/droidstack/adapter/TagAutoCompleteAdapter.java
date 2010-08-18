@@ -19,7 +19,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-public class TagAutocompleteAdapter extends BaseAdapter implements Filterable {
+public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 	
 	private class TagFilter extends Filter {
 		
@@ -63,7 +63,7 @@ public class TagAutocompleteAdapter extends BaseAdapter implements Filterable {
 	private String endpoint;
 	private StackWrapper mAPI;
 	
-	public TagAutocompleteAdapter(Context context, String endpoint) {
+	public TagAutoCompleteAdapter(Context context, String endpoint) {
 		this.endpoint = endpoint;
 		this.context = context;
 		

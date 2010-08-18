@@ -48,6 +48,19 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
+	    <activity android:name=".activity.TagsActivity">
+	        <intent-filter
+	        	android:icon="@drawable/icon"
+	        	android:label="View tags">
+	        	<action android:name="android.intent.action.VIEW" />
+	        	<action android:name="android.intent.action.PICK" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="tags" />
+	        	<data android:path="" />
+	        </intent-filter>
+	    </activity>
         <activity android:name=".activity.QuestionActivity"
         	android:theme="@android:style/Theme.Light"
         	android:configChanges="orientation|keyboard|keyboardHidden"
