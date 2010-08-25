@@ -63,16 +63,12 @@ public class UserActivity extends ListActivity {
 	private TextView mName;
 	private TextView mRep;
 	
-	private Context mContext;
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.user);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		
-		mContext = (Context) this;
 		
 		// get launch parameters
 		Uri data = getIntent().getData();
@@ -87,7 +83,7 @@ public class UserActivity extends ListActivity {
 			return;
 		}
 		
-		mAdapter = new MultiAdapter(mContext);
+		mAdapter = new MultiAdapter(this);
 		setListAdapter(mAdapter);
 		getListView().setOnItemClickListener(mAdapter);
 		
@@ -168,7 +164,7 @@ public class UserActivity extends ListActivity {
 		protected void onPostExecute(Void result) {
 			mAdapter.clear();
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(UserActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.user_fetch_error)
 					.setCancelable(false)
@@ -200,44 +196,44 @@ public class UserActivity extends ListActivity {
 		if (mQuestions.size() > 0) {
 			mAdapter.addItem(new HeaderItem("Recent Questions"));
 			for (Question q: mQuestions) {
-				mAdapter.addItem(new QuestionItem(q, mContext));
+				mAdapter.addItem(new QuestionItem(q, this));
 			}
-			Intent more = new Intent(mContext, QuestionsActivity.class);
+			Intent more = new Intent(this, QuestionsActivity.class);
 			String uri = "droidstack://questions/user" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
 				"&endpoint=" + Uri.encode(mEndpoint);
 			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
 			more.setData(Uri.parse(uri));
-			mAdapter.addItem(new MoreItem(more, mContext));
+			mAdapter.addItem(new MoreItem(more, this));
 		}
 		if (mAnswers.size() > 0) {
 			mAdapter.addItem(new HeaderItem("Recent Answers"));
 			for (Answer a: mAnswers) {
-				mAdapter.addItem(new AnswerItem(a, mContext));
+				mAdapter.addItem(new AnswerItem(a, this));
 			}
-			Intent more = new Intent(mContext, AnswersActivity.class);
+			Intent more = new Intent(this, AnswersActivity.class);
 			String uri = "droidstack://answers/user" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
 				"&endpoint=" + Uri.encode(mEndpoint);
 			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
 			more.setData(Uri.parse(uri));
-			mAdapter.addItem(new MoreItem(more, mContext));
+			mAdapter.addItem(new MoreItem(more, this));
 		}
 		if (mRepChanges.size() > 0) {
 			mAdapter.addItem(new HeaderItem("Reputation Changes"));
 			for (Reputation r: mRepChanges) {
 				mAdapter.addItem(new RepItem(r));
 			}
-			Intent more = new Intent(mContext, ReputationActivity.class);
+			Intent more = new Intent(this, ReputationActivity.class);
 			String uri = "droidstack://reputation" +
 				"?uid=" + mUserID +
 				"&uname=" + Uri.encode(mUser.getDisplayName()) +
 				"&endpoint=" + Uri.encode(mEndpoint);
 			if (mSiteName != null) uri += "&name=" + Uri.encode(mSiteName);
 			more.setData(Uri.parse(uri));
-			mAdapter.addItem(new MoreItem(more, mContext));
+			mAdapter.addItem(new MoreItem(more, this));
 		}
 		mAdapter.notifyDataSetChanged();
 	}
@@ -339,7 +335,7 @@ public class UserActivity extends ListActivity {
 		
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, QuestionActivity.class);
+			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
 			if (data.getPostType().equals("question")) {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
@@ -459,7 +455,7 @@ public class UserActivity extends ListActivity {
 
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, QuestionActivity.class);
+			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mQuestion.getPostId()));
@@ -537,7 +533,7 @@ public class UserActivity extends ListActivity {
 		
 		@Override
 		public void onClick() {
-			Intent i = new Intent(mContext, QuestionActivity.class);
+			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
 				"&qid=" + Uri.encode(String.valueOf(mAnswer.getQuestionId()));

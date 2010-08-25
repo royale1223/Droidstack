@@ -24,7 +24,6 @@ import org.droidstack.util.SitesDatabase;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
@@ -52,7 +51,6 @@ public class SitesActivity extends ListActivity {
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
 	private SitesAdapter mAdapter;
-	private Context mContext;
 	private File mIcons;
 	
     @Override
@@ -62,8 +60,7 @@ public class SitesActivity extends ListActivity {
         setContentView(R.layout.sites);
         
         HttpClient.setTimeout(Const.NET_TIMEOUT);
-        mContext = (Context) this;
-        mSitesDatabase = new SitesDatabase(mContext);
+        mSitesDatabase = new SitesDatabase(this);
         mSites = mSitesDatabase.getSites();
         startManagingCursor(mSites);
         
@@ -83,7 +80,7 @@ public class SitesActivity extends ListActivity {
         	}
         }
 
-        mAdapter = new SitesAdapter(mContext, mSites, mIcons);
+        mAdapter = new SitesAdapter(this, mSites, mIcons);
         setListAdapter(mAdapter);
         getListView().setOnItemClickListener(onSiteClicked);
         registerForContextMenu(getListView());
@@ -103,15 +100,15 @@ public class SitesActivity extends ListActivity {
         }
         
         // start notification service on app update
-        if (Const.getOldVersion(mContext) != Const.getNewVersion(mContext)) {
-        	startService(new Intent(mContext, NotificationsService.class));
-        	PreferenceManager.getDefaultSharedPreferences(mContext).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(mContext)).commit();
+        if (Const.getOldVersion(this) != Const.getNewVersion(this)) {
+        	startService(new Intent(this, NotificationsService.class));
+        	PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(this)).commit();
         }
         
     }
     
     private void externalMediaError() {
-    	new AlertDialog.Builder(mContext)
+    	new AlertDialog.Builder(this)
 		.setTitle(R.string.title_error)
 		.setCancelable(false)
 		.setMessage(R.string.no_sd_error)
@@ -141,7 +138,7 @@ public class SitesActivity extends ListActivity {
 			String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 			int uid = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
 			String uname = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_UNAME));
-			Intent i = new Intent(mContext, SiteActivity.class);
+			Intent i = new Intent(SitesActivity.this, SiteActivity.class);
 			String uri = "droidstack://site/" +
 				"?endpoint=" + Uri.encode(endpoint) +
 				"&name=" + Uri.encode(name) +
@@ -178,7 +175,7 @@ public class SitesActivity extends ListActivity {
 			if (userID > 0) {
 				userEntry.setText(String.valueOf(userID));
 			}
-			new AlertDialog.Builder(mContext)
+			new AlertDialog.Builder(this)
 				.setTitle(name)
 				.setView(dialogView)
 				.setNegativeButton(android.R.string.cancel, null)
@@ -216,7 +213,7 @@ public class SitesActivity extends ListActivity {
     		new SitePickerTask().execute();
     		break;
     	case R.id.menu_settings:
-    		Intent i = new Intent(mContext, PreferencesActivity.class);
+    		Intent i = new Intent(this, PreferencesActivity.class);
     		startActivity(i);
     	}
     	return false;
@@ -229,7 +226,7 @@ public class SitesActivity extends ListActivity {
     	
     	@Override
     	protected void onPreExecute() {
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			progressDialog = ProgressDialog.show(SitesActivity.this, "", getString(R.string.loading), true, false);
     	}
 
 		@Override
@@ -261,7 +258,7 @@ public class SitesActivity extends ListActivity {
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error refreshing site icons", mException);
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(SitesActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.icons_refresh_error)
 					.setCancelable(false)
@@ -295,7 +292,7 @@ public class SitesActivity extends ListActivity {
     	
     	@Override
 		protected void onPreExecute() {
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, false);
+			progressDialog = ProgressDialog.show(SitesActivity.this, "", getString(R.string.loading), true, false);
 		}
     	
 		@Override
@@ -316,7 +313,7 @@ public class SitesActivity extends ListActivity {
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error retrieving user info", mException);
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(SitesActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.fetch_user_error)
 					.setNeutralButton(android.R.string.ok, null)
@@ -326,7 +323,7 @@ public class SitesActivity extends ListActivity {
 				mSitesDatabase.setUser(mEndpoint, mUserID, result.getDisplayName());
 				mSites.requery();
 				mAdapter.notifyDataSetChanged();
-				Toast.makeText(mContext, "User " + result.getDisplayName() + " loaded", Toast.LENGTH_SHORT).show();
+				Toast.makeText(SitesActivity.this, "User " + result.getDisplayName() + " loaded", Toast.LENGTH_SHORT).show();
 			}
 		}
     }
@@ -341,7 +338,7 @@ public class SitesActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			mInstance = this;
-			progressDialog = ProgressDialog.show(mContext, "", getString(R.string.loading), true, true,
+			progressDialog = ProgressDialog.show(SitesActivity.this, "", getString(R.string.loading), true, true,
 				new OnCancelListener() {
 					@Override
 					public void onCancel(DialogInterface dialog) {
@@ -371,7 +368,7 @@ public class SitesActivity extends ListActivity {
 			progressDialog.dismiss();
 			if (mException != null) {
 				Log.e(Const.TAG, "Error retrieving sites", mException);
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(SitesActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.fetch_sites_error)
 					.setNeutralButton(android.R.string.ok, null)
@@ -383,7 +380,7 @@ public class SitesActivity extends ListActivity {
 				for (Site s: sites) {
 					items[i++] = s.getName();
 				}
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(SitesActivity.this)
 					.setTitle(R.string.menu_add_site)
 					.setItems(items, new OnClickListener() {
 						@Override
@@ -433,7 +430,7 @@ public class SitesActivity extends ListActivity {
 		protected void onPostExecute(Void result) {
 			mAdapter.setLoading(false);
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(SitesActivity.this)
 				.setTitle(R.string.title_error)
 				.setMessage(R.string.site_add_error)
 				.setNeutralButton(android.R.string.ok, null)

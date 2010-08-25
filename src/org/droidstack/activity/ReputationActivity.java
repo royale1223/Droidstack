@@ -13,7 +13,6 @@ import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -31,7 +30,6 @@ public class ReputationActivity extends ListActivity {
 	private String mEndpoint;
 	private int mUserID;
 	
-	private Context mContext;
 	private int mPageSize;
 	private int mPage = 1;
 	private ReputationAdapter mAdapter;
@@ -45,7 +43,6 @@ public class ReputationActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle inState) {
 		super.onCreate(inState);
-		mContext = (Context) this;
 		setContentView(R.layout.repchanges);
 		
 		Uri data = getIntent().getData();
@@ -62,9 +59,9 @@ public class ReputationActivity extends ListActivity {
 		}
 		
 		mAPI = new StackWrapper(mEndpoint);
-		mPageSize = Const.getPageSize(mContext);
+		mPageSize = Const.getPageSize(this);
 		mRepChanges = new ArrayList<Reputation>();
-		mAdapter = new ReputationAdapter(mContext, mRepChanges);
+		mAdapter = new ReputationAdapter(this, mRepChanges);
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(onScroll);
 		getListView().setOnItemClickListener(onClick);
@@ -109,7 +106,7 @@ public class ReputationActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			Reputation r = mRepChanges.get(position);
-			Intent i = new Intent(mContext, QuestionActivity.class);
+			Intent i = new Intent(ReputationActivity.this, QuestionActivity.class);
 			if (r.getPostType().equals("question")) {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
@@ -155,7 +152,7 @@ public class ReputationActivity extends ListActivity {
 			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
 			if (mException != null) {
-					new AlertDialog.Builder(mContext)
+					new AlertDialog.Builder(ReputationActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.rep_fetch_error)
 					.setCancelable(false)

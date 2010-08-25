@@ -15,7 +15,6 @@ import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -28,7 +27,6 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
@@ -52,8 +50,6 @@ public class AnswersActivity extends ListActivity {
 	
 	private List<Answer> mAnswers;
 	private AnswersAdapter mAdapter;
-	
-	private Context mContext;
 
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
@@ -64,8 +60,7 @@ public class AnswersActivity extends ListActivity {
 		setContentView(R.layout.answers);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mContext = this;
-		mPageSize = Const.getPageSize(mContext);
+		mPageSize = Const.getPageSize(this);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) mIsStartedForResult = true; 
 		
@@ -91,7 +86,7 @@ public class AnswersActivity extends ListActivity {
 			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
-		mAdapter = new AnswersAdapter(mContext, mAnswers);
+		mAdapter = new AnswersAdapter(this, mAnswers);
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(onAnswersScrolled);
 		getListView().setOnItemClickListener(onAnswerClicked);
@@ -201,7 +196,7 @@ public class AnswersActivity extends ListActivity {
 		protected void onPostExecute(List<Answer> result) {
 			mIsRequestOngoing = false;
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(AnswersActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.answers_fetch_error)
 					.setCancelable(false)
@@ -237,7 +232,7 @@ public class AnswersActivity extends ListActivity {
 				long id) {
 			Answer a = mAnswers.get(position);
 			if (!mIsStartedForResult) {
-				Intent i = new Intent(mContext, QuestionActivity.class);
+				Intent i = new Intent(AnswersActivity.this, QuestionActivity.class);
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
 					"&qid=" + Uri.encode(String.valueOf(a.getQuestionId()));

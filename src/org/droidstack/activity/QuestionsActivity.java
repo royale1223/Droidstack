@@ -20,7 +20,6 @@ import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -63,8 +62,6 @@ public class QuestionsActivity extends ListActivity {
 	private Order mOrder = Order.DESC;
 	private boolean mIsStartedForResult = false;
 	
-	private Context mContext;
-	
 	private List<Question> mQuestions;
 	private QuestionsAdapter mAdapter;
 	private ArrayAdapter<CharSequence> mSortAdapter;
@@ -76,8 +73,7 @@ public class QuestionsActivity extends ListActivity {
 		setContentView(R.layout.questions);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mContext = (Context) this;
-		mPageSize = Const.getPageSize(mContext);
+		mPageSize = Const.getPageSize(this);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) mIsStartedForResult = true;
 		
@@ -127,7 +123,7 @@ public class QuestionsActivity extends ListActivity {
 			if (inState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
-		mAdapter = new QuestionsAdapter(mContext, mQuestions, onTagClicked);
+		mAdapter = new QuestionsAdapter(this, mQuestions, onTagClicked);
 		setListAdapter(mAdapter);
 		getListView().setOnItemClickListener(onQuestionClicked);
 		getListView().setOnScrollListener(onQuestionsScrolled);
@@ -294,7 +290,7 @@ public class QuestionsActivity extends ListActivity {
 			setProgressBarIndeterminateVisibility(false);
 			mIsRequestOngoing = false;
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(QuestionsActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.questions_fetch_error)
 					.setCancelable(false)
@@ -345,7 +341,7 @@ public class QuestionsActivity extends ListActivity {
 				}
 				items[1] = buf.toString();
 			}
-			AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+			AlertDialog.Builder b = new AlertDialog.Builder(QuestionsActivity.this);
 			b.setTitle(R.string.title_menu_tag);
 			b.setItems(items, new DialogInterface.OnClickListener() {
 				@Override
@@ -376,7 +372,7 @@ public class QuestionsActivity extends ListActivity {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
 			if (!mIsStartedForResult) {
-				Intent i = new Intent(mContext, QuestionActivity.class);
+				Intent i = new Intent(QuestionsActivity.this, QuestionActivity.class);
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
 					"&qid=" + id;

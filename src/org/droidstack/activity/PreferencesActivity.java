@@ -6,7 +6,6 @@ import org.droidstack.util.Const;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.preference.Preference.OnPreferenceChangeListener;
 
 public class PreferencesActivity extends PreferenceActivity {
 	
-	private Context mContext;
 	private SharedPreferences mPreferences;
 	
 	@Override
@@ -26,8 +24,7 @@ public class PreferencesActivity extends PreferenceActivity {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.preferences);
 		
-		mContext = (Context) this;
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		
 		ListPreference interval = (ListPreference) findPreference(Const.PREF_NOTIF_INTERVAL);
 		interval.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
@@ -36,8 +33,8 @@ public class PreferencesActivity extends PreferenceActivity {
 				mPreferences.edit().putString(Const.PREF_NOTIF_INTERVAL, (String)newValue).commit();
 				int minutes = Integer.parseInt((String)newValue);
 				AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-				Intent i = new Intent(mContext, NotificationsService.class);
-				PendingIntent pi = PendingIntent.getService(mContext, 0, i, 0);
+				Intent i = new Intent(PreferencesActivity.this, NotificationsService.class);
+				PendingIntent pi = PendingIntent.getService(PreferencesActivity.this, 0, i, 0);
 				am.cancel(pi);
 				if (minutes > 0) {
 					startService(i);

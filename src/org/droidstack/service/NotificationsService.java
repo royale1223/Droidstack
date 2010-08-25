@@ -37,7 +37,6 @@ public class NotificationsService extends Service {
 	private long mLastRun;
 	private SitesDatabase mDB;
 	private Cursor mSites;
-	private Context mContext;
 	private NotificationManager mNotifManager;
 	private SharedPreferences mPreferences;
 	
@@ -45,8 +44,7 @@ public class NotificationsService extends Service {
 	public void onCreate() {
 		Log.d(Const.TAG, "NotificationService started");
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mContext = (Context) this;
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mInterval = Integer.parseInt(mPreferences.getString(Const.PREF_NOTIF_INTERVAL, Const.DEF_NOTIF_INTERVAL));
 		if (mInterval == 0) {
 			stopSelf();
@@ -62,7 +60,7 @@ public class NotificationsService extends Service {
 		mLastRun = mPreferences.getLong(Const.PREF_NOTIF_LASTRUN, -1);
 		mPreferences.edit().putLong(Const.PREF_NOTIF_LASTRUN, System.currentTimeMillis()/1000).commit();
 		mNotifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mDB = new SitesDatabase(mContext);
+		mDB = new SitesDatabase(this);
 		mSites = mDB.getSites();
 		new WorkerTask().execute();
 	}
@@ -70,8 +68,8 @@ public class NotificationsService extends Service {
 	private void setupNextRun() {
 		if (mInterval == 0) return;
 		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(mContext, NotificationsService.class);
-		PendingIntent pi = PendingIntent.getService(mContext, 0, i, 0);
+		Intent i = new Intent(this, NotificationsService.class);
+		PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
 		Log.d(Const.TAG, "NotificationService: starting again in " + mInterval + " minutes");
 		am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + mInterval*60*1000, pi);
 	}
@@ -107,21 +105,21 @@ public class NotificationsService extends Service {
 								posRep += rep.getPositiveRep();
 								negRep += rep.getNegativeRep();
 							}
-							Intent notifIntent = new Intent(mContext, ReputationActivity.class);
+							Intent notifIntent = new Intent(NotificationsService.this, ReputationActivity.class);
 							String uri = "droidstack://reputation" +
 								"?endpoint=" + Uri.encode(endpoint) +
 								"&name=" + Uri.encode(name) +
 								"&uid=" + String.valueOf(uid) +
 								"&uname=" + Uri.encode(uname);
 							notifIntent.setData(Uri.parse(uri));
-							PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, notifIntent, 0);
+							PendingIntent contentIntent = PendingIntent.getActivity(NotificationsService.this, 0, notifIntent, 0);
 							Notification notif = new Notification(R.drawable.ic_notif_rep, "New rep changes on " + name, repChanges.get(0).getOnDate()*1000);
 							String contentText = "";
 							if (posRep > 0 && negRep > 0) contentText = "+" + posRep + " / -" + negRep;
 							else if (posRep > 0) contentText = "+" + posRep;
 							else contentText = "-" + negRep;
 							contentText += ", new total: " + Const.longFormatRep(user.getReputation());
-							notif.setLatestEventInfo(mContext, name, contentText, contentIntent);
+							notif.setLatestEventInfo(NotificationsService.this, name, contentText, contentIntent);
 							notif.defaults |= Notification.DEFAULT_ALL;
 							notif.flags |= Notification.FLAG_AUTO_CANCEL;
 							mNotifManager.notify(endpoint, REP_ID, notif);

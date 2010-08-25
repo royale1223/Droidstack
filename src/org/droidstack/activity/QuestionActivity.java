@@ -20,7 +20,6 @@ import org.droidstack.util.Const;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +32,6 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -54,7 +52,6 @@ public class QuestionActivity extends Activity {
 	private int mPage = 0;
 	private int mPageSize;
 	
-	private Context mContext;
 	private StackWrapper mAPI;
 	private Question mQuestion;
 	private List<Answer> mAnswers;
@@ -74,7 +71,6 @@ public class QuestionActivity extends Activity {
 		setContentView(R.layout.question);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
-		mContext = (Context) this;
 		try {
 			InputStream is = getAssets().open("question.html", AssetManager.ACCESS_BUFFER);
 			StringBuilder builder = new StringBuilder();
@@ -121,8 +117,8 @@ public class QuestionActivity extends Activity {
 		title.setFocusable(true);
 		title.setFocusableInTouchMode(true);
 		title.requestFocus();
-		mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-		mPageSize = Const.getPageSize(mContext);
+		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		mPageSize = Const.getPageSize(this);
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
 		if (savedInstanceState == null) {
 			mAnswers = new ArrayList<Answer>();
@@ -373,7 +369,7 @@ public class QuestionActivity extends Activity {
 			isRequestOngoing = false;
 			mProgress.setVisibility(View.GONE);
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(QuestionActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.question_fetch_error)
 					.setCancelable(false)
@@ -422,7 +418,7 @@ public class QuestionActivity extends Activity {
 			isRequestOngoing = false;
 			mProgress.setVisibility(View.GONE);
 			if (mException != null) {
-				new AlertDialog.Builder(mContext)
+				new AlertDialog.Builder(QuestionActivity.this)
 					.setTitle(R.string.title_error)
 					.setMessage(R.string.more_answers_error)
 					.setNeutralButton(android.R.string.ok, null)

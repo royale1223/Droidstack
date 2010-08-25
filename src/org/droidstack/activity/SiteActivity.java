@@ -5,7 +5,6 @@ import org.droidstack.adapter.TagAutoCompleteAdapter;
 
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,7 +33,6 @@ public class SiteActivity extends ListActivity {
 	private static final int POS_MY_ANSWERS = 6;
 	private static final int POS_MY_PROFILE = 7;
 	
-	private Context mContext;
 	private String mEndpoint;
 	private String mSiteName;
 	private String mUserName;
@@ -45,8 +43,6 @@ public class SiteActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.site);
-		
-		mContext = this;
 		
 		Uri data = getIntent().getData();
 		
@@ -61,7 +57,7 @@ public class SiteActivity extends ListActivity {
 		setTitle(mSiteName);
 		
 		String[] items = getResources().getStringArray(R.array.site_actions);
-		mAdapter = new ArrayAdapter<String>(mContext, R.layout.item_siteaction, R.id.title, items);
+		mAdapter = new ArrayAdapter<String>(this, R.layout.item_siteaction, R.id.title, items);
 		setListAdapter(mAdapter);
 		
 		getListView().setOnItemClickListener(onItemClicked);
@@ -116,7 +112,7 @@ public class SiteActivity extends ListActivity {
 				nottagged = buf.toString().trim();
 				
 				if (intitle.length() > 0 || tagged.length() > 0 || nottagged.length() > 0) {
-					Intent i = new Intent(mContext, QuestionsActivity.class);
+					Intent i = new Intent(SiteActivity.this, QuestionsActivity.class);
 					String uri = "droidstack://questions/search" +
 						"?endpoint=" + Uri.encode(mEndpoint) +
 						"&name=" + Uri.encode(mSiteName);
@@ -154,7 +150,7 @@ public class SiteActivity extends ListActivity {
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {
-					Toast.makeText(mContext,
+					Toast.makeText(SiteActivity.this,
 							R.string.no_userid,
 							Toast.LENGTH_LONG).show();
 					break;
@@ -166,7 +162,7 @@ public class SiteActivity extends ListActivity {
 				break;
 			case POS_FAVORITES:
 				if (mUserID == 0) {
-					Toast.makeText(mContext,
+					Toast.makeText(SiteActivity.this,
 							R.string.no_userid,
 							Toast.LENGTH_LONG).show();
 					break;
@@ -178,7 +174,7 @@ public class SiteActivity extends ListActivity {
 				break;
 			case POS_MY_ANSWERS:
 				if (mUserID == 0) {
-					Toast.makeText(mContext,
+					Toast.makeText(SiteActivity.this,
 							R.string.no_userid,
 							Toast.LENGTH_LONG).show();
 					break;
@@ -190,7 +186,7 @@ public class SiteActivity extends ListActivity {
 				break;
 			case POS_MY_PROFILE:
 				if (mUserID == 0) {
-					Toast.makeText(mContext,
+					Toast.makeText(SiteActivity.this,
 							R.string.no_userid,
 							Toast.LENGTH_LONG).show();
 					break;
@@ -201,7 +197,7 @@ public class SiteActivity extends ListActivity {
 			}
 			if (activity != null && uri != null) {
 				uri += "endpoint=" + Uri.encode(mEndpoint) + "&name=" + Uri.encode(mSiteName);
-				Intent i = new Intent(mContext, activity);
+				Intent i = new Intent(SiteActivity.this, activity);
 				i.setData(Uri.parse(uri));
 				startActivity(i);
 			}
