@@ -38,11 +38,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class QuestionActivity extends Activity {
 	
-	public static final String KEY_QID = "question_id";
+	private static final String API_PREFIX = "api.";
 	
 	private int mQuestionID;
 	private int mAnswerID;
@@ -63,13 +64,13 @@ public class QuestionActivity extends Activity {
 	private TextView mAnswerCountView;
 	private Button mNextButton;
 	private Button mPreviousButton;
+	private ProgressBar mProgress;
 	
 	private boolean isRequestOngoing = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.question);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -174,6 +175,7 @@ public class QuestionActivity extends Activity {
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
 		mNextButton = (Button) findViewById(R.id.next);
 		mPreviousButton = (Button) findViewById(R.id.previous);
+		mProgress = (ProgressBar) findViewById(R.id.progress);
 	}
 	
 	@Override
@@ -298,12 +300,15 @@ public class QuestionActivity extends Activity {
 			mNextButton.setEnabled(false);
 			if (mCurAnswer > -1) mPreviousButton.setEnabled(true);
 			if (mCurAnswer < mAnswerCount-1) mNextButton.setEnabled(true);
+			mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
+			/*
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				mAnswerCountView.setText((mCurAnswer+1) + "\nof\n" + mAnswerCount);
+				mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
 			}
 			else {
 				mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
 			}
+			*/
 		}
 	}
 	
@@ -325,6 +330,14 @@ public class QuestionActivity extends Activity {
 		}
 	}
 	
+	public void browseTo(View target){
+		//HACK it would be better if api can provide a browsable URL
+		//but right now it looks like it lacks the feature.
+		String questionUrl = "http://" + Uri.parse(mEndpoint).getHost().replace(API_PREFIX, "");
+		questionUrl += "/questions/" + mQuestion.getPostId();
+		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(questionUrl)));
+	}
+	
 	private class FetchQuestionTask extends AsyncTask<Void, Void, Void> {
 		
 		private Exception mException;
@@ -332,7 +345,7 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
-			setProgressBarIndeterminateVisibility(true);
+			mProgress.setVisibility(View.VISIBLE);
 		}
 		
 		@Override
@@ -358,7 +371,7 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void result) {
 			isRequestOngoing = false;
-			setProgressBarIndeterminateVisibility(false);
+			mProgress.setVisibility(View.GONE);
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.title_error)
@@ -386,7 +399,7 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
-			setProgressBarIndeterminateVisibility(true);
+			mProgress.setVisibility(View.VISIBLE);
 		}
 		
 		@Override
@@ -407,7 +420,7 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPostExecute(List<Answer> result) {
 			isRequestOngoing = false;
-			setProgressBarIndeterminateVisibility(false);
+			mProgress.setVisibility(View.GONE);
 			if (mException != null) {
 				new AlertDialog.Builder(mContext)
 					.setTitle(R.string.title_error)
