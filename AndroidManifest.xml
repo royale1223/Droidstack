@@ -61,6 +61,19 @@
 	        	<data android:path="" />
 	        </intent-filter>
 	    </activity>
+	    <activity android:name=".activity.UsersActivity" android:configChanges="orientation|keyboard|keyboardHidden">
+	        <intent-filter
+	        	android:icon="@drawable/icon"
+	        	android:label="View users">
+	        	<action android:name="android.intent.action.VIEW" />
+	        	<action android:name="android.intent.action.PICK" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="users" />
+	        	<data android:path="" />
+	        </intent-filter>
+	    </activity>
         <activity android:name=".activity.QuestionActivity"
         	android:theme="@android:style/Theme.Light"
         	android:configChanges="orientation|keyboard|keyboardHidden"

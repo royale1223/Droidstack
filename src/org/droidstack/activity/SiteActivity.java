@@ -28,10 +28,11 @@ public class SiteActivity extends ListActivity {
 	private static final int POS_UNANSWERED = 1;
 	private static final int POS_SEARCH = 2;
 	private static final int POS_TAGS = 3;
-	private static final int POS_MY_QUESTIONS = 4;
-	private static final int POS_FAVORITES = 5;
-	private static final int POS_MY_ANSWERS = 6;
-	private static final int POS_MY_PROFILE = 7;
+	private static final int POS_USERS = 4;
+	private static final int POS_MY_QUESTIONS = 5;
+	private static final int POS_FAVORITES = 6;
+	private static final int POS_MY_ANSWERS = 7;
+	private static final int POS_MY_PROFILE = 8;
 	
 	private String mEndpoint;
 	private String mSiteName;
@@ -147,6 +148,10 @@ public class SiteActivity extends ListActivity {
 			case POS_TAGS:
 				activity = TagsActivity.class;
 				uri = "droidstack://tags?";
+				break;
+			case POS_USERS:
+				activity = UsersActivity.class;
+				uri = "droidstack://users?";
 				break;
 			case POS_MY_QUESTIONS:
 				if (mUserID == 0) {

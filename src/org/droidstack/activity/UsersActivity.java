@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
-import net.sf.stackwrap4j.entities.Tag;
-import net.sf.stackwrap4j.query.TagQuery;
+import net.sf.stackwrap4j.entities.User;
+import net.sf.stackwrap4j.query.UserQuery;
 
 import org.droidstack.R;
-import org.droidstack.adapter.TagsAdapter;
+import org.droidstack.adapter.UsersAdapter;
 import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
@@ -29,61 +29,63 @@ import android.widget.EditText;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class TagsActivity extends ListActivity {
-
+public class UsersActivity extends ListActivity {
+	
 	private String mEndpoint;
-	private int mPage;
-	private int mPageSize;
-	private boolean noMoreTags = false;
-	private boolean isRequestOngoing = false;
 	private StackWrapper mAPI;
 	
-	private TagsAdapter mAdapter;
-	private ArrayList<Tag> mTags;
-	private Handler mHandler;
+	private int mPage = 1;
+	private int mPageSize;
+	
+	private UsersAdapter mAdapter;
+	private ArrayList<User> mUsers;
+	
+	private boolean isRequestOngoing;
+	private boolean noMoreUsers;
+	private boolean isStartedForResult;
 	
 	private EditText mFilter;
-	
-	private boolean isStartedForResult = false;
+	private Handler mHandler;
 	
 	@Override
 	protected void onCreate(Bundle inState) {
 		super.onCreate(inState);
-		setContentView(R.layout.tags); 
+		setContentView(R.layout.users);
+		
+		mPageSize = Const.getPageSize(this);
+		
+		mFilter = (EditText) findViewById(R.id.filter);
+		mHandler = new Handler();
+		
+		mUsers = new ArrayList<User>();
+		mAdapter = new UsersAdapter(this, mUsers);
+		
+		setListAdapter(mAdapter);
+		getListView().setOnScrollListener(onScroll);
+		getListView().setOnItemClickListener(onClick);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) isStartedForResult = true;
 		
 		Uri data = getIntent().getData();
 		mEndpoint = data.getQueryParameter("endpoint");
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-
-		mFilter = (EditText) findViewById(R.id.filter);
-		mHandler = new Handler();
-		
-		mPageSize = Const.getPageSize(this);
-		mPage = 1;
-		
-		mTags = new ArrayList<Tag>();
-		mAdapter = new TagsAdapter(this, mTags);
-		setListAdapter(mAdapter);
-		getListView().setOnScrollListener(onScroll);
-		getListView().setOnItemClickListener(onClick);
 		
 		if (inState != null) {
-			mTags.addAll((ArrayList<Tag>) inState.getSerializable("mTags"));
+			mUsers.addAll((ArrayList<User>) inState.getSerializable("mUsers"));
 			mFilter.setText(inState.getString("filter"));
 			mPage = inState.getInt("mPage");
 			mAdapter.notifyDataSetChanged();
 			getListView().setSelection(inState.getInt("scroll"));
 		}
+		
 		mFilter.addTextChangedListener(onTextChanged);
 		
-		if (inState == null) new GetTags().execute();
+		if (inState == null) new GetUsers().execute();
 	}
 	
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable("mTags", mTags);
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable("mUsers", mUsers);
 		outState.putString("filter", mFilter.getText().toString());
 		outState.putInt("mPage", mPage);
 		outState.putInt("scroll", getListView().getFirstVisiblePosition());
@@ -114,37 +116,14 @@ public class TagsActivity extends ListActivity {
 		public void run() {
 			if (isRequestOngoing) return;
 			mPage = 1;
-			noMoreTags = false;
-			mTags.clear();
+			noMoreUsers = false;
+			mUsers.clear();
 			mAdapter.notifyDataSetChanged();
-			new GetTags().execute();
+			new GetUsers().execute();
 		}
 	};
 	
-	private OnItemClickListener onClick = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			Tag t = mTags.get(position);
-			if (!isStartedForResult) {
-				Intent i = new Intent(TagsActivity.this, QuestionsActivity.class);
-				String uri = "droidstack://questions/all" +
-					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&tagged=" + Uri.encode(t.getName());
-				i.setData(Uri.parse(uri));
-				startActivity(i);
-			}
-			else {
-				Intent i = new Intent();
-				i.putExtra("name", t.getName());
-				i.putExtra("count", t.getCount());
-				setResult(RESULT_OK, i);
-				finish();
-			}
-		}
-	};
-	
-	private class GetTags extends AsyncTask<Void, Void, List<Tag>> {
+	private class GetUsers extends AsyncTask<Void, Void, List<User>> {
 		
 		private Exception e;
 		
@@ -153,14 +132,14 @@ public class TagsActivity extends ListActivity {
 			mAdapter.setLoading(true);
 			isRequestOngoing = true;
 		}
-		
+
 		@Override
-		protected List<Tag> doInBackground(Void... params) {
-			TagQuery query = new TagQuery();
-			query.setPageSize(mPageSize).setPage(mPage);
+		protected List<User> doInBackground(Void... params) {
+			UserQuery query = new UserQuery();
+			query.setPage(mPage).setPageSize(mPageSize);
 			query.setFilter(mFilter.getText().toString());
 			try {
-				return mAPI.listTags(query);
+				return mAPI.listUsers(query);
 			}
 			catch (Exception e) {
 				this.e = e;
@@ -169,12 +148,12 @@ public class TagsActivity extends ListActivity {
 		}
 		
 		@Override
-		protected void onPostExecute(List<Tag> result) {
+		protected void onPostExecute(List<User> result) {
 			isRequestOngoing = false;
 			if (e != null) {
-				new AlertDialog.Builder(TagsActivity.this)
+				new AlertDialog.Builder(UsersActivity.this)
 					.setTitle(R.string.title_error)
-					.setMessage(R.string.tags_fetch_error)
+					.setMessage(R.string.users_fetch_error)
 					.setCancelable(false)
 					.setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 						@Override
@@ -182,12 +161,12 @@ public class TagsActivity extends ListActivity {
 							finish();
 						}
 					}).create().show();
-				Log.e(Const.TAG, "Failed to get rep changes", e);
+				Log.e(Const.TAG, "Failed to get users", e);
 			}
 			else {
-				mTags.addAll(result);
+				mUsers.addAll(result);
 				if (result.size() < mPageSize) {
-					noMoreTags = true;
+					noMoreUsers = true;
 					mAdapter.setLoading(false);
 				}
 				mAdapter.notifyDataSetChanged();
@@ -195,6 +174,31 @@ public class TagsActivity extends ListActivity {
 		}
 		
 	}
+	
+	private OnItemClickListener onClick = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			User u = mUsers.get(position);
+			if (!isStartedForResult) {
+				Intent i = new Intent(UsersActivity.this, UserActivity.class);
+				String uri = "droidstack://user" +
+					"?endpoint=" + Uri.encode(mEndpoint) +
+					"&uid=" + u.getId();
+				i.setData(Uri.parse(uri));
+				startActivity(i);
+			}
+			else {
+				Intent i = new Intent();
+				i.putExtra("uid", u.getId());
+				i.putExtra("name", u.getDisplayName());
+				i.putExtra("rep", u.getReputation());
+				i.putExtra("emailHash", u.getEmailHash());
+				setResult(RESULT_OK, i);
+				finish();
+			}
+		}
+	};
 	
 	private OnScrollListener onScroll = new OnScrollListener() {
 		
@@ -206,9 +210,9 @@ public class TagsActivity extends ListActivity {
 		@Override
 		public void onScroll(AbsListView view, int firstVisibleItem,
 				int visibleItemCount, int totalItemCount) {
-			if (isRequestOngoing == false && noMoreTags == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
+			if (isRequestOngoing == false && noMoreUsers == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
 				mPage++;
-				new GetTags().execute();
+				new GetUsers().execute();
 			}
 		}
 	};

@@ -41,17 +41,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class SitesActivity extends ListActivity {
 	
+	private final static int CODE_PICK_USER = 1;
+	
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
 	private SitesAdapter mAdapter;
 	private File mIcons;
+	
+	private String mResultEndpoint;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -166,31 +169,14 @@ public class SitesActivity extends ListActivity {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		mSites.moveToPosition(info.position);
 		final String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
-		int userID = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
-		String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 		switch(item.getItemId()) {
 		case R.id.menu_set_user:
-			View dialogView = getLayoutInflater().inflate(R.layout.dialog_set_user, null);
-			final EditText userEntry = (EditText) dialogView.findViewById(R.id.user);
-			if (userID > 0) {
-				userEntry.setText(String.valueOf(userID));
-			}
-			new AlertDialog.Builder(this)
-				.setTitle(name)
-				.setView(dialogView)
-				.setNegativeButton(android.R.string.cancel, null)
-				.setPositiveButton(android.R.string.ok, new OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						try {
-							int userID = Integer.parseInt(userEntry.getText().toString());
-							new SetUserIDTask(endpoint, userID).execute();
-						}
-						catch (Exception e) {
-							mSitesDatabase.setUser(endpoint, 0, "");
-						}
-					}
-				}).create().show();
+			Intent i = new Intent(this, UsersActivity.class);
+			i.setAction(Intent.ACTION_PICK);
+			String uri = "droidstack://users?endpoint=" + endpoint;
+			i.setData(Uri.parse(uri));
+			mResultEndpoint = endpoint;
+			startActivityForResult(i, CODE_PICK_USER);
 			return true;
 		case R.id.menu_remove:
 			mSitesDatabase.removeSite(endpoint);
@@ -199,6 +185,24 @@ public class SitesActivity extends ListActivity {
 			return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch(requestCode) {
+		case CODE_PICK_USER:
+			if (resultCode == RESULT_OK) {
+				int uid = data.getIntExtra("uid", 0);
+				String name = data.getStringExtra("name");
+				mSitesDatabase.setUser(mResultEndpoint, uid, name);
+				mSites.requery();
+				mAdapter.notifyDataSetChanged();
+			}
+			break;
+		default:
+			super.onActivityResult(requestCode, resultCode, data);
+			break;
+		}
 	}
 	
 	@Override

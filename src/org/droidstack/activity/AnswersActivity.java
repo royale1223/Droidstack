@@ -55,8 +55,8 @@ public class AnswersActivity extends ListActivity {
 	private ArrayAdapter<CharSequence> mOrderAdapter;
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onCreate(Bundle inState) {
+		super.onCreate(inState);
 		setContentView(R.layout.answers);
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -76,14 +76,14 @@ public class AnswersActivity extends ListActivity {
 		}
 		
 		mAPI = new StackWrapper(mEndpoint, Const.APIKEY);
-		if (savedInstanceState == null) {
+		if (inState == null) {
 			mAnswers = new ArrayList<Answer>();
 		}
 		else {
-			mAnswers = (ArrayList<Answer>) savedInstanceState.getSerializable("mAnswers");
-			mPage = savedInstanceState.getInt("mPage");
-			mSort = savedInstanceState.getInt("mSort");
-			if (savedInstanceState.getBoolean("isAsc")) mOrder = Order.ASC;
+			mAnswers = (ArrayList<Answer>) inState.getSerializable("mAnswers");
+			mPage = inState.getInt("mPage");
+			mSort = inState.getInt("mSort");
+			if (inState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new AnswersAdapter(this, mAnswers);
@@ -95,8 +95,8 @@ public class AnswersActivity extends ListActivity {
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		if (savedInstanceState == null) getAnswers();
-		else getListView().setSelection(savedInstanceState.getInt("scroll"));
+		if (inState == null) getAnswers();
+		else getListView().setSelection(inState.getInt("scroll"));
 	}
 	
 	@Override
