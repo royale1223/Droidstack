@@ -16,9 +16,11 @@ import net.sf.stackwrap4j.query.UserQuestionQuery;
 
 import org.droidstack.R;
 import org.droidstack.adapter.QuestionsAdapter;
+import org.droidstack.adapter.TagAutoCompleteAdapter;
 import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,17 +28,23 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 
 public class QuestionsActivity extends ListActivity {
 	
@@ -109,15 +117,16 @@ public class QuestionsActivity extends ListActivity {
 		mSortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mTagged = new ArrayList<String>();
 		if (inState == null) {
 			mQuestions = new ArrayList<Question>();
 			if (data.getQueryParameter("tagged") != null) {
-				mTagged = new ArrayList<String>(Arrays.asList(data.getQueryParameter("tagged").split(" ")));
+				mTagged.addAll(Arrays.asList(data.getQueryParameter("tagged").split(" ")));
 			}
 		}
 		else {
 			mQuestions = (ArrayList<Question>) inState.getSerializable("mQuestions");
-			if (inState.get("mTagged") != null) mTagged = (ArrayList<String>) inState.get("mTagged");
+			if (inState.get("mTagged") != null) mTagged.addAll((ArrayList<String>) inState.get("mTagged"));
 			mPage = inState.getInt("mPage");
 			mSort = inState.getInt("mSort");
 			if (inState.getBoolean("isAsc")) mOrder = Order.ASC;
@@ -147,6 +156,9 @@ public class QuestionsActivity extends ListActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
 		if (mIsRequestOngoing == false) {
 	    	getMenuInflater().inflate(R.menu.questions, menu);
+	    	if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES) || mQueryType.equals(TYPE_SEARCH)) {
+	    		menu.findItem(R.id.menu_tags).setEnabled(false);
+	    	}
 	    	return true;
 		}
 		return false;
@@ -182,6 +194,49 @@ public class QuestionsActivity extends ListActivity {
 			});
     		b.setNegativeButton(android.R.string.cancel, null);
     		b.create().show();
+    		break;
+    	case R.id.menu_tags:
+    		final Dialog diag = new Dialog(this, android.R.style.Theme_Panel);
+    		diag.setContentView(R.layout.dialog_tags);
+    		
+    		WindowManager.LayoutParams lp = diag.getWindow().getAttributes();
+    		lp.width = ViewGroup.LayoutParams.FILL_PARENT;
+    		lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+    		lp.gravity = Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
+    		lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
+    		
+    		diag.getWindow().setAttributes(lp);
+    		diag.setCanceledOnTouchOutside(true);
+    		diag.show();
+    		
+    		final MultiAutoCompleteTextView taggedEdit = (MultiAutoCompleteTextView) diag.findViewById(R.id.tagged);
+    		taggedEdit.setTokenizer(new CommaTokenizer());
+    		taggedEdit.setAdapter(new TagAutoCompleteAdapter(this, mEndpoint));
+    		final ImageButton searchButton = (ImageButton) diag.findViewById(R.id.search);
+    		
+    		StringBuilder builder = new StringBuilder();
+    		for (String tag: mTagged) {
+    			builder.append(tag).append(", ");
+    		}
+    		taggedEdit.setText(builder.toString());
+    		
+    		searchButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					diag.dismiss();
+					String tagged = taggedEdit.getText().toString();
+					mTagged.clear();
+					for (String tag: tagged.split(",")) {
+						if (!tag.trim().equals("")) mTagged.add(tag.trim());
+					}
+					mQuestions.clear();
+					mAdapter.notifyDataSetChanged();
+					mNoMoreQuestions = false;
+					mPage = 1;
+					getQuestions();
+				}
+			});
+    		
     		break;
     	}
     	return false;

@@ -67,12 +67,12 @@ public class SiteActivity extends ListActivity {
 	public boolean onSearchRequested() {
 		// bits stolen from the Android source code ;)
 		Dialog diag = new Dialog(this, android.R.style.Theme_Panel);
-		diag.setContentView(R.layout.search_dialog);
+		diag.setContentView(R.layout.dialog_search);
 		
 		WindowManager.LayoutParams lp = diag.getWindow().getAttributes();
 		lp.width = ViewGroup.LayoutParams.FILL_PARENT;
 		lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-		lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+		lp.gravity = Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
 		lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 		
 		diag.getWindow().setAttributes(lp);
@@ -94,18 +94,18 @@ public class SiteActivity extends ListActivity {
 		searchButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				StringBuffer buf;
+				StringBuilder buf;
 				String intitle = intitleEdit.getText().toString();
 				String tagged = taggedEdit.getText().toString();
 				String nottagged = nottaggedEdit.getText().toString();
 				
-				buf = new StringBuffer();
+				buf = new StringBuilder();
 				for (String tag: tagged.split(",")) {
 					buf.append(tag.trim()).append(" ");
 				}
 				tagged = buf.toString().trim();
 				
-				buf = new StringBuffer();
+				buf = new StringBuilder();
 				for (String tag: nottagged.split(",")) {
 					buf.append(tag.trim()).append(" ");
 				}
@@ -130,7 +130,7 @@ public class SiteActivity extends ListActivity {
 	private OnItemClickListener onItemClicked = new OnItemClickListener() {
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Class activity = null;
+			Class<?> activity = null;
 			String uri = null;
 			switch(position) {
 			case POS_ALL:

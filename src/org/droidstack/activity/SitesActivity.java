@@ -170,7 +170,7 @@ public class SitesActivity extends ListActivity {
 		String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
 		switch(item.getItemId()) {
 		case R.id.menu_set_user:
-			View dialogView = getLayoutInflater().inflate(R.layout.set_user_dialog, null);
+			View dialogView = getLayoutInflater().inflate(R.layout.dialog_set_user, null);
 			final EditText userEntry = (EditText) dialogView.findViewById(R.id.user);
 			if (userID > 0) {
 				userEntry.setText(String.valueOf(userID));
