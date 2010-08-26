@@ -38,13 +38,13 @@ public final class Const {
 	
 	public static int getNewVersion(Context ctx) {
 		try {
-        	return ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionCode;
-        }
-        catch (Exception e) {
-        	// this can not happen.. seriously!!
-        	Log.e(Const.TAG, "wtf, package not found?!", e);
-        	return -1;
-        }
+	    	return ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), 0).versionCode;
+	    }
+		catch (Exception e) {
+			// this can not happen.. seriously!!
+			Log.e(Const.TAG, "wtf, package not found?!", e);
+			return -1;
+		}
 	}
 	
 	public static int getOldVersion(Context ctx) {
