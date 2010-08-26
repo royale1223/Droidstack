@@ -44,10 +44,14 @@ public class TagsActivity extends ListActivity {
 	
 	private EditText mFilter;
 	
+	private boolean isStartedForResult = false;
+	
 	@Override
 	protected void onCreate(Bundle inState) {
 		super.onCreate(inState);
 		setContentView(R.layout.tags); 
+		
+		if (Intent.ACTION_PICK.equals(getIntent().getAction())) isStartedForResult = true;
 		
 		Uri data = getIntent().getData();
 		mEndpoint = data.getQueryParameter("endpoint");
@@ -123,12 +127,21 @@ public class TagsActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			Tag t = mTags.get(position);
-			Intent i = new Intent(TagsActivity.this, QuestionsActivity.class);
-			String uri = "droidstack://questions/all" +
-				"?endpoint=" + Uri.encode(mEndpoint) +
-				"&tagged=" + Uri.encode(t.getName());
-			i.setData(Uri.parse(uri));
-			startActivity(i);
+			if (!isStartedForResult) {
+				Intent i = new Intent(TagsActivity.this, QuestionsActivity.class);
+				String uri = "droidstack://questions/all" +
+					"?endpoint=" + Uri.encode(mEndpoint) +
+					"&tagged=" + Uri.encode(t.getName());
+				i.setData(Uri.parse(uri));
+				startActivity(i);
+			}
+			else {
+				Intent i = new Intent();
+				i.putExtra("name", t.getName());
+				i.putExtra("count", t.getCount());
+				setResult(RESULT_OK, i);
+				finish();
+			}
 		}
 	};
 	
