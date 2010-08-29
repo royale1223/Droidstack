@@ -235,7 +235,7 @@ public class UserActivity extends ListActivity {
 			more.setData(Uri.parse(uri));
 			mAdapter.addItem(new MoreItem(more, this));
 		}
-		mAdapter.notifyDataSetChanged();
+		mAdapter.notifyDataSetInvalidated();
 	}
 	
 	private class AboutItem extends MultiItem {
@@ -252,24 +252,19 @@ public class UserActivity extends ListActivity {
 		}
 
 		@Override
-		public View bindView(View view, Context context) {
-			try {
-				Boolean b = (Boolean) view.getTag(R.layout.item_about);
-				if (b == null || b.booleanValue() == false) throw new NullPointerException();
-				((TextView)view).setText(Html.fromHtml(mAbout));
-				return view;
-			}
-			catch (Exception e) {
-				return newView(context, null);
-			}
+		public void bindView(View view, Context context) {
+			((TextView)view).setText(Html.fromHtml(mAbout));
 		}
 
 		@Override
 		public View newView(Context context, ViewGroup parent) {
 			TextView v = (TextView) View.inflate(context, R.layout.item_about, null);
-			v.setTag(R.layout.item_about, true);
-			v.setText(Html.fromHtml(mAbout));
 			return v;
+		}
+
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_about;
 		}
 		
 	}
@@ -284,7 +279,13 @@ public class UserActivity extends ListActivity {
 			TextView title;
 		}
 		
-		private void prepareView(Tag tag) {
+		public RepItem(Reputation rep) {
+			data = rep;
+		}
+
+		@Override
+		public void bindView(View view, Context context) {
+			Tag tag = (Tag) view.getTag();
 			if (data.getPositiveRep() > 0) {
 				tag.rep_pos.setVisibility(View.VISIBLE);
 				tag.rep_pos.setText("+" + data.getPositiveRep());
@@ -303,23 +304,6 @@ public class UserActivity extends ListActivity {
 			
 			tag.title.setText(data.getTitle());
 		}
-		
-		public RepItem(Reputation rep) {
-			data = rep;
-		}
-
-		@Override
-		public View bindView(View view, Context context) {
-			try {
-				Tag tag = (Tag) view.getTag(R.layout.item_rep);
-				if (tag == null) throw new NullPointerException();
-				prepareView(tag);
-				return view;
-			}
-			catch (Exception e) {
-				return newView(context, null);
-			}
-		}
 
 		@Override
 		public View newView(Context context, ViewGroup parent) {
@@ -328,8 +312,7 @@ public class UserActivity extends ListActivity {
 			tag.title = (TextView) v.findViewById(R.id.title);
 			tag.rep_pos = (TextView) v.findViewById(R.id.rep_pos);
 			tag.rep_neg = (TextView) v.findViewById(R.id.rep_neg);
-			v.setTag(R.layout.item_rep, tag);
-			prepareView(tag);
+			v.setTag(tag);
 			return v;
 		}
 		
@@ -349,6 +332,11 @@ public class UserActivity extends ListActivity {
 				i.setData(Uri.parse(uri));
 			}
 			startActivity(i);
+		}
+
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_rep;
 		}
 		
 	}
@@ -387,8 +375,10 @@ public class UserActivity extends ListActivity {
 				tags = (LinearLayout) v.findViewById(R.id.tags);
 			}
 		}
-		
-		private void prepareView(Tag t) {
+
+		@Override
+		public void bindView(View view, Context context) {
+			Tag t = (Tag) view.getTag();
 			TextView tagView;
 			Question q = mQuestion;
 			
@@ -432,24 +422,10 @@ public class UserActivity extends ListActivity {
 		}
 
 		@Override
-		public View bindView(View view, Context context) {
-			try {
-				Tag tag = (Tag) view.getTag(R.layout.item_question);
-				if (tag == null) throw new NullPointerException();
-				prepareView(tag);
-				return view;
-			}
-			catch (Exception e) {
-				return newView(context, null);
-			}
-		}
-
-		@Override
 		public View newView(Context context, ViewGroup parent) {
 			View v = View.inflate(context, R.layout.item_question, null);
 			Tag t = new Tag(v);
-			v.setTag(R.layout.item_question, t);
-			prepareView(t);
+			v.setTag(t);
 			return v;
 		}
 
@@ -461,6 +437,11 @@ public class UserActivity extends ListActivity {
 				"&qid=" + Uri.encode(String.valueOf(mQuestion.getPostId()));
 			i.setData(Uri.parse(uri));
 			startActivity(i);
+		}
+
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_question;
 		}
 		
 	}
@@ -485,8 +466,10 @@ public class UserActivity extends ListActivity {
 			context = ctx;
 			mResources = ctx.getResources();
 		}
-		
-		private void prepareView(Tag t) {
+
+		@Override
+		public void bindView(View view, Context context) {
+			Tag t = (Tag) view.getTag();
 			t.score.setText(String.valueOf(mAnswer.getScore()));
 			t.title.setText(mAnswer.getTitle());
 			
@@ -509,25 +492,11 @@ public class UserActivity extends ListActivity {
 		}
 
 		@Override
-		public View bindView(View view, Context context) {
-			try {
-				Tag tag = (Tag) view.getTag(R.layout.item_answer);
-				if (tag == null) throw new NullPointerException();
-				prepareView(tag);
-				return view;
-			}
-			catch (Exception e) {
-				return newView(context, null);
-			}
-		}
-
-		@Override
 		public View newView(Context context, ViewGroup parent) {
 			Tag t;
 			View v = View.inflate(context, R.layout.item_answer, null);
 			t = new Tag(v);
-			v.setTag(R.layout.item_answer, t);
-			prepareView(t);
+			v.setTag(t);
 			return v;
 		}
 		
@@ -539,6 +508,11 @@ public class UserActivity extends ListActivity {
 				"&qid=" + Uri.encode(String.valueOf(mAnswer.getQuestionId()));
 			i.setData(Uri.parse(uri));
 			startActivity(i);
+		}
+
+		@Override
+		public int getLayoutResource() {
+			return R.layout.item_answer;
 		}
 		
 	}

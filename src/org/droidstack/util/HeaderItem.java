@@ -22,22 +22,11 @@ public class HeaderItem extends MultiItem {
 	}
 	
 	public boolean isEnabled() { return false; }
-	
-	private void prepareView(Tag tag) {
-		tag.title.setText(mTitle);
-	}
 
 	@Override
-	public View bindView(View view, Context context) {
-		try {
-			Tag tag = (Tag) view.getTag(R.layout.item_header);
-			if (tag == null) throw new NullPointerException();
-			prepareView(tag);
-			return view;
-		}
-		catch (Exception e) {
-			return newView(context, null);
-		}
+	public void bindView(View view, Context context) {
+		Tag tag = (Tag) view.getTag();
+		tag.title.setText(mTitle);
 	}
 
 	@Override
@@ -45,9 +34,13 @@ public class HeaderItem extends MultiItem {
 		View v = View.inflate(context, R.layout.item_header, null);
 		Tag tag = new Tag();
 		tag.title = (TextView) v.findViewById(R.id.title);
-		v.setTag(R.layout.item_header, tag);
-		prepareView(tag);
+		v.setTag(tag);
 		return v;
+	}
+
+	@Override
+	public int getLayoutResource() {
+		return R.layout.item_header;
 	}
 
 }

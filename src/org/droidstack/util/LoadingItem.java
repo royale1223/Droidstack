@@ -15,16 +15,18 @@ public class LoadingItem extends MultiItem {
 	}
 
 	@Override
-	public View bindView(View view, Context context) {
-		if (view.getTag(R.layout.item_loading) != null) return view;
-		return newView(context, null);
+	public void bindView(View view, Context context) {
+		// do nothing
 	}
 
 	@Override
 	public View newView(Context context, ViewGroup parent) {
-		View v = View.inflate(context, R.layout.item_loading, null);
-		v.setTag(R.layout.item_loading, true);
-		return v;
+		return View.inflate(context, R.layout.item_loading, null);
+	}
+
+	@Override
+	public int getLayoutResource() {
+		return R.layout.item_loading;
 	}
 
 }

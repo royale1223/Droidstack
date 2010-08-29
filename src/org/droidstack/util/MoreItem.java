@@ -19,27 +19,23 @@ public class MoreItem extends MultiItem {
 	}
 
 	@Override
-	public View bindView(View view, Context context) {
-		try {
-			Boolean b = (Boolean) view.getTag(R.layout.item_more);
-			if (b == null || b.booleanValue() == false) throw new NullPointerException();
-			return view;
-		}
-		catch (Exception e) {
-			return newView(context, null);
-		}
+	public void bindView(View view, Context context) {
+		// nothing to do
 	}
 
 	@Override
 	public View newView(Context context, ViewGroup parent) {
-		View v = View.inflate(context, R.layout.item_more, null);
-		v.setTag(R.layout.item_more, true);
-		return v;
+		return View.inflate(context, R.layout.item_more, null);
 	}
 	
 	@Override
 	public void onClick() {
 		mContext.startActivity(mIntent);
+	}
+
+	@Override
+	public int getLayoutResource() {
+		return R.layout.item_more;
 	}
 
 }
