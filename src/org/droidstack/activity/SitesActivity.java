@@ -29,7 +29,10 @@ import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.NetworkInfo.State;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -59,17 +62,22 @@ public class SitesActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		// requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.sites);
+
+        if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+        	externalMediaError();
+        }
+        
+        final ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        final NetworkInfo info = cm.getActiveNetworkInfo();
+        if (info == null || info.getState() != State.CONNECTED) {
+        	networkError();
+        }
         
         HttpClient.setTimeout(Const.NET_TIMEOUT);
         mSitesDatabase = new SitesDatabase(this);
         mSites = mSitesDatabase.getSites();
         startManagingCursor(mSites);
-        
-        if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-        	externalMediaError();
-        }
         
         mIcons = new File(Environment.getExternalStorageDirectory(), "/Android/data/org.droidstack/icons/");
         if (mIcons.mkdirs()) {
@@ -115,6 +123,20 @@ public class SitesActivity extends ListActivity {
 		.setTitle(R.string.title_error)
 		.setCancelable(false)
 		.setMessage(R.string.no_sd_error)
+		.setNeutralButton(android.R.string.ok, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+			}
+		})
+		.create().show();
+    }
+    
+    private void networkError() {
+    	new AlertDialog.Builder(this)
+		.setTitle(R.string.title_error)
+		.setCancelable(false)
+		.setMessage(R.string.no_network_error)
 		.setNeutralButton(android.R.string.ok, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {

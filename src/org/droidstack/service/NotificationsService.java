@@ -18,11 +18,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.NetworkInfo.State;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -43,6 +45,15 @@ public class NotificationsService extends Service {
 	@Override
 	public void onCreate() {
 		Log.d(Const.TAG, "NotificationService started");
+		
+		final ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        final NetworkInfo info = cm.getActiveNetworkInfo();
+        if (info == null || info.getState() != State.CONNECTED) {
+        	Log.d(Const.TAG, "NotificationsService: no network connection");
+        	stopSelf();
+        	return;
+        }
+		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mInterval = Integer.parseInt(mPreferences.getString(Const.PREF_NOTIF_INTERVAL, Const.DEF_NOTIF_INTERVAL));
