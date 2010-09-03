@@ -53,20 +53,10 @@
 			android:id="@+id/previous"
 			android:onClick="changePost"
 		/>
-		<ImageButton
-			android:layout_width="48dip"
-			android:layout_height="48dip"
-			android:layout_toLeftOf="@id/previous"
-			android:layout_centerVertical="true"
-			android:src="@drawable/browser"
-			android:textAppearance="@android:style/TextAppearance.Large"
-			android:id="@+id/browse"
-			android:onClick="browseTo"
-		/>
 		<ProgressBar
 			android:layout_width="32dp"
 			android:layout_height="32dp"
-			android:layout_toLeftOf="@id/browse"
+			android:layout_toLeftOf="@id/previous"
 			android:layout_centerVertical="true"
 			android:layout_marginRight="5dp"
 			android:indeterminateOnly="true"

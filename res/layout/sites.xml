@@ -4,14 +4,6 @@
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
 >
-	<TextView
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:id="@android:id/empty"
-		style="@style/EmptyList"
-		android:text="@string/no_sites"
-		android:visibility="gone"
-	/>
 	<ListView
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"

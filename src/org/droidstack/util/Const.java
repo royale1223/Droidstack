@@ -1,9 +1,12 @@
 package org.droidstack.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import android.content.Context;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -31,6 +34,9 @@ public final class Const {
 	public final static String PREF_FONTSIZE = "fontsize";
 	public final static String DEF_FONTSIZE = "1em";
 	
+	public final static String PREF_SITES_LASTRUN = "sites_lastrun";
+	public final static String PREF_SITES_LAST_ICON_REFRESH = "sites_last_icon_refresh";
+	
 	public static int getPageSize(Context ctx) {
 		String items = PreferenceManager.getDefaultSharedPreferences(ctx).getString(PREF_PAGESIZE, DEF_PAGESIZE);
 		return Integer.parseInt(items);
@@ -54,6 +60,21 @@ public final class Const {
 	public static String longFormatRep(int rep) {
 		NumberFormat formatter = new DecimalFormat(",000");
 		return formatter.format(rep);
+	}
+	
+	public static File getIconsDir() {
+		File dir = new File(Environment.getExternalStorageDirectory(), "/Android/data/org.droidstack/icons/");
+		if (dir.mkdirs()) {
+			File noMedia = new File(dir, ".nomedia");
+			try {
+				noMedia.createNewFile();
+			}
+			catch (IOException e) {
+				Log.i(TAG, "Could not create .nomedia file. Watch out for site icons popping up in Gallery");
+			}
+		}
+		if (!dir.exists()) return null;
+		return dir;
 	}
 	
 }

@@ -14,10 +14,11 @@ public class SitesDatabase {
 	public static final String KEY_NAME = "name";
 	public static final String KEY_UID = "uid";
 	public static final String KEY_UNAME = "user_name";
+	public static final String KEY_BOOKMARKED = "bookmarked";
 	
 	private static final String DATABASE_NAME = "stackexchange";
 	private static final String TABLE_NAME = "sites";
-	private static final int VERSION = 7;
+	private static final int VERSION = 8;
 	
 	private final SitesOpenHelper mOpenHelper;
 	private final SQLiteDatabase mDatabase;
@@ -33,9 +34,25 @@ public class SitesDatabase {
 		values.put(KEY_NAME, name);
 		values.put(KEY_UID, userID);
 		values.put(KEY_UNAME, uname);
-		
-		long r = mDatabase.replace(TABLE_NAME, null, values);
-		return r;
+		values.put(KEY_BOOKMARKED, 0);
+		try {
+			return mDatabase.insertOrThrow(TABLE_NAME, null, values);
+		}
+		catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	public int bookmarkSite(String endpoint) {
+		ContentValues cv = new ContentValues(1);
+		cv.put(KEY_BOOKMARKED, 1);
+		return mDatabase.update(TABLE_NAME, cv, KEY_ENDPOINT + " = ?", new String[] { endpoint });
+	}
+	
+	public int removeBookmark(String endpoint) {
+		ContentValues cv = new ContentValues(1);
+		cv.put(KEY_BOOKMARKED, 0);
+		return mDatabase.update(TABLE_NAME, cv, KEY_ENDPOINT + " = ?", new String[] { endpoint });
 	}
 	
 	public int removeSite(String endpoint) {
@@ -46,37 +63,12 @@ public class SitesDatabase {
 		return query(null, null, null);
 	}
 	
-	public int getUserID(String endpoint) {
-		Cursor c = query(KEY_ENDPOINT + " = ?", new String[] { endpoint }, new String[] { KEY_UID });
-		if (c.getCount() == 0) {
-			return 0;
-		}
-		c.moveToFirst();
-		int userID = c.getInt(0);
-		c.close();
-		return userID;
+	public Cursor getBookmarkedSites() {
+		return query(KEY_BOOKMARKED + " = ?", new String[] { "1" }, null);
 	}
 	
-	public String getUserName(String endpoint) {
-		Cursor c = query(KEY_ENDPOINT + " = ?", new String[] { endpoint }, new String[] { KEY_UNAME });
-		if (c.getCount() == 0) {
-			return null;
-		}
-		c.moveToFirst();
-		String name = c.getString(0);
-		c.close();
-		return name;
-	}
-	
-	public String getName(String endpoint) {
-		Cursor c = query(KEY_ENDPOINT + " = ?", new String[] { endpoint }, new String[] { KEY_NAME });
-		if (c.getCount() == 0) {
-			return null;
-		}
-		c.moveToFirst();
-		String name = c.getString(0);
-		c.close();
-		return name;
+	public Cursor getOtherSites() {
+		return query(KEY_BOOKMARKED + " = ?", new String[] { "0" }, null);
 	}
 	
 	public int setUser(String endpoint, long userID, String userName) {
@@ -100,7 +92,12 @@ public class SitesDatabase {
 			KEY_ENDPOINT + " TEXT PRIMARY KEY, " +
 			KEY_NAME + " TEXT, " +
 			KEY_UID + " NUMERIC, " +
-			KEY_UNAME + " TEXT)";
+			KEY_UNAME + " TEXT, " +
+			KEY_BOOKMARKED + " INTEGER)";
+		
+		private static final String UPGRADE_7_TO_8 =
+			"ALTER TABLE " + TABLE_NAME + " ADD COLUMN " +
+			KEY_BOOKMARKED + " INTEGER";
 		
 		public SitesOpenHelper(Context context) {
 			super(context, DATABASE_NAME, null, VERSION);
@@ -113,8 +110,16 @@ public class SitesDatabase {
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-			onCreate(db);
+			if (oldVersion == 7 && newVersion == 8) {
+				db.execSQL(UPGRADE_7_TO_8);
+				ContentValues cv = new ContentValues(1);
+				cv.put(KEY_BOOKMARKED, 1);
+				db.update(TABLE_NAME, cv, null, null);
+			}
+			else {
+				db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+				onCreate(db);
+			}
 		}
 	}
 	

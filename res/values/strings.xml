@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Droidstack</string>
-    <string name="menu_add_site">Add site</string>
+    <string name="bookmarked">Bookmarked Sites</string>
+    <string name="all_sites">All Sites</string>
+    <string name="menu_settings">Settings</string>
     <string name="menu_set_user">Pick user</string>
-    <string name="menu_remove">Remove</string>
-    <string name="hint_add_site">stackoverflow.com</string>
-    <string name="hint_add_user">User ID</string>
-    <string name="no_sites">"You have not added any StackExchange sites yet. To do so, press <b>Menu</b> and select <b>Add site</b>."</string>
-    <string name="user_actions">User-specific actions</string>
-    <string name="no_userid">You need to set a user ID for this site in order to use this feature</string>
+    <string name="menu_add_bookmark">Add bookmark</string>
+    <string name="menu_remove_bookmark">Remove bookmark</string>
+    <string name="menu_open_browser">Open in browser</string>
+    <string name="menu_share">Share</string>
+    <string name="no_userid">You need to pick a user for this site. Go back and long-click on a site to do that.</string>
     <string name="title_error">Error</string>
     <string name="title_menu_tag">Show questions tagged:</string>
     <string name="fetch_sites_error">An error occurred while retrieving the list of StackExchange sites. Please try again in a few moments.</string>
@@ -35,21 +36,13 @@
     <string name="dialog_sortby">Sort By</string>
     <string name="dialog_order">Order</string>
     <string name="loading">Loading...</string>
-    <string name="title_all_questions">All Questions</string>
-    <string name="title_all_unanswered">Unanswered Questions</string>
-    <string name="title_search_results">Search Results</string>
-    <string name="title_user_questions">"%s's Questions"</string>
-    <string name="title_user_favorites">"%s's Favorites"</string>
-    <string name="title_user_answers">"%s's Answers"</string>
     <string name="number_of_answers">%s Answers</string>
-    <string name="search_title">Search</string>
     <string name="search_intitle">Search in title</string>
     <string name="search_tagged">Tagged with</string>
     <string name="search_nottagged">Not tagged with</string>
-    <string name="search_separate_tags">Separate tags with a space</string>
+    <string name="search_separate_tags">Separate tags with a comma</string>
     <string name="intent_questions">View questions</string>
     <string name="intent_answers">View answers</string>
     <string name="intent_user">View user profile</string>
     <string name="intent_rep">View rep changes</string>
-    <string name="menu_settings">Settings</string>
 </resources>

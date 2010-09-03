@@ -31,6 +31,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -153,6 +155,33 @@ public class QuestionActivity extends Activity {
 			return true;
 		}
 		
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (isRequestOngoing) return false;
+		getMenuInflater().inflate(R.menu.question, menu);
+    	return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		//HACK it would be better if api can provide a browsable URL
+		//but right now it looks like it lacks the feature.
+		String questionUrl = "http://" + Uri.parse(mEndpoint).getHost().replace(API_PREFIX, "");
+		questionUrl += "/questions/" + mQuestion.getPostId();
+		switch(item.getItemId()) {
+		case R.id.menu_open:
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(questionUrl)));
+			return true;
+		case R.id.menu_share:
+			Intent i = new Intent(Intent.ACTION_SEND);
+			i.setType("text/plain");
+			i.putExtra(Intent.EXTRA_TEXT, questionUrl);
+			startActivity(Intent.createChooser(i, getString(R.string.menu_share)));
+			return true;
+		}
+		return false;
 	}
 	
 	private void prepareViews() {
@@ -324,14 +353,6 @@ public class QuestionActivity extends Activity {
 			updateView();
 			break;
 		}
-	}
-	
-	public void browseTo(View target){
-		//HACK it would be better if api can provide a browsable URL
-		//but right now it looks like it lacks the feature.
-		String questionUrl = "http://" + Uri.parse(mEndpoint).getHost().replace(API_PREFIX, "");
-		questionUrl += "/questions/" + mQuestion.getPostId();
-		startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(questionUrl)));
 	}
 	
 	private class FetchQuestionTask extends AsyncTask<Void, Void, Void> {

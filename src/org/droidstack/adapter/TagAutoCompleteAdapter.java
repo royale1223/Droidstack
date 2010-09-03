@@ -60,11 +60,9 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 	private TagFilter filter;
 	private Context context;
 	
-	private String endpoint;
 	private StackWrapper mAPI;
 	
 	public TagAutoCompleteAdapter(Context context, String endpoint) {
-		this.endpoint = endpoint;
 		this.context = context;
 		
 		mAPI = new StackWrapper(endpoint, Const.APIKEY);
