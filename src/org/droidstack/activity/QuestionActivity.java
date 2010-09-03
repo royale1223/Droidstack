@@ -177,6 +177,7 @@ public class QuestionActivity extends Activity {
 		case R.id.menu_share:
 			Intent i = new Intent(Intent.ACTION_SEND);
 			i.setType("text/plain");
+			i.putExtra(Intent.EXTRA_SUBJECT, mQuestion.getTitle());
 			i.putExtra(Intent.EXTRA_TEXT, questionUrl);
 			startActivity(Intent.createChooser(i, getString(R.string.menu_share)));
 			return true;
@@ -325,15 +326,12 @@ public class QuestionActivity extends Activity {
 			mNextButton.setEnabled(false);
 			if (mCurAnswer > -1) mPreviousButton.setEnabled(true);
 			if (mCurAnswer < mAnswerCount-1) mNextButton.setEnabled(true);
-			mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
-			/*
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
+				mAnswerCountView.setText((mCurAnswer+1) + "\nof\n" + mAnswerCount);
 			}
 			else {
 				mAnswerCountView.setText((mCurAnswer+1) + "/" + mAnswerCount);
 			}
-			*/
 		}
 	}
 	

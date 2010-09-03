@@ -42,6 +42,7 @@
 			android:textAppearance="@android:style/TextAppearance.Large"
 			android:id="@+id/next"
 			android:onClick="changePost"
+			android:enabled="false"
 		/>
 		<Button
 			android:layout_width="48dip"
@@ -52,6 +53,7 @@
 			android:textAppearance="@android:style/TextAppearance.Large"
 			android:id="@+id/previous"
 			android:onClick="changePost"
+			android:enabled="false"
 		/>
 		<ProgressBar
 			android:layout_width="32dp"
