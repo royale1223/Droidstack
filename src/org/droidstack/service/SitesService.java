@@ -166,7 +166,7 @@ public class SitesService extends Service {
 			// full refresh ~ every week
 			if (mPreferences.getLong(Const.PREF_SITES_LAST_ICON_REFRESH, -1) < now - 7*24*60*60) {
 				fullRefresh = true;
-				mPreferences.edit().putLong(Const.PREF_SITES_LAST_ICON_REFRESH, now);
+				mPreferences.edit().putLong(Const.PREF_SITES_LAST_ICON_REFRESH, now).commit();
 			}
 			File iconsDir = Const.getIconsDir();
 			if (iconsDir == null) return null;
