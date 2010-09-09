@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 public class AnswersAdapter extends BaseAdapter {
 	
+	private String title;
 	private Context context;
 	private List<Answer> answers;
 	private Resources resources;
@@ -42,14 +43,38 @@ public class AnswersAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 	
+	public void setTitle(String title) {
+		if (title.equals(this.title)) return;
+		this.title = title;
+		notifyDataSetChanged();
+	}
+	
 	@Override
 	public int getCount() {
-		if (loading) return answers.size()+1;
-		else return answers.size();
+		int count = answers.size();
+		if (loading) count++;
+		if (title != null) count++;
+		return count;
 	}
-
+	
+	@Override
+	public int getViewTypeCount() {
+		return 1;
+	}
+	
+	@Override
+	public int getItemViewType(int position) {
+		if (title != null) {
+			if (position == 0) return IGNORE_ITEM_VIEW_TYPE;
+			position--;
+		}
+		if (position == answers.size()) return IGNORE_ITEM_VIEW_TYPE;
+		return 0;
+	}
+	
 	@Override
 	public Object getItem(int position) {
+		if (title != null) position--;
 		try {
 			return answers.get(position);
 		}
@@ -60,6 +85,7 @@ public class AnswersAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
+		if (title != null) position--;
 		try {
 			return answers.get(position).getPostId();
 		}
@@ -70,20 +96,32 @@ public class AnswersAdapter extends BaseAdapter {
 	
 	@Override
 	public boolean areAllItemsEnabled() {
-		if (loading) return false;
+		if (loading || title != null) return false;
 		else return true;
 	}
 
 	@Override
 	public boolean isEnabled(int position) {
+		if (title != null) {
+			if (position == 0) return false;
+			position--;
+		}
 		if (position == answers.size()) return false;
 		return true;
 	}
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
+		if (title != null) {
+			if (position == 0) {
+				View v = View.inflate(context, R.layout.item_header, null);
+				((TextView)v.findViewById(R.id.title)).setText(title);
+				return v;
+			}
+			position--;
+		}
 		if (position == answers.size()) return View.inflate(context, R.layout.item_loading, null);
-		Answer a = (Answer) getItem(position);
+		Answer a = answers.get(position);
 		View v;
 		Tag t;
 		

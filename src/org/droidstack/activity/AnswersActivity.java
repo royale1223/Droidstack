@@ -67,11 +67,10 @@ public class AnswersActivity extends ListActivity {
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
 		mEndpoint = data.getQueryParameter("endpoint");
+		mUserName = data.getQueryParameter("uname");
 		
 		if (mQueryType.equals(TYPE_USER)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
-			mUserName = data.getQueryParameter("uname");
-			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.a_sort_user, android.R.layout.simple_spinner_item);
 		}
 		
@@ -97,6 +96,32 @@ public class AnswersActivity extends ListActivity {
 		
 		if (inState == null) getAnswers();
 		else getListView().setSelection(inState.getInt("scroll"));
+		
+		setNiceTitle();
+	}
+	
+	@Override
+	public void setTitle(CharSequence title) {
+		if (mAdapter == null) return;
+		mAdapter.setTitle(title.toString());
+	}
+	
+	@Override
+	public void setTitle(int titleId) {
+		setTitle(getString(titleId));
+	}
+	
+	private void setNiceTitle() {
+		StringBuilder b = new StringBuilder();
+		if (mQueryType.equals(TYPE_USER)) {
+			if (mUserName != null) {
+				if (mUserName.endsWith("s")) b.append(mUserName).append("' answers");
+				else b.append(mUserName).append("'s answers");
+			}
+			else b.append("User answers");
+		}
+		
+		setTitle(b);
 	}
 	
 	@Override

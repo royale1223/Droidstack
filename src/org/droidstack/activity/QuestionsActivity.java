@@ -57,10 +57,10 @@ public class QuestionsActivity extends ListActivity {
 	private StackWrapper mAPI;
 	private String mQueryType;
 	private String mEndpoint;
+	private String mUserName;
 	private int mPage = 1;
 	private int mPageSize;
 	private int mUserID = 0;
-	private String mUserName;
 	private String mInTitle;
 	private ArrayList<String> mTagged;
 	private String mNotTagged;
@@ -88,6 +88,7 @@ public class QuestionsActivity extends ListActivity {
 		Uri data = getIntent().getData();
 		mQueryType = data.getPathSegments().get(0);
 		mEndpoint = data.getQueryParameter("endpoint");
+		mUserName = data.getQueryParameter("uname");
 		
 		if (mQueryType.equals(TYPE_ALL)) {
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_all, android.R.layout.simple_spinner_item);
@@ -97,14 +98,10 @@ public class QuestionsActivity extends ListActivity {
 		}
 		else if (mQueryType.equals(TYPE_USER)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
-			mUserName = data.getQueryParameter("uname");
-			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_user, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_FAVORITES)) {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
-			mUserName = data.getQueryParameter("uname");
-			if (mUserName == null) mUserName = "#" + String.valueOf(mUserID);
 			mSortAdapter = ArrayAdapter.createFromResource(this, R.array.q_sort_favorites, android.R.layout.simple_spinner_item);
 		}
 		else if (mQueryType.equals(TYPE_SEARCH)) {
@@ -133,6 +130,7 @@ public class QuestionsActivity extends ListActivity {
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new QuestionsAdapter(this, mQuestions, onTagClicked);
+		mAdapter.setTitle("Questions");
 		setListAdapter(mAdapter);
 		getListView().setOnItemClickListener(onQuestionClicked);
 		getListView().setOnScrollListener(onQuestionsScrolled);
@@ -140,6 +138,54 @@ public class QuestionsActivity extends ListActivity {
 		if (inState == null) getQuestions();
 		else getListView().setSelection(inState.getInt("scroll"));
 		
+		setNiceTitle();
+	}
+	
+	@Override
+	public void setTitle(CharSequence title) {
+		if (mAdapter == null) return;
+		mAdapter.setTitle(title.toString());
+	}
+	
+	@Override
+	public void setTitle(int titleId) {
+		setTitle(getString(titleId));
+	}
+	
+	private void setNiceTitle() {
+		StringBuilder b = new StringBuilder();
+		if (mQueryType.equals(TYPE_ALL)) {
+			b.append("All questions");
+		}
+		else if (mQueryType.equals(TYPE_UNANSWERED)) {
+			b.append("Unanswered questions");
+		}
+		else if (mQueryType.equals(TYPE_USER)) {
+			if (mUserName != null) {
+				if (mUserName.endsWith("s")) b.append(mUserName).append("' questions");
+				else b.append(mUserName).append("'s questions");
+			}
+			else b.append("User questions");
+		}
+		else if (mQueryType.equals(TYPE_FAVORITES)) {
+			if (mUserName != null) {
+				if (mUserName.endsWith("s")) b.append(mUserName).append("' favorites");
+				else b.append(mUserName).append("'s favorites");
+			}
+			else b.append("User favorites");
+		}
+		else if (mQueryType.equals(TYPE_SEARCH)) {
+			b.append("Search results \"").append(mInTitle).append("\"");
+		}
+		
+		if (mTagged != null && mTagged.size() > 0) {
+			b.append(" tagged ").append(mTagged.get(0));
+			for (int i=1; i < mTagged.size(); i++) {
+				b.append(", ").append(mTagged.get(i));
+			}
+		}
+		
+		setTitle(b);
 	}
 	
 	@Override
@@ -416,6 +462,7 @@ public class QuestionsActivity extends ListActivity {
 					mAdapter.notifyDataSetChanged();
 					mAdapter.setLoading(true);
 					getQuestions();
+					setNiceTitle();
 				}
 			});
 			b.create().show();
