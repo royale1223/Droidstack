@@ -6,11 +6,9 @@ import java.util.List;
 import net.sf.stackwrap4j.entities.Question;
 
 import org.droidstack.R;
-import org.droidstack.util.Const;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -30,19 +28,23 @@ public class QuestionsAdapter extends BaseAdapter {
 	
 	private class Tag {
 		public TextView title;
-		public TextView score;
+		public TextView votes;
+		public TextView votesLabel;
 		public TextView answers;
-		public TextView answerLabel;
+		public TextView answersLabel;
 		public TextView views;
+		public TextView viewsLabel;
 		public TextView bounty;
 		public LinearLayout tags;
 		
 		public Tag(View v) {
 			title = (TextView) v.findViewById(R.id.title);
-			score = (TextView) v.findViewById(R.id.votesN);
+			votes = (TextView) v.findViewById(R.id.votesN);
+			votesLabel = (TextView) v.findViewById(R.id.votesL);
 			answers = (TextView) v.findViewById(R.id.answersN);
-			answerLabel = (TextView) v.findViewById(R.id.answersL);
+			answersLabel = (TextView) v.findViewById(R.id.answersL);
 			views = (TextView) v.findViewById(R.id.viewsN);
+			viewsLabel = (TextView) v.findViewById(R.id.viewsL);
 			bounty = (TextView) v.findViewById(R.id.bounty);
 			tags = (LinearLayout) v.findViewById(R.id.tags);
 		}
@@ -157,9 +159,15 @@ public class QuestionsAdapter extends BaseAdapter {
 		}
 		
 		h.title.setText(q.getTitle());
-		h.score.setText(String.valueOf(q.getScore()));
+		h.votes.setText(String.valueOf(q.getScore()));
+		if (q.getScore() == 1) h.votesLabel.setText(R.string.vote);
+		else h.votesLabel.setText(R.string.votes);
 		h.answers.setText(String.valueOf(q.getAnswerCount()));
+		if (q.getAnswerCount() == 1) h.answersLabel.setText(R.string.answer);
+		else h.answersLabel.setText(R.string.answers);
 		h.views.setText(String.valueOf(q.getViewCount()));
+		if (q.getViewCount() == 1) h.viewsLabel.setText(R.string.view);
+		else h.viewsLabel.setText(R.string.views);
 		
 		h.bounty.setVisibility(View.GONE);
 		if (q.getBountyAmount() > 0 && new Date(q.getBountyClosesDate()).before(new Date())) {
@@ -177,20 +185,20 @@ public class QuestionsAdapter extends BaseAdapter {
 		
 		if (q.getAnswerCount() == 0) {
 			h.answers.setBackgroundResource(R.color.no_answers_bg);
-			h.answerLabel.setBackgroundResource(R.color.no_answers_bg);
+			h.answersLabel.setBackgroundResource(R.color.no_answers_bg);
 			h.answers.setTextColor(resources.getColor(R.color.no_answers_text));
-			h.answerLabel.setTextColor(resources.getColor(R.color.no_answers_text));
+			h.answersLabel.setTextColor(resources.getColor(R.color.no_answers_text));
 		}
 		else {
 			h.answers.setBackgroundResource(R.color.some_answers_bg);
-			h.answerLabel.setBackgroundResource(R.color.some_answers_bg);
+			h.answersLabel.setBackgroundResource(R.color.some_answers_bg);
 			if (q.getAcceptedAnswerId() > 0) {
 				h.answers.setTextColor(resources.getColor(R.color.answer_accepted_text));
-				h.answerLabel.setTextColor(resources.getColor(R.color.answer_accepted_text));
+				h.answersLabel.setTextColor(resources.getColor(R.color.answer_accepted_text));
 			}
 			else {
 				h.answers.setTextColor(resources.getColor(R.color.some_answers_text));
-				h.answerLabel.setTextColor(resources.getColor(R.color.some_answers_text));
+				h.answersLabel.setTextColor(resources.getColor(R.color.some_answers_text));
 			}
 		}
 		

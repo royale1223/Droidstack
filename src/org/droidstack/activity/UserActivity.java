@@ -358,19 +358,23 @@ public class UserActivity extends ListActivity {
 		
 		private class Tag {
 			public TextView title;
-			public TextView score;
+			public TextView votes;
+			public TextView votesLabel;
 			public TextView answers;
-			public TextView answerLabel;
+			public TextView answersLabel;
 			public TextView views;
+			public TextView viewsLabel;
 			public TextView bounty;
 			public LinearLayout tags;
 			
 			public Tag(View v) {
 				title = (TextView) v.findViewById(R.id.title);
-				score = (TextView) v.findViewById(R.id.votesN);
+				votes = (TextView) v.findViewById(R.id.votesN);
+				votesLabel = (TextView) v.findViewById(R.id.votesL);
 				answers = (TextView) v.findViewById(R.id.answersN);
-				answerLabel = (TextView) v.findViewById(R.id.answersL);
+				answersLabel = (TextView) v.findViewById(R.id.answersL);
 				views = (TextView) v.findViewById(R.id.viewsN);
+				viewsLabel = (TextView) v.findViewById(R.id.viewsL);
 				bounty = (TextView) v.findViewById(R.id.bounty);
 				tags = (LinearLayout) v.findViewById(R.id.tags);
 			}
@@ -383,9 +387,15 @@ public class UserActivity extends ListActivity {
 			Question q = mQuestion;
 			
 			t.title.setText(q.getTitle());
-			t.score.setText(String.valueOf(q.getScore()));
+			t.votes.setText(String.valueOf(q.getScore()));
+			if (q.getScore() == 1) t.votesLabel.setText(R.string.vote);
+			else t.votesLabel.setText(R.string.votes);
 			t.answers.setText(String.valueOf(q.getAnswerCount()));
+			if (q.getAnswerCount() == 1) t.answersLabel.setText(R.string.answer);
+			else t.answersLabel.setText(R.string.answers);
 			t.views.setText(String.valueOf(q.getViewCount()));
+			if (q.getViewCount() == 1) t.viewsLabel.setText(R.string.view);
+			else t.viewsLabel.setText(R.string.views);
 			
 			t.bounty.setVisibility(View.GONE);
 			if (q.getBountyAmount() > 0 && new Date(q.getBountyClosesDate()).before(new Date())) {
@@ -403,20 +413,20 @@ public class UserActivity extends ListActivity {
 			
 			if (q.getAnswerCount() == 0) {
 				t.answers.setBackgroundResource(R.color.no_answers_bg);
-				t.answerLabel.setBackgroundResource(R.color.no_answers_bg);
+				t.answersLabel.setBackgroundResource(R.color.no_answers_bg);
 				t.answers.setTextColor(mResources.getColor(R.color.no_answers_text));
-				t.answerLabel.setTextColor(mResources.getColor(R.color.no_answers_text));
+				t.answersLabel.setTextColor(mResources.getColor(R.color.no_answers_text));
 			}
 			else {
 				t.answers.setBackgroundResource(R.color.some_answers_bg);
-				t.answerLabel.setBackgroundResource(R.color.some_answers_bg);
+				t.answersLabel.setBackgroundResource(R.color.some_answers_bg);
 				if (q.getAcceptedAnswerId() > 0) {
 					t.answers.setTextColor(mResources.getColor(R.color.answer_accepted_text));
-					t.answerLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));
+					t.answersLabel.setTextColor(mResources.getColor(R.color.answer_accepted_text));
 				}
 				else {
 					t.answers.setTextColor(mResources.getColor(R.color.some_answers_text));
-					t.answerLabel.setTextColor(mResources.getColor(R.color.some_answers_text));
+					t.answersLabel.setTextColor(mResources.getColor(R.color.some_answers_text));
 				}
 			}
 		}

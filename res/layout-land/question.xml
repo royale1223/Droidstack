@@ -33,7 +33,7 @@
 			android:id="@+id/answer_count"
 		/>
 		<TextView
-			android:text="@string/answers"
+			android:id="@+id/answer_label"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_centerHorizontal="true"

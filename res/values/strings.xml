@@ -30,13 +30,15 @@
     <string name="no_answers">No answers here</string>
     <string name="no_repchanges">No reputation changes</string>
     <string name="votes">votes</string>
+    <string name="vote">vote</string>
     <string name="answers">answers</string>
+    <string name="answer">answer</string>
     <string name="views">views</string>
+    <string name="view">view</string>
     <string name="menu_sort">Sorting</string>
     <string name="dialog_sortby">Sort By</string>
     <string name="dialog_order">Order</string>
     <string name="loading">Loading...</string>
-    <string name="number_of_answers">%s Answers</string>
     <string name="search_intitle">Search in title</string>
     <string name="search_tagged">Tagged with</string>
     <string name="search_nottagged">Not tagged with</string>

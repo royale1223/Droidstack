@@ -6,13 +6,12 @@
 	android:padding="5dip"
 	android:orientation="vertical"
 	android:descendantFocusability="blocksDescendants"
-	>
-	
+>
 	<HorizontalScrollView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:scrollbars="none"
-		>
+	>
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -21,50 +20,50 @@
 			android:paddingRight="5dip"
 			android:background="@drawable/arrow"
 			android:gravity="center_vertical"
-			>
+		>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatNumber"
-				android:id="@+id/votesN" />
+				android:id="@+id/votesN"
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatLabel"
 				android:id="@+id/votesL"
-				android:text="@string/votes"
-				/>
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatNumber"
-				android:id="@+id/answersN" />
+				android:id="@+id/answersN"
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatLabel"
 				android:id="@+id/answersL"
-				android:text="@string/answers"
-				/>
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatNumber"
-				android:id="@+id/viewsN" />
+				android:id="@+id/viewsN"
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="fill_parent"
 				style="@style/StatLabel"
 				android:id="@+id/viewsL"
-				android:text="@string/views"
-				/>
+			/>
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:visibility="gone"
 				style="@style/bounty"
 				android:id="@+id/bounty"
-				/>
+			/>
 		</LinearLayout>
 	</HorizontalScrollView>
 	

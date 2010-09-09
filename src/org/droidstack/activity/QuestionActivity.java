@@ -61,6 +61,7 @@ public class QuestionActivity extends Activity {
 	
 	private WebView mWebView;
 	private TextView mAnswerCountView;
+	private TextView mAnswerLabel;
 	private Button mNextButton;
 	private Button mPreviousButton;
 	private ProgressBar mProgress;
@@ -199,6 +200,7 @@ public class QuestionActivity extends Activity {
 			Log.i(Const.TAG, "Unable to enable WebView caching", e);
 		}
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
+		mAnswerLabel = (TextView) findViewById(R.id.answer_label);
 		mNextButton = (Button) findViewById(R.id.next);
 		mPreviousButton = (Button) findViewById(R.id.previous);
 		mProgress = (ProgressBar) findViewById(R.id.progress);
@@ -265,10 +267,13 @@ public class QuestionActivity extends Activity {
 			tpl.parse("main");
 			mWebView.loadDataWithBaseURL("about:blank", tpl.out(), "text/html", "utf-8", null);
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+				if (mAnswerCount == 1) mAnswerLabel.setText(R.string.answer);
+				else mAnswerLabel.setText(R.string.answers);
 				mAnswerCountView.setText(String.valueOf(mAnswerCount));
 			}
 			else {
-				mAnswerCountView.setText(getString(R.string.number_of_answers).replace("%s", String.valueOf(mAnswerCount)));
+				if (mAnswerCount == 1) mAnswerCountView.setText(mAnswerCount + " " + getString(R.string.answer));
+				else mAnswerCountView.setText(mAnswerCount + " " + getString(R.string.answers));
 			}
 			
 			mPreviousButton.setEnabled(false);
@@ -327,6 +332,8 @@ public class QuestionActivity extends Activity {
 			if (mCurAnswer > -1) mPreviousButton.setEnabled(true);
 			if (mCurAnswer < mAnswerCount-1) mNextButton.setEnabled(true);
 			if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+				if (mAnswerCount == 1) mAnswerLabel.setText(R.string.answer);
+				else mAnswerLabel.setText(R.string.answers);
 				mAnswerCountView.setText((mCurAnswer+1) + "\nof\n" + mAnswerCount);
 			}
 			else {
