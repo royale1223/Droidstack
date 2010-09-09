@@ -280,6 +280,7 @@ public class QuestionsActivity extends ListActivity {
 					mNoMoreQuestions = false;
 					mPage = 1;
 					getQuestions();
+					setNiceTitle();
 				}
 			});
     		
