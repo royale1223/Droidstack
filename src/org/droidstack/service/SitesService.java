@@ -190,7 +190,6 @@ public class SitesService extends Service {
 					}
 					in.close();
 					out.close();
-					publishProgress();
 				}
 				catch (Exception e) {
 					// whoopsies
@@ -201,13 +200,9 @@ public class SitesService extends Service {
 		}
 		
 		@Override
-		protected void onProgressUpdate(Void... values) {
-			sendToAll(MSG_UPDATE);
-		}
-		
-		@Override
 		protected void onPostExecute(Void result) {
 			// that was it
+			sendToAll(MSG_UPDATE);
 			sendToAll(MSG_FINISHED);
 			mPreferences.edit().putLong(Const.PREF_SITES_LASTRUN, System.currentTimeMillis()/1000).commit();
 			stopSelf();

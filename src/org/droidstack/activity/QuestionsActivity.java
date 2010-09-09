@@ -383,7 +383,7 @@ public class QuestionsActivity extends ListActivity {
 			}
 			final String tag = ((TextView) v).getText().toString();
 			String[] items;
-			if (mTagged == null || mTagged.size() == 0) {
+			if (mTagged == null || mTagged.size() == 0 || mTagged.contains(tag)) {
 				items = new String[1];
 				items[0] = tag;
 			}
