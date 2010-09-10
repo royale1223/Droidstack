@@ -255,7 +255,8 @@ public class AnswersActivity extends ListActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			Answer a = mAnswers.get(position);
+			// position-1 because we currently always have a title set on the adapter
+			Answer a = mAnswers.get(position-1);
 			if (!mIsStartedForResult) {
 				Intent i = new Intent(AnswersActivity.this, QuestionActivity.class);
 				String uri = "droidstack://question" +
