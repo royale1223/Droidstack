@@ -24,6 +24,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -84,6 +85,11 @@ public class SitesService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+        	stopSelf();
+        	return;
+        }
 		
 		final ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         final NetworkInfo info = cm.getActiveNetworkInfo();
