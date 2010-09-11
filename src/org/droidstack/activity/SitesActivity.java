@@ -45,7 +45,6 @@ public class SitesActivity extends ListActivity {
 	
 	private final static int CODE_PICK_USER = 1;
 	
-	private boolean firstStart = true;
 	private SitesDatabase mSitesDatabase;
 	private Cursor mBookmarked;
 	private Cursor mOthers;
@@ -144,35 +143,9 @@ public class SitesActivity extends ListActivity {
         	startService(new Intent(this, NotificationsService.class));
         	PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(this)).commit();
         }
-        
-    }
-    
-    @Override
-    protected void onResume() {
-    	super.onResume();
 
         // start sites fetcher service
         bindService(new Intent(this, SitesService.class), mConnection, BIND_AUTO_CREATE);
-        if (firstStart) firstStart = false;
-        else mAdapter.notifyDataSetChanged();
-    }
-    
-    @Override
-    protected void onPause() {
-    	super.onPause();
-    	
-    	if (mService != null) {
-			try {
-				Message msg = Message.obtain(null, SitesService.MSG_UNREGISTER);
-				msg.replyTo = mMessenger;
-				mService.send(msg);
-			}
-			catch (RemoteException e) {
-				
-			}
-		}
-		unbindService(mConnection);
-		mAdapter.setLoading(false);
     }
     
     private void externalMediaError() {
@@ -207,6 +180,18 @@ public class SitesActivity extends ListActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		mSitesDatabase.dispose();
+		
+		if (mService != null) {
+			try {
+				Message msg = Message.obtain(null, SitesService.MSG_UNREGISTER);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			}
+			catch (RemoteException e) {
+				
+			}
+		}
+		unbindService(mConnection);
 	}
 
 	private OnItemClickListener onSiteClicked = new OnItemClickListener() {

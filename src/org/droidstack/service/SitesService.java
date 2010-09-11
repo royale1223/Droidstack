@@ -96,12 +96,7 @@ public class SitesService extends Service {
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mDatabase = new SitesDatabase(this);
 		
-		long now = System.currentTimeMillis()/1000;
-		// sites refresh ~ every day
-		if (mPreferences.getLong(Const.PREF_SITES_LASTRUN, -1) < now - 24*60*60) {
-			isWorking = true;
-			new RefreshSites().execute();
-		}
+		new RefreshSites().execute();
 	}
 	
 	@Override
@@ -126,6 +121,7 @@ public class SitesService extends Service {
 		
 		@Override
 		protected void onPreExecute() {
+			isWorking = true;
 			sendToAll(MSG_LOADING);
 		}
 		
@@ -160,7 +156,22 @@ public class SitesService extends Service {
 	private class RefreshIcons extends AsyncTask<Void, Void, Void> {
 		
 		@Override
+		protected void onPreExecute() {
+			isWorking = true;
+			sendToAll(MSG_LOADING);
+		}
+		
+		@Override
 		protected Void doInBackground(Void... params) {
+			if (mSites == null) {
+				try {
+					mSites = StackAuth.getAllSites();					
+				}
+				catch (Exception e) {
+					Log.e(Const.TAG, "RefreshIcons: failed fetching sites", e);
+					return null;
+				}
+			}
 			long now = System.currentTimeMillis()/1000;
 			boolean fullRefresh = false;
 			// full refresh ~ every week
@@ -204,7 +215,6 @@ public class SitesService extends Service {
 			// that was it
 			sendToAll(MSG_UPDATE);
 			sendToAll(MSG_FINISHED);
-			mPreferences.edit().putLong(Const.PREF_SITES_LASTRUN, System.currentTimeMillis()/1000).commit();
 			stopSelf();
 		}
 		

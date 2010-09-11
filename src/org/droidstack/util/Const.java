@@ -34,7 +34,6 @@ public final class Const {
 	public final static String PREF_FONTSIZE = "fontsize";
 	public final static String DEF_FONTSIZE = "1em";
 	
-	public final static String PREF_SITES_LASTRUN = "sites_lastrun";
 	public final static String PREF_SITES_LAST_ICON_REFRESH = "sites_last_icon_refresh";
 	
 	public static int getPageSize(Context ctx) {
