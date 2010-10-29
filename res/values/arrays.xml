@@ -82,19 +82,21 @@
     </string-array>
     
     <string-array name="interval_labels">
+    	<item>Never</item>
+    	<item>2 minutes</item>
     	<item>15 minutes</item>
     	<item>30 minutes</item>
     	<item>1 hour</item>
     	<item>6 hours</item>
-    	<item>Never</item>
     </string-array>
     
     <string-array name="interval_values">
+    	<item>0</item>
+    	<item>2</item>
     	<item>15</item>
     	<item>30</item>
     	<item>60</item>
     	<item>360</item>
-    	<item>0</item>
     </string-array>
     
     <string-array name="fontsize_labels">

@@ -13,7 +13,6 @@ import org.droidstack.activity.ReputationActivity;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
-import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -27,7 +26,8 @@ import android.net.Uri;
 import android.net.NetworkInfo.State;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.os.SystemClock;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -35,7 +35,8 @@ public class NotificationsService extends Service {
 	
 	private static final int REP_ID = 1;
 	
-	private int mInterval;
+	private WakeLock mWakeLock;
+	
 	private long mLastRun;
 	private SitesDatabase mDB;
 	private Cursor mSites;
@@ -44,27 +45,29 @@ public class NotificationsService extends Service {
 	
 	@Override
 	public void onCreate() {
-		Log.d(Const.TAG, "NotificationService started");
+		PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Const.TAG);
+		mWakeLock.acquire();
+		Log.d(Const.TAG, "Wakelock acquired");
 		
 		final ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+		if (!cm.getBackgroundDataSetting()) {
+			Log.d(Const.TAG, "Background data setting is OFF");
+			stopSelf();
+			return;
+		}
         final NetworkInfo info = cm.getActiveNetworkInfo();
         if (info == null || info.getState() != State.CONNECTED) {
-        	Log.d(Const.TAG, "NotificationsService: no network connection");
+        	Log.d(Const.TAG, "No active network connection");
         	stopSelf();
         	return;
         }
 		
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-		mInterval = Integer.parseInt(mPreferences.getString(Const.PREF_NOTIF_INTERVAL, Const.DEF_NOTIF_INTERVAL));
-		if (mInterval == 0) {
-			stopSelf();
-			return;
-		}
 		if (mPreferences.getLong(Const.PREF_NOTIF_LASTRUN, -1) == -1) {
-			Log.d(Const.TAG, "NotificationService: no previous run");
+			Log.d(Const.TAG, "No previous run");
 			mPreferences.edit().putLong(Const.PREF_NOTIF_LASTRUN, System.currentTimeMillis()/1000).commit();
-			setupNextRun();
 			stopSelf();
 			return;
 		}
@@ -76,15 +79,6 @@ public class NotificationsService extends Service {
 		new WorkerTask().execute();
 	}
 	
-	private void setupNextRun() {
-		if (mInterval == 0) return;
-		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-		Intent i = new Intent(this, NotificationsService.class);
-		PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
-		Log.d(Const.TAG, "NotificationService: starting again in " + mInterval + " minutes");
-		am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + mInterval*60*1000, pi);
-	}
-	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -94,13 +88,13 @@ public class NotificationsService extends Service {
 		
 		@Override
 		protected Void doInBackground(Void... params) {
-			Log.d(Const.TAG, "NotificationService working");
+			Log.d(Const.TAG, "Working...");
 			mSites.moveToFirst();
 			while (!mSites.isAfterLast()) {
-				String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
-				String name = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_NAME));
-				int uid = mSites.getInt(mSites.getColumnIndex(SitesDatabase.KEY_UID));
-				String uname = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_UNAME));
+				String endpoint = SitesDatabase.getEndpoint(mSites);
+				String name = SitesDatabase.getName(mSites);
+				int uid = (int) SitesDatabase.getUserID(mSites);
+				String uname = SitesDatabase.getUserName(mSites);
 				if (uid > 0) {
 					try {
 						StackWrapper api = new StackWrapper(endpoint, Const.APIKEY);
@@ -109,7 +103,6 @@ public class NotificationsService extends Service {
 						query.setFromDate(mLastRun).setIds(uid);
 						List<Reputation> repChanges = api.getReputationByUserId(query);
 						if (repChanges.size() > 0) {
-							Log.d(Const.TAG, "NotificationService: new rep changes on " + endpoint);
 							int posRep = 0;
 							int negRep = 0;
 							for (Reputation rep: repChanges) {
@@ -137,7 +130,7 @@ public class NotificationsService extends Service {
 						}
 					}
 					catch (Exception e) {
-						Log.e(Const.TAG, "NotificationService: exception on " + endpoint, e);
+						Log.e(Const.TAG, "Exception on " + endpoint, e);
 					}
 				}
 				mSites.moveToNext();
@@ -147,12 +140,17 @@ public class NotificationsService extends Service {
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			Log.d(Const.TAG, "NotificationService finished");
 			mSites.close();
 			mDB.dispose();
-			setupNextRun();
 			stopSelf();
 		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		mWakeLock.release();
+		Log.d(Const.TAG, "Wakelock released");
 	}
 
 }

@@ -20,10 +20,13 @@ import org.droidstack.service.NotificationsService;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -33,6 +36,7 @@ import android.net.NetworkInfo.State;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -101,6 +105,27 @@ public class SitesActivity extends ListActivity {
         	startService(new Intent(this, NotificationsService.class));
         	PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(this)).commit();
         }
+    }
+    
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+    	int minutes = 0;
+    	try {
+    		minutes = Integer.parseInt(prefs.getString(Const.PREF_NOTIF_INTERVAL, Const.DEF_NOTIF_INTERVAL));
+    	}
+    	catch (NumberFormatException e) { }
+		AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+		Intent i = new Intent(this, NotificationsService.class);
+		PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
+		am.cancel(pi);
+    	if (minutes > 0) {
+    		am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+    				SystemClock.elapsedRealtime() + minutes*60*1000,
+    				minutes*60*1000, pi);
+    		Log.d(Const.TAG, "AlarmManager set");
+    	}
     }
     
     private class GetIcons extends AsyncTask<Void, Void, Void> {

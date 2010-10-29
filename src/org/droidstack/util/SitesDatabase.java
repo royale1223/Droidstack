@@ -28,6 +28,15 @@ public class SitesDatabase {
 	public static String getEndpoint(Cursor c) {
 		return c.getString(c.getColumnIndex(KEY_ENDPOINT));
 	}
+	public static String getName(Cursor c) {
+		return c.getString(c.getColumnIndex(KEY_NAME));
+	}
+	public static String getUserName(Cursor c) {
+		return c.getString(c.getColumnIndex(KEY_UNAME));
+	}
+	public static long getUserID(Cursor c) {
+		return c.getLong(c.getColumnIndex(KEY_UID));
+	}
 	
 	public SitesDatabase(Context context) {
 		mOpenHelper = new SitesOpenHelper(context);
