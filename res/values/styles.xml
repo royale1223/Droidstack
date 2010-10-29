@@ -2,11 +2,12 @@
 <resources>
 	<style name="EmptyList" parent="@android:style/TextAppearance.Large">
 		<item name="android:padding">10dip</item>
-		<item name="android:textColor">@android:color/primary_text_light</item>
 	</style>
 	<style name="site_label" parent="@android:style/TextAppearance.Medium">
-		<item name="android:textColor">@android:color/primary_text_light</item>
 		<item name="android:textStyle">bold</item>
+	</style>
+	<style name="site_user" parent="@android:style/TextAppearance.Small">
+		<item name="android:textColor">@android:color/tertiary_text_light</item>
 	</style>
 	<style name="StatNumber" parent="@android:style/TextAppearance.Medium">
 		<item name="android:textStyle">bold</item>

@@ -14,14 +14,20 @@ public class SitesDatabase {
 	public static final String KEY_NAME = "name";
 	public static final String KEY_UID = "uid";
 	public static final String KEY_UNAME = "user_name";
+	// not used anymore, kept for backward-compatibility
+	// should be removed in next version!
 	public static final String KEY_BOOKMARKED = "bookmarked";
 	
 	private static final String DATABASE_NAME = "stackexchange";
 	private static final String TABLE_NAME = "sites";
-	private static final int VERSION = 8;
+	private static final int VERSION = 9;
 	
 	private final SitesOpenHelper mOpenHelper;
 	private final SQLiteDatabase mDatabase;
+	
+	public static String getEndpoint(Cursor c) {
+		return c.getString(c.getColumnIndex(KEY_ENDPOINT));
+	}
 	
 	public SitesDatabase(Context context) {
 		mOpenHelper = new SitesOpenHelper(context);
@@ -34,7 +40,6 @@ public class SitesDatabase {
 		values.put(KEY_NAME, name);
 		values.put(KEY_UID, userID);
 		values.put(KEY_UNAME, uname);
-		values.put(KEY_BOOKMARKED, 0);
 		try {
 			return mDatabase.insertOrThrow(TABLE_NAME, null, values);
 		}
@@ -43,16 +48,12 @@ public class SitesDatabase {
 		}
 	}
 	
-	public int bookmarkSite(String endpoint) {
-		ContentValues cv = new ContentValues(1);
-		cv.put(KEY_BOOKMARKED, 1);
-		return mDatabase.update(TABLE_NAME, cv, KEY_ENDPOINT + " = ?", new String[] { endpoint });
-	}
-	
-	public int removeBookmark(String endpoint) {
-		ContentValues cv = new ContentValues(1);
-		cv.put(KEY_BOOKMARKED, 0);
-		return mDatabase.update(TABLE_NAME, cv, KEY_ENDPOINT + " = ?", new String[] { endpoint });
+	public boolean exists(String endpoint) {
+		Cursor c = mDatabase.query(TABLE_NAME, new String[] { "1" },
+				KEY_ENDPOINT + " = ?", new String[] { endpoint }, null, null, null);
+		boolean result = c.getCount() > 0;
+		c.close();
+		return result;
 	}
 	
 	public int removeSite(String endpoint) {
@@ -61,14 +62,6 @@ public class SitesDatabase {
 	
 	public Cursor getSites() {
 		return query(null, null, null);
-	}
-	
-	public Cursor getBookmarkedSites() {
-		return query(KEY_BOOKMARKED + " = ?", new String[] { "1" }, null);
-	}
-	
-	public Cursor getOtherSites() {
-		return query(KEY_BOOKMARKED + " = ?", new String[] { "0" }, null);
 	}
 	
 	public int setUser(String endpoint, long userID, String userName) {
@@ -92,12 +85,7 @@ public class SitesDatabase {
 			KEY_ENDPOINT + " TEXT PRIMARY KEY, " +
 			KEY_NAME + " TEXT, " +
 			KEY_UID + " NUMERIC, " +
-			KEY_UNAME + " TEXT, " +
-			KEY_BOOKMARKED + " INTEGER)";
-		
-		private static final String UPGRADE_7_TO_8 =
-			"ALTER TABLE " + TABLE_NAME + " ADD COLUMN " +
-			KEY_BOOKMARKED + " INTEGER";
+			KEY_UNAME + " TEXT)";
 		
 		public SitesOpenHelper(Context context) {
 			super(context, DATABASE_NAME, null, VERSION);
@@ -110,11 +98,8 @@ public class SitesDatabase {
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			if (oldVersion == 7 && newVersion == 8) {
-				db.execSQL(UPGRADE_7_TO_8);
-				ContentValues cv = new ContentValues(1);
-				cv.put(KEY_BOOKMARKED, 1);
-				db.update(TABLE_NAME, cv, null, null);
+			if (oldVersion == 8 && newVersion == 9) {
+				db.delete(TABLE_NAME, KEY_BOOKMARKED + " = ?", new String[] { "0" });
 			}
 			else {
 				db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);

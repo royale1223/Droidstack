@@ -4,10 +4,16 @@
 	android:layout_height="fill_parent"
 	android:layout_width="fill_parent"
 >
-	<ListView
+	<TextView android:id="@android:id/empty"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:id="@android:id/list"
+		style="@style/EmptyList"
+		android:layout_centerInParent="true"
+		android:text="@string/no_sites"
+	/>
+	<ListView android:id="@android:id/list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
 		android:fadeScrollbars="true"
 		android:scrollbarStyle="insideOverlay"
 	/>

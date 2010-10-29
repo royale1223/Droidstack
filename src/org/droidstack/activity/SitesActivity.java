@@ -1,35 +1,38 @@
 package org.droidstack.activity;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
+import net.sf.stackwrap4j.StackWrapper;
+import net.sf.stackwrap4j.entities.Stats;
 import net.sf.stackwrap4j.http.HttpClient;
 
 import org.droidstack.R;
-import org.droidstack.adapter.SitesAdapter;
+import org.droidstack.adapter.SitesCursorAdapter;
 import org.droidstack.service.NotificationsService;
-import org.droidstack.service.SitesService;
 import org.droidstack.util.Const;
 import org.droidstack.util.SitesDatabase;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -43,61 +46,12 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class SitesActivity extends ListActivity {
 	
-	private final static int CODE_PICK_USER = 1;
+	private final static int REQUEST_PICK_USER = 1;
+	private final static int REQUEST_PICK_SITES = 2;
 	
 	private SitesDatabase mSitesDatabase;
-	private Cursor mBookmarked;
-	private Cursor mOthers;
-	private SitesAdapter mAdapter;
-	private File mIcons;
-	private Messenger mService;
-	
-	private String mResultEndpoint;
-	
-	class IncomingHandler extends Handler {
-		@Override
-		public void handleMessage(Message msg) {
-			switch(msg.what) {
-			case SitesService.MSG_UPDATE:
-				mBookmarked.requery();
-				mOthers.requery();
-				mAdapter.notifyDataSetChanged();
-			case SitesService.MSG_LOADING:
-				mAdapter.setLoading(true);
-				break;
-			case SitesService.MSG_FINISHED:
-				mAdapter.setLoading(false);
-				break;
-			default:
-				super.handleMessage(msg);
-				break;
-			}
-		}
-	}
-	
-	private Messenger mMessenger = new Messenger(new IncomingHandler());
-	
-	private ServiceConnection mConnection = new ServiceConnection() {
-		
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mService = null;
-			mAdapter.setLoading(false);
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			mService = new Messenger(service);
-			Message msg = Message.obtain(null, SitesService.MSG_REGISTER);
-			msg.replyTo = mMessenger;
-			try {
-				mService.send(msg);
-			}
-			catch (RemoteException e) {
-				Log.e(Const.TAG, "Could not send REGISTER message", e);
-			}
-		}
-	};
+	private Cursor mSites;
+	private SitesCursorAdapter mAdapter;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,36 +70,93 @@ public class SitesActivity extends ListActivity {
         
         HttpClient.setTimeout(Const.NET_TIMEOUT);
         mSitesDatabase = new SitesDatabase(this);
-        mBookmarked = mSitesDatabase.getBookmarkedSites();
-        mOthers = mSitesDatabase.getOtherSites();
-        startManagingCursor(mBookmarked);
-        startManagingCursor(mOthers);
+        mSites = mSitesDatabase.getSites();
+        startManagingCursor(mSites);
         
-        mIcons = new File(Environment.getExternalStorageDirectory(), "/Android/data/org.droidstack/icons/");
-        if (mIcons.mkdirs()) {
-        	File noMedia = new File(mIcons, ".nomedia");
-        	try {
-        		noMedia.createNewFile();
-        	}
-        	catch (Exception e) {
-        		Log.e(Const.TAG, ".nomedia creation error", e);
-        		externalMediaError();
-        	}
-        }
+        if (Const.getIconsDir() == null) externalMediaError();
 
-        mAdapter = new SitesAdapter(this, mBookmarked, mOthers);
+        mAdapter = new SitesCursorAdapter(this, mSites);
         setListAdapter(mAdapter);
         getListView().setOnItemClickListener(onSiteClicked);
         registerForContextMenu(getListView());
+        
+        // check for missing icons
+        mSites.moveToFirst();
+        ArrayList<String> endpoints = new ArrayList<String>();
+        while (!mSites.isAfterLast()) {
+        	String endpoint = SitesDatabase.getEndpoint(mSites);
+        	String host = Uri.parse(endpoint).getHost();
+        	File f = new File(Const.getIconsDir(), host);
+        	if (!f.exists()) {
+        		endpoints.add(endpoint);
+        	}
+        	mSites.moveToNext();
+        }
+        if (endpoints.size() > 0) {
+        	new GetIcons(endpoints).execute();
+        }
         
         // start notification service on app update
         if (Const.getOldVersion(this) != Const.getNewVersion(this)) {
         	startService(new Intent(this, NotificationsService.class));
         	PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(this)).commit();
         }
-
-        // start sites fetcher service
-        bindService(new Intent(this, SitesService.class), mConnection, BIND_AUTO_CREATE);
+    }
+    
+    private class GetIcons extends AsyncTask<Void, Void, Void> {
+    	private final HashMap<String, String> icons;
+    	private final List<String> endpoints;
+    	public GetIcons(HashMap<String, String> icons) {
+    		this.icons = icons;
+    		this.endpoints = null;
+    	}
+    	public GetIcons(List<String> endpoints) {
+    		this.endpoints = endpoints;
+    		this.icons = new HashMap<String, String>();
+    	}
+    	@Override
+    	protected Void doInBackground(Void... params) {
+    		if (endpoints != null) {
+    			for (String endpoint: endpoints) {
+    				StackWrapper api = new StackWrapper(endpoint, Const.APIKEY);
+    				try {
+    					Stats stats = api.getStats();
+    					icons.put(stats.getSite().getIconUrl(), Uri.parse(endpoint).getHost());
+    				}
+    				catch (Exception e) {
+    					Log.e(Const.TAG, "Could not get site stats for " + endpoint, e);
+    				}
+    			}
+    		}
+    		for (Entry<String, String> icon: icons.entrySet()) {
+    			try {
+	    			File f = new File(Const.getIconsDir(), icon.getValue());
+	    			InputStream in = new URL(icon.getKey()).openStream();
+	    			OutputStream out = new FileOutputStream(f);
+	    			byte[] buf = new byte[8192];
+	    			int len;
+	    			while ((len = in.read(buf)) > 0) {
+	    				out.write(buf, 0, len);
+	    			}
+	    			in.close();
+	    			out.close();
+    			}
+    			catch (Exception e) {
+    				Log.e(Const.TAG, "Could not fetch icon " + icon.getKey() + " for " + icon.getValue(), e);
+    			}
+    			publishProgress();
+    		}
+    		return null;
+    	}
+    	@Override
+    	protected void onProgressUpdate(Void... values) {
+    		mAdapter.notifyDataSetChanged();
+    	}
+    	@Override
+    	protected void onPostExecute(Void result) {
+    		if (isFinishing()) return;
+    		mAdapter.notifyDataSetChanged();
+    	}
     }
     
     private void externalMediaError() {
@@ -180,18 +191,6 @@ public class SitesActivity extends ListActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		mSitesDatabase.dispose();
-		
-		if (mService != null) {
-			try {
-				Message msg = Message.obtain(null, SitesService.MSG_UNREGISTER);
-				msg.replyTo = mMessenger;
-				mService.send(msg);
-			}
-			catch (RemoteException e) {
-				
-			}
-		}
-		unbindService(mConnection);
 	}
 
 	private OnItemClickListener onSiteClicked = new OnItemClickListener() {
@@ -225,41 +224,28 @@ public class SitesActivity extends ListActivity {
     		Object item = mAdapter.getItem(info.position);
     		if (item instanceof Integer) return;
     		Cursor site = (Cursor) item;
-    		int resource;
-    		if (item == mBookmarked) resource = R.menu.site_bookmarked;
-    		else resource = R.menu.site_other;
     		String name = site.getString(site.getColumnIndex(SitesDatabase.KEY_NAME));
     		menu.setHeaderTitle(name);
-    		getMenuInflater().inflate(resource, menu);
+    		getMenuInflater().inflate(R.menu.site_context, menu);
     	}
 	}
     
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		Object obj = mAdapter.getItem(info.position);
-		if (obj instanceof Integer) return super.onContextItemSelected(item);
-		Cursor site = (Cursor) obj;
-		final String endpoint = site.getString(site.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+		mSites.moveToPosition(info.position);
+		final String endpoint = SitesDatabase.getEndpoint(mSites);
 		switch(item.getItemId()) {
 		case R.id.menu_set_user:
 			Intent i = new Intent(this, UsersActivity.class);
 			i.setAction(Intent.ACTION_PICK);
-			String uri = "droidstack://users?endpoint=" + endpoint;
+			String uri = "droidstack://users?endpoint=" + Uri.encode(endpoint);
 			i.setData(Uri.parse(uri));
-			mResultEndpoint = endpoint;
-			startActivityForResult(i, CODE_PICK_USER);
-			return true;
-		case R.id.menu_add:
-			mSitesDatabase.bookmarkSite(endpoint);
-			mBookmarked.requery();
-			mOthers.requery();
-			mAdapter.notifyDataSetChanged();
+			startActivityForResult(i, REQUEST_PICK_USER);
 			return true;
 		case R.id.menu_remove:
-			mSitesDatabase.removeBookmark(endpoint);
-			mBookmarked.requery();
-			mOthers.requery();
+			mSitesDatabase.removeSite(endpoint);
+			mSites.requery();
 			mAdapter.notifyDataSetChanged();
 			return true;
 		}
@@ -268,14 +254,47 @@ public class SitesActivity extends ListActivity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Bundle extras = data.getExtras();
 		switch(requestCode) {
-		case CODE_PICK_USER:
+		case REQUEST_PICK_USER:
 			if (resultCode == RESULT_OK) {
-				int uid = data.getIntExtra("uid", 0);
-				String name = data.getStringExtra("name");
-				mSitesDatabase.setUser(mResultEndpoint, uid, name);
-				mBookmarked.requery();
-				mOthers.requery();
+				String endpoint = extras.getString("endpoint");
+				int uid = extras.getInt("uid");
+				String name = extras.getString("name");
+				mSitesDatabase.setUser(endpoint, uid, name);
+				mSites.requery();
+				mAdapter.notifyDataSetChanged();
+			}
+			break;
+		case REQUEST_PICK_SITES:
+			if (resultCode == RESULT_OK) {
+				String[] endpoints = (String[]) extras.getSerializable("endpoints");
+				String[] names = (String[]) extras.getSerializable("names");
+				String[] icons = (String[]) extras.getSerializable("icons");
+				// remove unchecked sites
+				mSites.moveToFirst();
+				while (!mSites.isAfterLast()) {
+					String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+					boolean flag = false;
+					for (String e: endpoints) {
+						if (e.equals(endpoint))
+							flag = true;
+					}
+					if (!flag) mSitesDatabase.removeSite(endpoint);
+					mSites.moveToNext();
+				}
+				// add checked sites
+				HashMap<String, String> iconsToGet = new HashMap<String, String>();
+				for (int i=0; i < endpoints.length; i++) {
+					if (mSitesDatabase.exists(endpoints[i])) continue;
+					mSitesDatabase.addSite(endpoints[i], names[i], 0, null);
+					String host = Uri.parse(endpoints[i]).getHost();
+					File icon = new File(Const.getIconsDir(), host);
+					if (!icon.exists())
+						iconsToGet.put(icons[i], host);
+				}
+				if (iconsToGet.size() > 0) new GetIcons(iconsToGet).execute();
+				mSites.requery();
 				mAdapter.notifyDataSetChanged();
 			}
 			break;
@@ -292,10 +311,24 @@ public class SitesActivity extends ListActivity {
     }
 	
     public boolean onOptionsItemSelected(MenuItem item) {
+    	Intent i;
     	switch (item.getItemId()) {
     	case R.id.menu_settings:
-    		Intent i = new Intent(this, PreferencesActivity.class);
+    		i = new Intent(this, PreferencesActivity.class);
     		startActivity(i);
+    		return true;
+    	case R.id.menu_pick_sites:
+    		i = new Intent(this, SitePickerActivity.class);
+    		String[] checked = new String[mSites.getCount()];
+    		mSites.moveToFirst();
+    		while (!mSites.isAfterLast()) {
+    			String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+    			checked[mSites.getPosition()] = endpoint;
+    			mSites.moveToNext();
+    		}
+    		i.putExtra("checked", checked);
+    		startActivityForResult(i, REQUEST_PICK_SITES);
+    		return true;
     	}
     	return false;
     }

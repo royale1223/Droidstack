@@ -190,6 +190,7 @@ public class UsersActivity extends ListActivity {
 			}
 			else {
 				Intent i = new Intent();
+				i.putExtra("endpoint", mEndpoint);
 				i.putExtra("uid", u.getId());
 				i.putExtra("name", u.getDisplayName());
 				i.putExtra("rep", u.getReputation());

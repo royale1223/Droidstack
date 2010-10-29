@@ -3,10 +3,11 @@
     <string name="app_name">Droidstack</string>
     <string name="bookmarked">Bookmarked Sites</string>
     <string name="all_sites">All Sites</string>
+    <string name="btn_done">Done</string>
+    <string name="menu_pick_sites">Pick sites</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_set_user">Pick user</string>
-    <string name="menu_add_bookmark">Add bookmark</string>
-    <string name="menu_remove_bookmark">Remove bookmark</string>
+    <string name="menu_remove">Remove</string>
     <string name="menu_open_browser">Open in browser</string>
     <string name="menu_share">Share</string>
     <string name="no_userid">You need to pick a user for this site. Go back and long-click on a site to do that.</string>
@@ -18,6 +19,7 @@
     <string name="questions_fetch_error">An error has occurred while retrieving the list of questions. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="question_fetch_error">An error has occurred while retrieving this question. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="answers_fetch_error">An error has occurred while retrieving the list of answers. Make sure you are connected to the Internet and try again in a few moments.</string>
+    <string name="sites_fetch_error">An error has occurred while retrieving the list of sites. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="rep_fetch_error">An error has occurred while retrieving the list of reputation changes. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="user_fetch_error">An error has occurred while retrieving the profile data. Make sure you are connected to the Internet and try again in a few moments.</string>
     <string name="tags_fetch_error">An error has occurred while retrieving the list of tags. Make sure you are connected to the Internet and try again in a few moments.</string>
@@ -29,6 +31,7 @@
     <string name="no_questions">No questions here</string>
     <string name="no_answers">No answers here</string>
     <string name="no_repchanges">No reputation changes</string>
+    <string name="no_sites">You have not picked any sites yet. Click <b>Menu</b> and select <b>Pick sites</b> to start using Droidstack.</string>
     <string name="votes">votes</string>
     <string name="vote">vote</string>
     <string name="answers">answers</string>
