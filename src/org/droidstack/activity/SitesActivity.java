@@ -99,12 +99,6 @@ public class SitesActivity extends ListActivity {
         if (endpoints.size() > 0) {
         	new GetIcons(endpoints).execute();
         }
-        
-        // start notification service on app update
-        if (Const.getOldVersion(this) != Const.getNewVersion(this)) {
-        	startService(new Intent(this, NotificationsService.class));
-        	PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(Const.PREF_VERSION, Const.getNewVersion(this)).commit();
-        }
     }
     
     @Override
