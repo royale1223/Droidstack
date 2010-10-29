@@ -83,7 +83,6 @@
     
     <string-array name="interval_labels">
     	<item>Never</item>
-    	<item>2 minutes</item>
     	<item>15 minutes</item>
     	<item>30 minutes</item>
     	<item>1 hour</item>
@@ -92,7 +91,6 @@
     
     <string-array name="interval_values">
     	<item>0</item>
-    	<item>2</item>
     	<item>15</item>
     	<item>30</item>
     	<item>60</item>
