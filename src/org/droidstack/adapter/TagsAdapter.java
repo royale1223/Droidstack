@@ -61,8 +61,7 @@ public class TagsAdapter extends BaseAdapter {
 	
 	@Override
 	public boolean areAllItemsEnabled() {
-		if (loading) return false;
-		else return true;
+		return false;
 	}
 
 	@Override

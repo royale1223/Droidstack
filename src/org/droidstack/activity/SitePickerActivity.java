@@ -18,7 +18,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+import android.util.SparseBooleanArray;
 
 public class SitePickerActivity extends ListActivity {
 	
@@ -87,29 +87,31 @@ public class SitePickerActivity extends ListActivity {
 		}
 	}
 	
-	public void done(View target) {
-		// Bah, deprecated functions (because of a typo)
-		long[] checked;
-		try {
-			checked = getListView().getCheckedItemIds();
+	@Override
+	public void onBackPressed() {
+		if (mSites.size() > 0) {
+			// Bah, deprecated functions (because of a typo)
+			SparseBooleanArray checked = getListView().getCheckedItemPositions();
+			ArrayList<Integer> checkedPositions = new ArrayList<Integer>();
+			for (int i=0; i < mSites.size(); i++) {
+				if (checked.get(i)) checkedPositions.add(i);
+			}
+			String[] endpoints = new String[checkedPositions.size()];
+			String[] names = new String[checkedPositions.size()];
+			String[] icons = new String[checkedPositions.size()];
+			for (int i=0; i < checkedPositions.size(); i++) {
+				Site site = mSites.get((int) checkedPositions.get(i));
+				endpoints[i] = site.getApiEndpoint();
+				names[i] = site.getName();
+				icons[i] = site.getIconUrl();
+				Log.d(Const.TAG, endpoints[i]);
+			}
+			Intent result = new Intent();
+			result.putExtra("endpoints", endpoints);
+			result.putExtra("names", names);
+			result.putExtra("icons", icons);
+			setResult(RESULT_OK, result);
 		}
-		catch(NoSuchMethodError e) {
-			checked = getListView().getCheckItemIds();
-		}
-		String[] endpoints = new String[checked.length];
-		String[] names = new String[checked.length];
-		String[] icons = new String[checked.length];
-		for (int i=0; i < checked.length; i++) {
-			Site site = mSites.get((int) checked[i]);
-			endpoints[i] = site.getApiEndpoint();
-			names[i] = site.getName();
-			icons[i] = site.getIconUrl();
-		}
-		Intent result = new Intent();
-		result.putExtra("endpoints", endpoints);
-		result.putExtra("names", names);
-		result.putExtra("icons", icons);
-		setResult(RESULT_OK, result);
 		finish();
 	}
 	

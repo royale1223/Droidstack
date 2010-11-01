@@ -45,11 +45,6 @@ public class SitesArrayAdapter extends BaseAdapter {
 	}
 	
 	@Override
-	public boolean hasStableIds() {
-		return true;
-	}
-	
-	@Override
 	public long getItemId(int position) {
 		return position;
 	}

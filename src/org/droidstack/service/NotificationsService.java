@@ -141,7 +141,6 @@ public class NotificationsService extends Service {
 		@Override
 		protected void onPostExecute(Void result) {
 			mSites.close();
-			mDB.dispose();
 			stopSelf();
 		}
 	}

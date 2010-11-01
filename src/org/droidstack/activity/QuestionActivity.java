@@ -367,6 +367,8 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
+			mPreviousButton.setEnabled(false);
+			mNextButton.setEnabled(false);
 			mProgress.setVisibility(View.VISIBLE);
 		}
 		
@@ -407,9 +409,7 @@ public class QuestionActivity extends Activity {
 					}).create().show();
 				Log.e(Const.TAG, "Failed to get question", mException);
 			}
-			else {
-				updateView();
-			}
+			updateView();
 		}
 		
 	}
@@ -421,6 +421,8 @@ public class QuestionActivity extends Activity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
+			mPreviousButton.setEnabled(false);
+			mNextButton.setEnabled(false);
 			mProgress.setVisibility(View.VISIBLE);
 		}
 		
@@ -455,8 +457,8 @@ public class QuestionActivity extends Activity {
 			}
 			else {
 				mAnswers.addAll(result);
-				updateView();
 			}
+			updateView();
 		}
 		
 	}

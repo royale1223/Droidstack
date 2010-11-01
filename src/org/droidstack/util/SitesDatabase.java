@@ -117,11 +117,10 @@ public class SitesDatabase {
 		}
 	}
 	
-	public void dispose() {
-		
+	@Override
+	protected void finalize() throws Throwable {
 		mDatabase.close();
 		mOpenHelper.close();
-		
 	}
 	
 }

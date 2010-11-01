@@ -205,12 +205,6 @@ public class SitesActivity extends ListActivity {
 		})
 		.create().show();
     }
-    
-    @Override
-	protected void onDestroy() {
-		super.onDestroy();
-		mSitesDatabase.dispose();
-	}
 
 	private OnItemClickListener onSiteClicked = new OnItemClickListener() {
 
@@ -273,7 +267,9 @@ public class SitesActivity extends ListActivity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		Bundle extras = data.getExtras();
+		Bundle extras;
+		if (data != null) extras = data.getExtras();
+		else extras = null;
 		switch(requestCode) {
 		case REQUEST_PICK_USER:
 			if (resultCode == RESULT_OK) {
@@ -293,7 +289,7 @@ public class SitesActivity extends ListActivity {
 				// remove unchecked sites
 				mSites.moveToFirst();
 				while (!mSites.isAfterLast()) {
-					String endpoint = mSites.getString(mSites.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+					String endpoint = SitesDatabase.getEndpoint(mSites);
 					boolean flag = false;
 					for (String e: endpoints) {
 						if (e.equals(endpoint))
