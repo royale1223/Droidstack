@@ -12,6 +12,7 @@ import org.droidstack.util.Const;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -56,9 +57,10 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 		
 	}
 	
-	private ArrayList<String> tags;
-	private TagFilter filter;
-	private Context context;
+	private final ArrayList<String> tags;
+	private final TagFilter filter;
+	private final Context context;
+	private final LayoutInflater inflater;
 	
 	private StackWrapper mAPI;
 	
@@ -68,6 +70,8 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 		mAPI = new StackWrapper(endpoint, Const.APIKEY);
 		tags = new ArrayList<String>();
 		filter = new TagFilter();
+		
+		inflater = LayoutInflater.from(context);
 	}
 	
 	@Override
@@ -97,7 +101,7 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 			return convertView;
 		}
 		else {
-			TextView v = (TextView) View.inflate(context, R.layout.item_dropdown, null);
+			TextView v = (TextView) inflater.inflate(R.layout.item_dropdown, null);
 			v.setText(tags.get(position));
 			return v;
 		}

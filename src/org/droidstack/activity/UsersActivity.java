@@ -1,6 +1,8 @@
 package org.droidstack.activity;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import net.sf.stackwrap4j.StackWrapper;
@@ -13,16 +15,21 @@ import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -39,6 +46,7 @@ public class UsersActivity extends ListActivity {
 	
 	private UsersAdapter mAdapter;
 	private ArrayList<User> mUsers;
+	private HashMap<String, Bitmap> mAvatars;
 	
 	private boolean isRequestOngoing;
 	private boolean noMoreUsers;
@@ -58,7 +66,8 @@ public class UsersActivity extends ListActivity {
 		mHandler = new Handler();
 		
 		mUsers = new ArrayList<User>();
-		mAdapter = new UsersAdapter(this, mUsers);
+		mAvatars = new HashMap<String, Bitmap>();
+		mAdapter = new UsersAdapter(this, mUsers, mAvatars);
 		
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(onScroll);
@@ -149,6 +158,7 @@ public class UsersActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(List<User> result) {
+			if (isFinishing()) return;
 			isRequestOngoing = false;
 			if (e != null) {
 				new AlertDialog.Builder(UsersActivity.this)
@@ -169,8 +179,52 @@ public class UsersActivity extends ListActivity {
 					noMoreUsers = true;
 					mAdapter.setLoading(false);
 				}
+				ArrayList<String> hashes = new ArrayList<String>();
+				for (User u: mUsers) {
+					if (!mAvatars.containsKey(u.getEmailHash())) {
+						hashes.add(u.getEmailHash());
+					}
+				}
+				if (hashes.size() > 0) {
+					new GetAvatars(hashes).execute();
+				}
 				mAdapter.notifyDataSetChanged();
 			}
+		}
+		
+	}
+	
+	private class GetAvatars extends AsyncTask<Void, Void, Void> {
+		
+		private int size = 64;
+		private List<String> hashes;
+		
+		public GetAvatars(List<String> hashes) {
+			DisplayMetrics metrics = new DisplayMetrics();
+			((WindowManager)UsersActivity.this.getSystemService(Context.WINDOW_SERVICE))
+				.getDefaultDisplay().getMetrics(metrics);
+			size *= metrics.density;
+			this.hashes = hashes;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			for (String hash: hashes) {
+				try {
+					URL avatar = new URL("http://www.gravatar.com/avatar/" + hash + "?s=" + size + "&d=identicon&r=PG");
+					mAvatars.put(hash, BitmapFactory.decodeStream(avatar.openStream()));
+					publishProgress();
+				}
+				catch (Exception e) {
+					Log.e(Const.TAG, "Could not fetch avatar", e);
+				}
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			mAdapter.notifyDataSetChanged();
 		}
 		
 	}

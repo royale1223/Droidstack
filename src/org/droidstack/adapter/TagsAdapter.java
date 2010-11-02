@@ -7,6 +7,7 @@ import net.sf.stackwrap4j.entities.Tag;
 import org.droidstack.R;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -23,13 +24,15 @@ public class TagsAdapter extends BaseAdapter {
 		}
 	}
 	
-	private Context context;
-	private List<Tag> tags;
+	private final Context context;
+	private final LayoutInflater inflater;
+	private final List<Tag> tags;
 	private boolean loading;
 	
 	public TagsAdapter(Context context, List<Tag> tags) {
 		this.context = context;
 		this.tags = tags;
+		inflater = LayoutInflater.from(context);
 	}
 	
 	public void setLoading(boolean isLoading) {
@@ -72,12 +75,12 @@ public class TagsAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == tags.size()) return View.inflate(context, R.layout.item_loading, null);
+		if (position == tags.size()) return inflater.inflate(R.layout.item_loading, null);
 		Tag tag = tags.get(position);
 		View v = convertView;
 		ViewTag t;
 		if (v == null || v.getTag() == null) {
-			v = View.inflate(context, R.layout.item_tag, null);
+			v = inflater.inflate(R.layout.item_tag, null);
 			t = new ViewTag(v);
 			v.setTag(t);
 		}

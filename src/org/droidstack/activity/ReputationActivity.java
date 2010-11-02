@@ -149,6 +149,7 @@ public class ReputationActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(List<Reputation> result) {
+			if (isFinishing()) return;
 			isRequestOngoing = false;
 			setProgressBarIndeterminateVisibility(false);
 			if (mException != null) {

@@ -5,17 +5,20 @@ import org.droidstack.adapter.MultiAdapter.MultiItem;
 
 import android.content.Context;
 import android.content.Intent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class MoreItem extends MultiItem {
 	
-	private Intent mIntent;
-	private Context mContext;
+	private final Intent intent;
+	private final Context context;
+	private final LayoutInflater inflater;
 	
-	public MoreItem(Intent i, Context ctx) {
-		mIntent = i;
-		mContext = ctx;
+	public MoreItem(Intent intent, Context context) {
+		this.intent = intent;
+		this.context = context;
+		inflater = LayoutInflater.from(context);
 	}
 
 	@Override
@@ -25,12 +28,12 @@ public class MoreItem extends MultiItem {
 
 	@Override
 	public View newView(Context context, ViewGroup parent) {
-		return View.inflate(context, R.layout.item_more, null);
+		return inflater.inflate(R.layout.item_more, null);
 	}
 	
 	@Override
 	public void onClick() {
-		mContext.startActivity(mIntent);
+		context.startActivity(intent);
 	}
 
 	@Override

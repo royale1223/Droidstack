@@ -389,6 +389,7 @@ public class QuestionsActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(List<Question> result) {
+			if (isFinishing()) return;
 			setProgressBarIndeterminateVisibility(false);
 			mIsRequestOngoing = false;
 			if (mException != null) {

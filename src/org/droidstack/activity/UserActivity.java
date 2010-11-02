@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -122,7 +123,7 @@ public class UserActivity extends ListActivity {
 		
 		@Override
 		protected void onPreExecute() {
-			mAdapter.addItem(new LoadingItem());
+			mAdapter.addItem(new LoadingItem(UserActivity.this));
 		}
 		
 		@Override
@@ -162,6 +163,7 @@ public class UserActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(Void result) {
+			if (isFinishing()) return;
 			mAdapter.clear();
 			if (mException != null) {
 				new AlertDialog.Builder(UserActivity.this)
@@ -194,7 +196,7 @@ public class UserActivity extends ListActivity {
 		}
 		*/
 		if (mQuestions.size() > 0) {
-			mAdapter.addItem(new HeaderItem("Recent Questions"));
+			mAdapter.addItem(new HeaderItem(this, "Recent Questions"));
 			for (Question q: mQuestions) {
 				mAdapter.addItem(new QuestionItem(q, this));
 			}
@@ -208,7 +210,7 @@ public class UserActivity extends ListActivity {
 			mAdapter.addItem(new MoreItem(more, this));
 		}
 		if (mAnswers.size() > 0) {
-			mAdapter.addItem(new HeaderItem("Recent Answers"));
+			mAdapter.addItem(new HeaderItem(this, "Recent Answers"));
 			for (Answer a: mAnswers) {
 				mAdapter.addItem(new AnswerItem(a, this));
 			}
@@ -222,9 +224,9 @@ public class UserActivity extends ListActivity {
 			mAdapter.addItem(new MoreItem(more, this));
 		}
 		if (mRepChanges.size() > 0) {
-			mAdapter.addItem(new HeaderItem("Reputation Changes"));
+			mAdapter.addItem(new HeaderItem(this, "Reputation Changes"));
 			for (Reputation r: mRepChanges) {
-				mAdapter.addItem(new RepItem(r));
+				mAdapter.addItem(new RepItem(this, r));
 			}
 			Intent more = new Intent(this, ReputationActivity.class);
 			String uri = "droidstack://reputation" +
@@ -238,40 +240,10 @@ public class UserActivity extends ListActivity {
 		mAdapter.notifyDataSetInvalidated();
 	}
 	
-	private class AboutItem extends MultiItem {
-		
-		String mAbout;
-		
-		public AboutItem(String about) {
-			mAbout = about.trim();
-		}
-		
-		@Override
-		public boolean isEnabled() {
-			return false;
-		}
-
-		@Override
-		public void bindView(View view, Context context) {
-			((TextView)view).setText(Html.fromHtml(mAbout));
-		}
-
-		@Override
-		public View newView(Context context, ViewGroup parent) {
-			TextView v = (TextView) View.inflate(context, R.layout.item_about, null);
-			return v;
-		}
-
-		@Override
-		public int getLayoutResource() {
-			return R.layout.item_about;
-		}
-		
-	}
-	
 	private class RepItem extends MultiItem {
 		
-		private Reputation data;
+		private final Reputation rep;
+		private final LayoutInflater inflater;
 		
 		private class Tag {
 			TextView rep_pos;
@@ -279,35 +251,36 @@ public class UserActivity extends ListActivity {
 			TextView title;
 		}
 		
-		public RepItem(Reputation rep) {
-			data = rep;
+		public RepItem(Context context, Reputation rep) {
+			this.rep = rep;
+			inflater = LayoutInflater.from(context);
 		}
 
 		@Override
 		public void bindView(View view, Context context) {
 			Tag tag = (Tag) view.getTag();
-			if (data.getPositiveRep() > 0) {
+			if (rep.getPositiveRep() > 0) {
 				tag.rep_pos.setVisibility(View.VISIBLE);
-				tag.rep_pos.setText("+" + data.getPositiveRep());
+				tag.rep_pos.setText("+" + rep.getPositiveRep());
 			}
 			else {
 				tag.rep_pos.setVisibility(View.GONE);
 			}
 			
-			if (data.getNegativeRep() > 0) {
+			if (rep.getNegativeRep() > 0) {
 				tag.rep_neg.setVisibility(View.VISIBLE);
-				tag.rep_neg.setText("-" + data.getNegativeRep());
+				tag.rep_neg.setText("-" + rep.getNegativeRep());
 			}
 			else {
 				tag.rep_neg.setVisibility(View.GONE);
 			}
 			
-			tag.title.setText(data.getTitle());
+			tag.title.setText(rep.getTitle());
 		}
 
 		@Override
 		public View newView(Context context, ViewGroup parent) {
-			View v = View.inflate(context, R.layout.item_rep, null);
+			View v = inflater.inflate(R.layout.item_rep, null);
 			Tag tag = new Tag();
 			tag.title = (TextView) v.findViewById(R.id.title);
 			tag.rep_pos = (TextView) v.findViewById(R.id.rep_pos);
@@ -319,16 +292,16 @@ public class UserActivity extends ListActivity {
 		@Override
 		public void onClick() {
 			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
-			if (data.getPostType().equals("question")) {
+			if (rep.getPostType().equals("question")) {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&qid=" + Uri.encode(String.valueOf(data.getPostId()));
+					"&qid=" + Uri.encode(String.valueOf(rep.getPostId()));
 				i.setData(Uri.parse(uri));
 			}
 			else {
 				String uri = "droidstack://question" +
 					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&aid=" + Uri.encode(String.valueOf(data.getPostId()));
+					"&aid=" + Uri.encode(String.valueOf(rep.getPostId()));
 				i.setData(Uri.parse(uri));
 			}
 			startActivity(i);
@@ -343,17 +316,19 @@ public class UserActivity extends ListActivity {
 	
 	private class QuestionItem extends MultiItem {
 		
-		private Question mQuestion;
-		private LinearLayout.LayoutParams tagLayout;
-		private Context context;
-		private Resources mResources;
+		private final Question question;
+		private final LinearLayout.LayoutParams tagLayout;
+		private final Context context;
+		private final LayoutInflater inflater;
+		private final Resources mResources;
 		
-		public QuestionItem(Question q, Context ctx) {
-			mQuestion = q;
-			context = ctx;
+		public QuestionItem(Question question, Context context) {
+			this.question = question;
+			this.context = context;
+			inflater = LayoutInflater.from(context);
 			tagLayout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 			tagLayout.setMargins(0, 0, 5, 0);
-			mResources = ctx.getResources();
+			mResources = context.getResources();
 		}
 		
 		private class Tag {
@@ -384,7 +359,7 @@ public class UserActivity extends ListActivity {
 		public void bindView(View view, Context context) {
 			Tag t = (Tag) view.getTag();
 			TextView tagView;
-			Question q = mQuestion;
+			Question q = question;
 			
 			t.title.setText(q.getTitle());
 			t.votes.setText(String.valueOf(q.getScore()));
@@ -405,7 +380,7 @@ public class UserActivity extends ListActivity {
 			
 			t.tags.removeAllViews();
 			for (String tag: q.getTags()){
-				tagView = (TextView) View.inflate(context, R.layout.tag, null);
+				tagView = (TextView) inflater.inflate(R.layout.tag, null);
 				tagView.setText(tag);
 				// tagView.setOnClickListener(onTagClicked); What do we do here?
 				t.tags.addView(tagView, tagLayout);
@@ -433,7 +408,7 @@ public class UserActivity extends ListActivity {
 
 		@Override
 		public View newView(Context context, ViewGroup parent) {
-			View v = View.inflate(context, R.layout.item_question, null);
+			View v = inflater.inflate(R.layout.item_question, null);
 			Tag t = new Tag(v);
 			v.setTag(t);
 			return v;
@@ -444,7 +419,7 @@ public class UserActivity extends ListActivity {
 			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
-				"&qid=" + Uri.encode(String.valueOf(mQuestion.getPostId()));
+				"&qid=" + Uri.encode(String.valueOf(question.getPostId()));
 			i.setData(Uri.parse(uri));
 			startActivity(i);
 		}
@@ -458,9 +433,10 @@ public class UserActivity extends ListActivity {
 	
 	private class AnswerItem extends MultiItem {
 		
-		private Answer mAnswer;
-		private Context context;
-		private Resources mResources;
+		private final Answer answer;
+		private final Context context;
+		private final LayoutInflater inflater;
+		private final Resources mResources;
 
 		private class Tag {
 			public TextView score;
@@ -471,27 +447,28 @@ public class UserActivity extends ListActivity {
 			}
 		}
 		
-		public AnswerItem(Answer a, Context ctx) {
-			mAnswer = a;
-			context = ctx;
-			mResources = ctx.getResources();
+		public AnswerItem(Answer answer, Context context) {
+			this.answer = answer;
+			this.context = context;
+			inflater = LayoutInflater.from(context);
+			mResources = context.getResources();
 		}
 
 		@Override
 		public void bindView(View view, Context context) {
 			Tag t = (Tag) view.getTag();
-			t.score.setText(String.valueOf(mAnswer.getScore()));
-			t.title.setText(mAnswer.getTitle());
+			t.score.setText(String.valueOf(answer.getScore()));
+			t.title.setText(answer.getTitle());
 			
-			if (mAnswer.isAccepted()) {
+			if (answer.isAccepted()) {
 				t.score.setBackgroundResource(R.color.score_max_bg);
 				t.score.setTextColor(mResources.getColor(R.color.score_max_text));
 			}
-			else if (mAnswer.getScore() == 0) {
+			else if (answer.getScore() == 0) {
 				t.score.setBackgroundResource(R.color.score_neutral_bg);
 				t.score.setTextColor(mResources.getColor(R.color.score_neutral_text));
 			}
-			else if (mAnswer.getScore() > 0) {
+			else if (answer.getScore() > 0) {
 				t.score.setBackgroundResource(R.color.score_high_bg);
 				t.score.setTextColor(mResources.getColor(R.color.score_high_text));
 			}
@@ -504,7 +481,7 @@ public class UserActivity extends ListActivity {
 		@Override
 		public View newView(Context context, ViewGroup parent) {
 			Tag t;
-			View v = View.inflate(context, R.layout.item_answer, null);
+			View v = inflater.inflate(R.layout.item_answer, null);
 			t = new Tag(v);
 			v.setTag(t);
 			return v;
@@ -515,7 +492,7 @@ public class UserActivity extends ListActivity {
 			Intent i = new Intent(UserActivity.this, QuestionActivity.class);
 			String uri = "droidstack://question" +
 				"?endpoint=" + Uri.encode(mEndpoint) +
-				"&qid=" + Uri.encode(String.valueOf(mAnswer.getQuestionId()));
+				"&qid=" + Uri.encode(String.valueOf(answer.getQuestionId()));
 			i.setData(Uri.parse(uri));
 			startActivity(i);
 		}

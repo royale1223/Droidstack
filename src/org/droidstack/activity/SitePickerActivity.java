@@ -60,6 +60,7 @@ public class SitePickerActivity extends ListActivity {
 		}
 		@Override
 		protected void onPostExecute(List<Site> result) {
+			if (isFinishing()) return;
 			mAdapter.setLoading(false);
 			if (e != null) {
 				new AlertDialog.Builder(SitePickerActivity.this)

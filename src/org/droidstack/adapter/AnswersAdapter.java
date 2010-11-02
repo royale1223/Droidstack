@@ -8,6 +8,7 @@ import org.droidstack.R;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -16,9 +17,10 @@ import android.widget.TextView;
 public class AnswersAdapter extends BaseAdapter {
 	
 	private String title;
-	private Context context;
-	private List<Answer> answers;
-	private Resources resources;
+	private final Context context;
+	private final LayoutInflater inflater;
+	private final List<Answer> answers;
+	private final Resources resources;
 	private boolean loading;
 	
 	private class Tag {
@@ -31,10 +33,11 @@ public class AnswersAdapter extends BaseAdapter {
 		}
 	}
 	
-	public AnswersAdapter(Context ctx, List<Answer> data) {
-		context = ctx;
-		answers = data;
+	public AnswersAdapter(Context context, List<Answer> answers) {
+		this.context = context;
+		this.answers = answers;
 		resources = context.getResources();
+		inflater = LayoutInflater.from(context);
 	}
 	
 	public void setLoading(boolean isLoading) {
@@ -114,19 +117,19 @@ public class AnswersAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (title != null) {
 			if (position == 0) {
-				View v = View.inflate(context, R.layout.item_header, null);
+				View v = inflater.inflate(R.layout.item_header, null);
 				((TextView)v.findViewById(R.id.title)).setText(title);
 				return v;
 			}
 			position--;
 		}
-		if (position == answers.size()) return View.inflate(context, R.layout.item_loading, null);
+		if (position == answers.size()) return inflater.inflate(R.layout.item_loading, null);
 		Answer a = answers.get(position);
 		View v;
 		Tag t;
 		
 		if (convertView == null || convertView.getTag() == null) {
-			v = View.inflate(context, R.layout.item_answer, null);
+			v = inflater.inflate(R.layout.item_answer, null);
 			t = new Tag(v);
 			v.setTag(t);
 		}

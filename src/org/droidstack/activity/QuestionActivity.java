@@ -394,6 +394,7 @@ public class QuestionActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(Void result) {
+			if (isFinishing()) return;
 			isRequestOngoing = false;
 			mProgress.setVisibility(View.GONE);
 			if (mException != null) {
@@ -443,6 +444,7 @@ public class QuestionActivity extends Activity {
 		
 		@Override
 		protected void onPostExecute(List<Answer> result) {
+			if (isFinishing()) return;
 			isRequestOngoing = false;
 			mProgress.setVisibility(View.GONE);
 			if (mException != null) {

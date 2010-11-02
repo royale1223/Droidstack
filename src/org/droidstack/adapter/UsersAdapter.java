@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -72,14 +73,17 @@ public class UsersAdapter extends BaseAdapter {
 		
 	}
 	
-	private Context context;
-	private List<User> users;
+	private final Context context;
+	private final LayoutInflater inflater;
+	private final List<User> users;
 	private boolean loading;
-	private final HashMap<String, Bitmap> avatars = new HashMap<String, Bitmap>();
+	private final HashMap<String, Bitmap> avatars;
 	
-	public UsersAdapter(Context context, List<User> users) {
+	public UsersAdapter(Context context, List<User> users, HashMap<String, Bitmap> avatars) {
 		this.context = context;
 		this.users = users;
+		this.avatars = avatars;
+		inflater = LayoutInflater.from(context);
 	}
 	
 	public void setLoading(boolean isLoading) {
@@ -116,8 +120,7 @@ public class UsersAdapter extends BaseAdapter {
 	
 	@Override
 	public boolean areAllItemsEnabled() {
-		if (loading) return false;
-		else return true;
+		return false;
 	}
 
 	@Override
@@ -128,12 +131,12 @@ public class UsersAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == users.size()) return View.inflate(context, R.layout.item_loading, null);
+		if (position == users.size()) return inflater.inflate(R.layout.item_loading, null);
 		User user = users.get(position);
 		View v = convertView;
 		Tag t;
 		if (v == null || v.getTag() == null) {
-			v = View.inflate(context, R.layout.item_user, null);
+			v = inflater.inflate(R.layout.item_user, null);
 			t = new Tag(v);
 			v.setTag(t);
 		}
@@ -148,7 +151,6 @@ public class UsersAdapter extends BaseAdapter {
 			t.avatar.setImageBitmap(avatars.get(user.getEmailHash()));
 		}
 		else {
-			new GetAvatar().execute(user.getEmailHash());
 			t.avatar.setImageResource(R.drawable.noavatar);
 		}
 		

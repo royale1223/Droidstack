@@ -170,6 +170,7 @@ public class TagsActivity extends ListActivity {
 		
 		@Override
 		protected void onPostExecute(List<Tag> result) {
+			if (isFinishing()) return;
 			isRequestOngoing = false;
 			if (e != null) {
 				new AlertDialog.Builder(TagsActivity.this)

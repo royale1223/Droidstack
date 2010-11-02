@@ -9,6 +9,7 @@ import org.droidstack.R;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -19,11 +20,12 @@ import android.widget.TextView;
 public class QuestionsAdapter extends BaseAdapter {
 	
 	private String title;
-	private Context context;
-	private List<Question> questions;
+	private final Context context;
+	private final LayoutInflater inflater;
+	private final List<Question> questions;
 	private Resources resources;
 	private boolean loading;
-	private LinearLayout.LayoutParams tagLayout;
+	private final LinearLayout.LayoutParams tagLayout;
 	private OnClickListener tagClickListener;
 	
 	private class Tag {
@@ -50,13 +52,14 @@ public class QuestionsAdapter extends BaseAdapter {
 		}
 	}
 	
-	public QuestionsAdapter(Context ctx, List<Question> data, OnClickListener onTagClicked) {
-		context = ctx;
-		questions = data;
+	public QuestionsAdapter(Context context, List<Question> questions, OnClickListener onTagClicked) {
+		this.context = context;
+		this.questions = questions;
 		tagLayout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
 		tagLayout.setMargins(0, 0, 5, 0);
 		resources = context.getResources();
 		tagClickListener = onTagClicked;
+		inflater = LayoutInflater.from(context);
 	}
 	
 	public void setLoading(boolean isLoading) {
@@ -136,20 +139,20 @@ public class QuestionsAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (title != null) {
 			if (position == 0) {
-				View v = View.inflate(context, R.layout.item_header, null);
+				View v = inflater.inflate(R.layout.item_header, null);
 				((TextView)v.findViewById(R.id.title)).setText(title);
 				return v;
 			}
 			position--;
 		}
-		if (position == questions.size()) return View.inflate(context, R.layout.item_loading, null);
+		if (position == questions.size()) return inflater.inflate(R.layout.item_loading, null);
 		Question q = questions.get(position);
 		View v;
 		TextView tagView;
 		Tag h;
 		
 		if (convertView == null || convertView.getTag() == null) {
-			v = View.inflate(context, R.layout.item_question, null);
+			v = inflater.inflate(R.layout.item_question, null);
 			h = new Tag(v);
 			v.setTag(h);
 		}
@@ -177,7 +180,7 @@ public class QuestionsAdapter extends BaseAdapter {
 		
 		h.tags.removeAllViews();
 		for (String tag: q.getTags()){
-			tagView = (TextView) View.inflate(context, R.layout.tag, null);
+			tagView = (TextView) inflater.inflate(R.layout.tag, null);
 			tagView.setText(tag);
 			tagView.setOnClickListener(tagClickListener);
 			h.tags.addView(tagView, tagLayout);

@@ -7,6 +7,7 @@ import net.sf.stackwrap4j.entities.Reputation;
 import org.droidstack.R;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -14,8 +15,9 @@ import android.widget.TextView;
 
 public class ReputationAdapter extends BaseAdapter {
 
-	private Context context;
-	private List<Reputation> changes;
+	private final Context context;
+	private final LayoutInflater inflater;
+	private final List<Reputation> changes;
 	private boolean loading;
 	
 	private class Tag {
@@ -29,9 +31,10 @@ public class ReputationAdapter extends BaseAdapter {
 		}
 	}
 	
-	public ReputationAdapter(Context ctx, List<Reputation> data) {
-		context = ctx;
-		changes = data;
+	public ReputationAdapter(Context context, List<Reputation> changes) {
+		this.context = context;
+		this.changes = changes;
+		inflater = LayoutInflater.from(context);
 	}
 
 	public void setLoading(boolean isLoading) {
@@ -75,13 +78,13 @@ public class ReputationAdapter extends BaseAdapter {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == changes.size()) return View.inflate(context, R.layout.item_loading, null);
+		if (position == changes.size()) return inflater.inflate(R.layout.item_loading, null);
 		Reputation r = changes.get(position);
 		View v;
 		Tag t;
 		
 		if (convertView == null || convertView.getTag() == null) {
-			v = View.inflate(context, R.layout.item_rep, null);
+			v = inflater.inflate(R.layout.item_rep, null);
 			t = new Tag(v);
 			v.setTag(t);
 		}

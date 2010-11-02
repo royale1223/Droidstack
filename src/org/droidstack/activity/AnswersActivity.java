@@ -219,6 +219,7 @@ public class AnswersActivity extends ListActivity {
 		}
 		@Override
 		protected void onPostExecute(List<Answer> result) {
+			if (isFinishing()) return;
 			mIsRequestOngoing = false;
 			if (mException != null) {
 				new AlertDialog.Builder(AnswersActivity.this)

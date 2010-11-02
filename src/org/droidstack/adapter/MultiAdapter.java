@@ -18,10 +18,10 @@ public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
 	// of this method that ListView holds
 	private static final int VIEW_TYPE_COUNT = 10;
 	
-	private Context context;
+	private final Context context;
 	
-	private ArrayList<MultiItem> listItems;
-	private SparseIntArray viewTypes;
+	private final ArrayList<MultiItem> listItems;
+	private final SparseIntArray viewTypes;
 	
 	private int viewTypeCount;
 	
@@ -42,7 +42,7 @@ public class MultiAdapter extends BaseAdapter implements OnItemClickListener {
 		listItems = new ArrayList<MultiAdapter.MultiItem>();
 		viewTypes = new SparseIntArray();
 		
-		this.viewTypeCount = viewTypeCount; 
+		this.viewTypeCount = viewTypeCount;
 	}
 	
 	public MultiAdapter(Context context) {
