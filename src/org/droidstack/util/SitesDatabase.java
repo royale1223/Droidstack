@@ -119,8 +119,8 @@ public class SitesDatabase {
 	
 	@Override
 	protected void finalize() throws Throwable {
-		mDatabase.close();
 		mOpenHelper.close();
+		mDatabase.close();
 	}
 	
 }
