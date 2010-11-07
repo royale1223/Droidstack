@@ -107,7 +107,6 @@ public class SitePickerActivity extends ListActivity {
 					endpoints[i] = site.getApiEndpoint();
 					names[i] = site.getName();
 					icons[i] = site.getIconUrl();
-					Log.d(Const.TAG, endpoints[i]);
 				}
 				Intent result = new Intent();
 				result.putExtra("endpoints", endpoints);
