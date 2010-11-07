@@ -13,13 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 
 public class SiteActivity extends ListActivity {
@@ -60,8 +59,6 @@ public class SiteActivity extends ListActivity {
 		String[] items = getResources().getStringArray(R.array.site_actions);
 		mAdapter = new ArrayAdapter<String>(this, R.layout.item_siteaction, R.id.title, items);
 		setListAdapter(mAdapter);
-		
-		getListView().setOnItemClickListener(onItemClicked);
 	}
 	
 	@Override
@@ -127,86 +124,84 @@ public class SiteActivity extends ListActivity {
 		});
 		return false;
 	}
-
-	private OnItemClickListener onItemClicked = new OnItemClickListener() {
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			Class<?> activity = null;
-			String uri = null;
-			switch(position) {
-			case POS_ALL:
-				activity = QuestionsActivity.class;
-				uri = "droidstack://questions/all?";
-				break;
-			case POS_UNANSWERED:
-				activity = QuestionsActivity.class;
-				uri = "droidstack://questions/unanswered?";
-				break;
-			case POS_SEARCH:
-				onSearchRequested();
-				break;
-			case POS_TAGS:
-				activity = TagsActivity.class;
-				uri = "droidstack://tags?";
-				break;
-			case POS_USERS:
-				activity = UsersActivity.class;
-				uri = "droidstack://users?";
-				break;
-			case POS_MY_QUESTIONS:
-				if (mUserID == 0) {
-					Toast.makeText(SiteActivity.this,
-							R.string.no_userid,
-							Toast.LENGTH_LONG).show();
-					break;
-				}
-				activity = QuestionsActivity.class;
-				uri = "droidstack://questions/user" +
-					"?uid=" + mUserID +
-					"&uname=" + Uri.encode(mUserName) + "&";
-				break;
-			case POS_FAVORITES:
-				if (mUserID == 0) {
-					Toast.makeText(SiteActivity.this,
-							R.string.no_userid,
-							Toast.LENGTH_LONG).show();
-					break;
-				}
-				activity = QuestionsActivity.class;
-				uri = "droidstack://questions/favorites" +
-					"?uid=" + mUserID +
-					"&uname=" + Uri.encode(mUserName) + "&";
-				break;
-			case POS_MY_ANSWERS:
-				if (mUserID == 0) {
-					Toast.makeText(SiteActivity.this,
-							R.string.no_userid,
-							Toast.LENGTH_LONG).show();
-					break;
-				}
-				activity = AnswersActivity.class;
-				uri = "droidstack://answers/user" +
-					"?uid=" + mUserID +
-					"&uname=" + Uri.encode(mUserName) + "&";
-				break;
-			case POS_MY_PROFILE:
-				if (mUserID == 0) {
-					Toast.makeText(SiteActivity.this,
-							R.string.no_userid,
-							Toast.LENGTH_LONG).show();
-					break;
-				}
-				activity = UserActivity.class;
-				uri = "droidstack://user?uid=" + mUserID + "&";
+	
+	@Override
+	protected void onListItemClick(ListView parent, View view, int position, long id) {
+		Class<?> activity = null;
+		String uri = null;
+		switch(position) {
+		case POS_ALL:
+			activity = QuestionsActivity.class;
+			uri = "droidstack://questions/all?";
+			break;
+		case POS_UNANSWERED:
+			activity = QuestionsActivity.class;
+			uri = "droidstack://questions/unanswered?";
+			break;
+		case POS_SEARCH:
+			onSearchRequested();
+			break;
+		case POS_TAGS:
+			activity = TagsActivity.class;
+			uri = "droidstack://tags?";
+			break;
+		case POS_USERS:
+			activity = UsersActivity.class;
+			uri = "droidstack://users?";
+			break;
+		case POS_MY_QUESTIONS:
+			if (mUserID == 0) {
+				Toast.makeText(SiteActivity.this,
+						R.string.no_userid,
+						Toast.LENGTH_LONG).show();
 				break;
 			}
-			if (activity != null && uri != null) {
-				uri += "endpoint=" + Uri.encode(mEndpoint) + "&name=" + Uri.encode(mSiteName);
-				Intent i = new Intent(SiteActivity.this, activity);
-				i.setData(Uri.parse(uri));
-				startActivity(i);
+			activity = QuestionsActivity.class;
+			uri = "droidstack://questions/user" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUserName) + "&";
+			break;
+		case POS_FAVORITES:
+			if (mUserID == 0) {
+				Toast.makeText(SiteActivity.this,
+						R.string.no_userid,
+						Toast.LENGTH_LONG).show();
+				break;
 			}
+			activity = QuestionsActivity.class;
+			uri = "droidstack://questions/favorites" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUserName) + "&";
+			break;
+		case POS_MY_ANSWERS:
+			if (mUserID == 0) {
+				Toast.makeText(SiteActivity.this,
+						R.string.no_userid,
+						Toast.LENGTH_LONG).show();
+				break;
+			}
+			activity = AnswersActivity.class;
+			uri = "droidstack://answers/user" +
+				"?uid=" + mUserID +
+				"&uname=" + Uri.encode(mUserName) + "&";
+			break;
+		case POS_MY_PROFILE:
+			if (mUserID == 0) {
+				Toast.makeText(SiteActivity.this,
+						R.string.no_userid,
+						Toast.LENGTH_LONG).show();
+				break;
+			}
+			activity = UserActivity.class;
+			uri = "droidstack://user?uid=" + mUserID + "&";
+			break;
 		}
-	};
+		if (activity != null && uri != null) {
+			uri += "endpoint=" + Uri.encode(mEndpoint) + "&name=" + Uri.encode(mSiteName);
+			Intent i = new Intent(SiteActivity.this, activity);
+			i.setData(Uri.parse(uri));
+			startActivity(i);
+		}
+	}
 	
 }

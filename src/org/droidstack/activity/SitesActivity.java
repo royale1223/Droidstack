@@ -45,8 +45,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class SitesActivity extends ListActivity {
 	
@@ -81,7 +81,6 @@ public class SitesActivity extends ListActivity {
 
         mAdapter = new SitesCursorAdapter(this, mSites);
         setListAdapter(mAdapter);
-        getListView().setOnItemClickListener(onSiteClicked);
         registerForContextMenu(getListView());
         
         // check for missing icons
@@ -206,28 +205,24 @@ public class SitesActivity extends ListActivity {
 		.create().show();
     }
 
-	private OnItemClickListener onSiteClicked = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			Object item = mAdapter.getItem(position);
-			if (item instanceof Integer) return;
-			Cursor site = (Cursor) item;
-			String endpoint = site.getString(site.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
-			String name = site.getString(site.getColumnIndex(SitesDatabase.KEY_NAME));
-			int uid = site.getInt(site.getColumnIndex(SitesDatabase.KEY_UID));
-			String uname = site.getString(site.getColumnIndex(SitesDatabase.KEY_UNAME));
-			Intent i = new Intent(SitesActivity.this, SiteActivity.class);
-			String uri = "droidstack://site/" +
-				"?endpoint=" + Uri.encode(endpoint) +
-				"&name=" + Uri.encode(name) +
-				"&uid=" + String.valueOf(uid) +
-				"&uname=" + Uri.encode(uname);
-			i.setData(Uri.parse(uri));
-			startActivity(i);
-		}
-	};
+    @Override
+    protected void onListItemClick(ListView parent, View view, int position, long id) {
+    	Object item = mAdapter.getItem(position);
+		if (item instanceof Integer) return;
+		Cursor site = (Cursor) item;
+		String endpoint = site.getString(site.getColumnIndex(SitesDatabase.KEY_ENDPOINT));
+		String name = site.getString(site.getColumnIndex(SitesDatabase.KEY_NAME));
+		int uid = site.getInt(site.getColumnIndex(SitesDatabase.KEY_UID));
+		String uname = site.getString(site.getColumnIndex(SitesDatabase.KEY_UNAME));
+		Intent i = new Intent(SitesActivity.this, SiteActivity.class);
+		String uri = "droidstack://site" +
+			"?endpoint=" + Uri.encode(endpoint) +
+			"&name=" + Uri.encode(name) +
+			"&uid=" + String.valueOf(uid) +
+			"&uname=" + Uri.encode(uname);
+		i.setData(Uri.parse(uri));
+		startActivity(i);
+    }
     
     @Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -347,5 +342,18 @@ public class SitesActivity extends ListActivity {
     	}
     	return false;
     }
+
+	public void openChat(View target) {
+		int position = (Integer) target.getTag();
+		mSites.moveToPosition(position);
+		String endpoint = SitesDatabase.getEndpoint(mSites);
+		String name = SitesDatabase.getName(mSites);
+		Intent i = new Intent(this, ChatActivity.class);
+		String uri = "droidstack://chat" +
+			"?endpoint=" + Uri.encode(endpoint) +
+			"&name=" + Uri.encode(name);
+		i.setData(Uri.parse(uri));
+		startActivity(i);
+	}
     
 }
