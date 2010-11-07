@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+	<WebView android:id="@+id/content"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent" />
+	<LinearLayout android:id="@+id/title_layout"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/transparent_title"
+		android:orientation="horizontal"
+		android:gravity="center_vertical">
+		<TextView android:id="@+id/title"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:padding="10dp"
+			android:textAppearance="@android:style/TextAppearance.Medium"
+			android:textStyle="bold" />
+		<ProgressBar
+			android:layout_width="16dp"
+			android:layout_height="16dp"
+			android:layout_marginRight="10dp"
+			android:indeterminateOnly="true" />
+	</LinearLayout>
+</merge>
