@@ -44,7 +44,17 @@ public class NotificationsService extends Service {
 	private SharedPreferences mPreferences;
 	
 	@Override
-	public void onCreate() {
+	public void onStart(Intent intent, int startId) {
+		handleIntent(intent);
+	}
+	
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		handleIntent(intent);
+		return START_NOT_STICKY;
+	}
+	
+	private void handleIntent(Intent intent) {
 		PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
 		mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, Const.TAG);
 		mWakeLock.acquire();
@@ -140,7 +150,6 @@ public class NotificationsService extends Service {
 		
 		@Override
 		protected void onPostExecute(Void result) {
-			mSites.close();
 			stopSelf();
 		}
 	}
@@ -148,8 +157,10 @@ public class NotificationsService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		if (mSites != null) mSites.close();
+		if (mDB != null) mDB.close();
+		Log.d(Const.TAG, "Releasing wakelock");
 		mWakeLock.release();
-		Log.d(Const.TAG, "Wakelock released");
 	}
 
 }
