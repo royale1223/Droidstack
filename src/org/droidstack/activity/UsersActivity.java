@@ -28,6 +28,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AbsListView;
@@ -194,7 +195,7 @@ public class UsersActivity extends ListActivity {
 		
 	}
 	
-	private class GetAvatars extends AsyncTask<Void, Void, Void> {
+	private class GetAvatars extends AsyncTask<Void, Pair<String, Bitmap>, Void> {
 		
 		private int size = 64;
 		private List<String> hashes;
@@ -211,9 +212,10 @@ public class UsersActivity extends ListActivity {
 		protected Void doInBackground(Void... params) {
 			for (String hash: hashes) {
 				try {
-					URL avatar = new URL("http://www.gravatar.com/avatar/" + hash + "?s=" + size + "&d=identicon&r=PG");
-					mAvatars.put(hash, BitmapFactory.decodeStream(avatar.openStream()));
-					publishProgress();
+					URL avatarURL = new URL("http://www.gravatar.com/avatar/" + hash + "?s=" + size + "&d=identicon&r=PG");
+					Bitmap avatar = BitmapFactory.decodeStream(avatarURL.openStream());
+					Pair<String, Bitmap> pair = new Pair<String, Bitmap>(hash, avatar);
+					publishProgress(pair);
 				}
 				catch (Exception e) {
 					Log.e(Const.TAG, "Could not fetch avatar", e);
@@ -223,7 +225,9 @@ public class UsersActivity extends ListActivity {
 		}
 		
 		@Override
-		protected void onProgressUpdate(Void... values) {
+		protected void onProgressUpdate(Pair<String, Bitmap>... pairs) {
+			if (isFinishing()) return;
+			mAvatars.put(pairs[0].first, pairs[0].second);
 			mAdapter.notifyDataSetChanged();
 		}
 		
