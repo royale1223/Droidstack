@@ -168,6 +168,7 @@ public class SitesActivity extends ListActivity {
     	}
     	@Override
     	protected void onProgressUpdate(Void... values) {
+    		if (isFinishing()) return;
     		mAdapter.notifyDataSetChanged();
     	}
     	@Override
