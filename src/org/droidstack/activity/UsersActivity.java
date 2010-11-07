@@ -195,7 +195,7 @@ public class UsersActivity extends ListActivity {
 		
 	}
 	
-	private class GetAvatars extends AsyncTask<Void, Pair<String, Bitmap>, Void> {
+	private class GetAvatars extends AsyncTask<Void, Object, Void> {
 		
 		private int size = 64;
 		private List<String> hashes;
@@ -215,8 +215,7 @@ public class UsersActivity extends ListActivity {
 				try {
 					URL avatarURL = new URL("http://www.gravatar.com/avatar/" + hash + "?s=" + size + "&d=identicon&r=PG");
 					Bitmap avatar = BitmapFactory.decodeStream(avatarURL.openStream());
-					Pair<String, Bitmap> pair = new Pair<String, Bitmap>(hash, avatar);
-					publishProgress(pair);
+					publishProgress(hash, avatar);
 				}
 				catch (Exception e) {
 					Log.e(Const.TAG, "Could not fetch avatar", e);
@@ -226,9 +225,9 @@ public class UsersActivity extends ListActivity {
 		}
 		
 		@Override
-		protected void onProgressUpdate(Pair<String, Bitmap>... pairs) {
+		protected void onProgressUpdate(Object... params) {
 			if (isFinishing()) return;
-			mAvatars.put(pairs[0].first, pairs[0].second);
+			mAvatars.put((String) params[0], (Bitmap) params[1]);
 			mAdapter.notifyDataSetChanged();
 		}
 		
