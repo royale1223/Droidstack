@@ -13,17 +13,17 @@
 		android:fadeScrollbars="true"
 		android:scrollbarStyle="insideOverlay"
 	/>
-	<RelativeLayout
+	<LinearLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:background="@android:drawable/bottom_bar"
+		android:gravity="center_vertical"
+		android:background="@drawable/bottom_bar"
+		android:orientation="horizontal"
 	>
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_alignParentLeft="true"
-			android:layout_centerVertical="true"
+			android:layout_weight="1"
 			style="@android:style/TextAppearance.Medium"
 			android:textColor="@android:color/primary_text_dark"
 			android:textStyle="bold"
@@ -33,37 +33,35 @@
 			android:paddingRight="5dip"
 			android:id="@+id/answer_count"
 		/>
-		<Button
-			android:layout_width="48dip"
-			android:layout_height="48dip"
-			android:layout_alignParentRight="true"
-			android:layout_centerVertical="true"
-			android:text="▶"
-			android:textAppearance="@android:style/TextAppearance.Large"
-			android:id="@+id/next"
-			android:onClick="changePost"
-			android:enabled="false"
-		/>
-		<Button
-			android:layout_width="48dip"
-			android:layout_height="48dip"
-			android:layout_toLeftOf="@id/next"
-			android:layout_centerVertical="true"
-			android:text="◀"
-			android:textAppearance="@android:style/TextAppearance.Large"
-			android:id="@+id/previous"
-			android:onClick="changePost"
-			android:enabled="false"
-		/>
 		<ProgressBar
 			android:layout_width="32dp"
 			android:layout_height="32dp"
-			android:layout_toLeftOf="@id/previous"
-			android:layout_centerVertical="true"
 			android:layout_marginRight="5dp"
 			android:indeterminateOnly="true"
 			android:id="@+id/progress"
 			android:visibility="gone"
 		/>
-	</RelativeLayout>
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="◀"
+			android:paddingLeft="20dp"
+			android:paddingRight="20dp"
+			android:textAppearance="@android:style/TextAppearance.Large"
+			android:id="@+id/previous"
+			android:onClick="changePost"
+			android:enabled="false"
+		/>
+		<Button
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="▶"
+			android:paddingLeft="20dp"
+			android:paddingRight="20dp"
+			android:textAppearance="@android:style/TextAppearance.Large"
+			android:id="@+id/next"
+			android:onClick="changePost"
+			android:enabled="false"
+		/>
+	</LinearLayout>
 </LinearLayout>

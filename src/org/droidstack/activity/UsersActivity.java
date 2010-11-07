@@ -211,6 +211,7 @@ public class UsersActivity extends ListActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			for (String hash: hashes) {
+				if (isFinishing()) return null;
 				try {
 					URL avatarURL = new URL("http://www.gravatar.com/avatar/" + hash + "?s=" + size + "&d=identicon&r=PG");
 					Bitmap avatar = BitmapFactory.decodeStream(avatarURL.openStream());
