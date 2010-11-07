@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.KeyEvent;
 
 public class SitePickerActivity extends ListActivity {
 	
@@ -89,31 +90,35 @@ public class SitePickerActivity extends ListActivity {
 	}
 	
 	@Override
-	public void onBackPressed() {
-		if (mSites.size() > 0) {
-			// Bah, deprecated functions (because of a typo)
-			SparseBooleanArray checked = getListView().getCheckedItemPositions();
-			ArrayList<Integer> checkedPositions = new ArrayList<Integer>();
-			for (int i=0; i < mSites.size(); i++) {
-				if (checked.get(i)) checkedPositions.add(i);
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+			if (mSites.size() > 0) {
+				// Bah, deprecated functions (because of a typo)
+				SparseBooleanArray checked = getListView().getCheckedItemPositions();
+				ArrayList<Integer> checkedPositions = new ArrayList<Integer>();
+				for (int i=0; i < mSites.size(); i++) {
+					if (checked.get(i)) checkedPositions.add(i);
+				}
+				String[] endpoints = new String[checkedPositions.size()];
+				String[] names = new String[checkedPositions.size()];
+				String[] icons = new String[checkedPositions.size()];
+				for (int i=0; i < checkedPositions.size(); i++) {
+					Site site = mSites.get((int) checkedPositions.get(i));
+					endpoints[i] = site.getApiEndpoint();
+					names[i] = site.getName();
+					icons[i] = site.getIconUrl();
+					Log.d(Const.TAG, endpoints[i]);
+				}
+				Intent result = new Intent();
+				result.putExtra("endpoints", endpoints);
+				result.putExtra("names", names);
+				result.putExtra("icons", icons);
+				setResult(RESULT_OK, result);
 			}
-			String[] endpoints = new String[checkedPositions.size()];
-			String[] names = new String[checkedPositions.size()];
-			String[] icons = new String[checkedPositions.size()];
-			for (int i=0; i < checkedPositions.size(); i++) {
-				Site site = mSites.get((int) checkedPositions.get(i));
-				endpoints[i] = site.getApiEndpoint();
-				names[i] = site.getName();
-				icons[i] = site.getIconUrl();
-				Log.d(Const.TAG, endpoints[i]);
-			}
-			Intent result = new Intent();
-			result.putExtra("endpoints", endpoints);
-			result.putExtra("names", names);
-			result.putExtra("icons", icons);
-			setResult(RESULT_OK, result);
+			finish();
+			return true;
 		}
-		finish();
+		return super.onKeyDown(keyCode, event);
 	}
 	
 }
