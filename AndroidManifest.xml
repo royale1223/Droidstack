@@ -114,6 +114,18 @@
 	        		android:path="" />
 	    	</intent-filter>
 	    </activity>
+	    <activity android:name=".activity.ChatActivity" android:configChanges="orientation|keyboard|keyboardHidden">
+	    	<intent-filter
+	    		android:icon="@drawable/icon"
+	    		android:label="@string/intent_chat">
+	    		<action android:name="android.intent.action.VIEW" />
+	        	<category android:name="android.intent.category.DEFAULT" />
+	        	<data 
+	        		android:scheme="droidstack"
+	        		android:host="chat"
+	        		android:path="" />
+	    	</intent-filter>
+	    </activity>
 	    <activity android:name=".activity.PreferencesActivity" android:label="Preferences" />
 	    
 	    <receiver android:name=".receiver.BootReceiver">

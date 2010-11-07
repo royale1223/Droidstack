@@ -9,6 +9,7 @@
     <string name="menu_set_user">Pick user</string>
     <string name="menu_remove">Remove</string>
     <string name="menu_open_browser">Open in browser</string>
+    <string name="menu_close_chat">Close chat</string>
     <string name="menu_share">Share</string>
     <string name="no_userid">You need to pick a user for this site. Go back and long-click on a site to do that.</string>
     <string name="title_error">Error</string>
@@ -50,4 +51,5 @@
     <string name="intent_answers">View answers</string>
     <string name="intent_user">View user profile</string>
     <string name="intent_rep">View rep changes</string>
+    <string name="intent_chat">Chat</string>
 </resources>

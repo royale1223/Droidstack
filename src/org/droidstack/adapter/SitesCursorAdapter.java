@@ -30,11 +30,13 @@ public class SitesCursorAdapter extends BaseAdapter {
 		public final TextView label;
 		public final TextView user;
 		public final ImageView icon;
+		public final ImageView chat;
 		
 		public Tag(View v) {
 			label = (TextView) v.findViewById(R.id.label);
 			user = (TextView) v.findViewById(R.id.user);
 			icon = (ImageView) v.findViewById(R.id.icon);
+			chat = (ImageView) v.findViewById(R.id.chat);
 		}
 	}
 	
@@ -91,8 +93,8 @@ public class SitesCursorAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Cursor site = (Cursor) getItem(position);
-		String name = site.getString(site.getColumnIndex(SitesDatabase.KEY_NAME));
-		String user = site.getString(site.getColumnIndex(SitesDatabase.KEY_UNAME));
+		String name = SitesDatabase.getName(site);
+		String user = SitesDatabase.getUserName(site);
 		View v;
 		Tag h;
 		if (convertView == null || convertView.getTag() == null) {
@@ -111,6 +113,7 @@ public class SitesCursorAdapter extends BaseAdapter {
 		}
 		else h.user.setVisibility(View.GONE);
 		h.icon.setImageDrawable(icons.get(position));
+		h.chat.setTag(position);
 		return v;
 	}
 
