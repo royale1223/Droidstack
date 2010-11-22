@@ -410,7 +410,9 @@ public class QuestionActivity extends Activity {
 					}).create().show();
 				Log.e(Const.TAG, "Failed to get question", mException);
 			}
-			updateView();
+			else {
+				updateView();
+			}
 		}
 		
 	}
