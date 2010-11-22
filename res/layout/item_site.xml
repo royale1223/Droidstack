@@ -18,11 +18,23 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			style="@style/site_label" />
-		<TextView android:id="@+id/user"
-			android:layout_width="wrap_content"
+		<LinearLayout android:id="@+id/user_layout"
+			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			style="@style/site_user"
-			android:visibility="gone" />
+			android:orientation="horizontal"
+			android:visibility="gone">
+			<TextView android:id="@+id/user_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:inputType="text"
+				android:ellipsize="marquee"
+				style="@style/site_user" />
+			<TextView android:id="@+id/user_rep"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				style="@style/site_rep" />
+		</LinearLayout>
 	</LinearLayout>
 	<View
 		android:layout_width="1dp"

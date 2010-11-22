@@ -28,16 +28,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class UsersActivity extends ListActivity {
+public class UsersActivity extends ListActivity implements OnScrollListener {
 	
 	private String mEndpoint;
 	private StackWrapper mAPI;
@@ -71,8 +69,7 @@ public class UsersActivity extends ListActivity {
 		mAdapter = new UsersAdapter(this, mUsers, mAvatars);
 		
 		setListAdapter(mAdapter);
-		getListView().setOnScrollListener(onScroll);
-		getListView().setOnItemClickListener(onClick);
+		getListView().setOnScrollListener(this);
 		
 		if (Intent.ACTION_PICK.equals(getIntent().getAction())) isStartedForResult = true;
 		
@@ -233,47 +230,41 @@ public class UsersActivity extends ListActivity {
 		
 	}
 	
-	private OnItemClickListener onClick = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			User u = mUsers.get(position);
-			if (!isStartedForResult) {
-				Intent i = new Intent(UsersActivity.this, UserActivity.class);
-				String uri = "droidstack://user" +
-					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&uid=" + u.getId();
-				i.setData(Uri.parse(uri));
-				startActivity(i);
-			}
-			else {
-				Intent i = new Intent();
-				i.putExtra("endpoint", mEndpoint);
-				i.putExtra("uid", u.getId());
-				i.putExtra("name", u.getDisplayName());
-				i.putExtra("rep", u.getReputation());
-				i.putExtra("emailHash", u.getEmailHash());
-				setResult(RESULT_OK, i);
-				finish();
-			}
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		User u = mUsers.get(position);
+		if (!isStartedForResult) {
+			Intent i = new Intent(UsersActivity.this, UserActivity.class);
+			String uri = "droidstack://user" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&uid=" + u.getId();
+			i.setData(Uri.parse(uri));
+			startActivity(i);
+		}
+		else {
+			Intent i = new Intent();
+			i.putExtra("endpoint", mEndpoint);
+			i.putExtra("uid", u.getId());
+			i.putExtra("name", u.getDisplayName());
+			i.putExtra("rep", u.getReputation());
+			i.putExtra("emailHash", u.getEmailHash());
+			setResult(RESULT_OK, i);
+			finish();
 		}
 	};
 	
-	private OnScrollListener onScroll = new OnScrollListener() {
-		
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			// not used
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (isRequestOngoing == false && noMoreUsers == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
+			mPage++;
+			new GetUsers().execute();
 		}
-		
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
-			if (isRequestOngoing == false && noMoreUsers == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
-				mPage++;
-				new GetUsers().execute();
-			}
-		}
-	};
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// not used
+	}
 	
 }

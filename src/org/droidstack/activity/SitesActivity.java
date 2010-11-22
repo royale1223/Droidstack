@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Stats;
+import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
 
 import org.droidstack.R;
@@ -98,6 +99,9 @@ public class SitesActivity extends ListActivity {
         if (endpoints.size() > 0) {
         	new GetIcons(endpoints).execute();
         }
+        
+        // get (new) reps
+        new GetReputation().execute();
     }
     
     @Override
@@ -119,6 +123,38 @@ public class SitesActivity extends ListActivity {
     				minutes*60*1000, pi);
     		Log.d(Const.TAG, "AlarmManager set");
     	}
+    }
+    
+    private class GetReputation extends AsyncTask<Void, Void, Void> {
+		@Override
+		protected Void doInBackground(Void... params) {
+			Cursor sites = mSitesDatabase.getSites();
+			sites.moveToFirst();
+			while (!sites.isAfterLast()) {
+				try {
+					String endpoint = SitesDatabase.getEndpoint(sites);
+					int uid = SitesDatabase.getUserID(sites);
+					if (uid > 0) {
+						StackWrapper api = new StackWrapper(endpoint, Const.APIKEY);
+						User u = api.getUserById(uid);
+						mSitesDatabase.setReputation(endpoint, u.getReputation());
+						publishProgress();
+					}
+				}
+				catch (Exception e) {
+					Log.e(Const.TAG, "Could not get user info for rep update", e);
+				}
+				sites.moveToNext();
+			}
+			sites.close();
+			return null;
+		}
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			if (isFinishing()) return;
+			mSites.requery();
+			mAdapter.notifyDataSetChanged();
+		}
     }
     
     private class GetIcons extends AsyncTask<Void, Void, Void> {
@@ -272,7 +308,8 @@ public class SitesActivity extends ListActivity {
 				String endpoint = extras.getString("endpoint");
 				int uid = extras.getInt("uid");
 				String name = extras.getString("name");
-				mSitesDatabase.setUser(endpoint, uid, name);
+				int rep = extras.getInt("rep");
+				mSitesDatabase.setUser(endpoint, uid, rep, name);
 				mSites.requery();
 				mAdapter.notifyDataSetChanged();
 			}
