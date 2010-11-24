@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 public class SitesDatabase {
 
@@ -21,7 +22,7 @@ public class SitesDatabase {
 	
 	private static final String DATABASE_NAME = "stackexchange";
 	private static final String TABLE_NAME = "sites";
-	private static final int VERSION = 10;
+	private static final int VERSION = 11;
 	
 	private final SitesOpenHelper mOpenHelper;
 	private final SQLiteDatabase mDatabase;
@@ -105,6 +106,7 @@ public class SitesDatabase {
 			KEY_ENDPOINT + " TEXT PRIMARY KEY, " +
 			KEY_NAME + " TEXT, " +
 			KEY_UID + " NUMERIC, " +
+			KEY_REPUTATION + " INTEGER, " +
 			KEY_UNAME + " TEXT)";
 		
 		public SitesOpenHelper(Context context) {
@@ -124,9 +126,19 @@ public class SitesDatabase {
 			case 9:
 				db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_REPUTATION + " INTEGER");
 				break;
+			case 10:
+				try {
+					db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + KEY_REPUTATION + " INTEGER");
+				}
+				catch (Exception e) {
+					// this is a bugfix
+					Log.e(Const.TAG, "bugfix!");
+				}
+				break;
 			default:
 				db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 				onCreate(db);
+				break;
 			}
 		}
 	}
