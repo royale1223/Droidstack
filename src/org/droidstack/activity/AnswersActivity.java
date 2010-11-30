@@ -28,6 +28,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -53,6 +54,9 @@ public class AnswersActivity extends ListActivity {
 
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
+	
+	private View mTitleView;
+	private View mLoadingView;
 	
 	@Override
 	protected void onCreate(Bundle inState) {
@@ -86,6 +90,9 @@ public class AnswersActivity extends ListActivity {
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new AnswersAdapter(this, mAnswers);
+		mTitleView = View.inflate(this, R.layout.item_header, null);
+		mLoadingView = View.inflate(this, R.layout.item_loading, null);
+		getListView().addHeaderView(mTitleView, null, false);
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(onAnswersScrolled);
 		getListView().setOnItemClickListener(onAnswerClicked);
@@ -94,7 +101,7 @@ public class AnswersActivity extends ListActivity {
 		mOrderAdapter = ArrayAdapter.createFromResource(this, R.array.q_order, android.R.layout.simple_spinner_item);
 		mOrderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		
-		if (inState == null) getAnswers();
+		if (inState == null) new GetAnswersTask().execute();
 		else getListView().setSelection(inState.getInt("scroll"));
 		
 		setNiceTitle();
@@ -102,8 +109,7 @@ public class AnswersActivity extends ListActivity {
 	
 	@Override
 	public void setTitle(CharSequence title) {
-		if (mAdapter == null) return;
-		mAdapter.setTitle(title.toString());
+		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
 	}
 	
 	@Override
@@ -122,6 +128,11 @@ public class AnswersActivity extends ListActivity {
 		}
 		
 		setTitle(b);
+	}
+	
+	private void setLoading(boolean loading) {
+		getListView().removeFooterView(mLoadingView);
+		if (loading) getListView().addFooterView(mLoadingView, null, false);
 	}
 	
 	@Override
@@ -169,7 +180,7 @@ public class AnswersActivity extends ListActivity {
 					mAdapter.notifyDataSetChanged();
 					mNoMoreAnswers = false;
 					mPage = 1;
-					getAnswers();
+					new GetAnswersTask().execute();
 				}
 			});
     		b.setNegativeButton(android.R.string.cancel, null);
@@ -179,17 +190,13 @@ public class AnswersActivity extends ListActivity {
     	return false;
     }
 	
-	private void getAnswers() {
-		new GetAnswersTask().execute();
-	}
-	
 	private class GetAnswersTask extends AsyncTask<Void, Void, List<Answer>> {
 		
 		private Exception mException;
 		
 		@Override
 		protected void onPreExecute() {
-			mAdapter.setLoading(true);
+			setLoading(true);
 			mIsRequestOngoing = true;
 		}
 		
@@ -238,7 +245,7 @@ public class AnswersActivity extends ListActivity {
 				if (mPage == 1) mAnswers.clear();
 				if (result.size() < mPageSize) {
 					mNoMoreAnswers = true;
-					mAdapter.setLoading(false);
+					setLoading(false);
 				}
 				mAnswers.addAll(result);
 				mAdapter.notifyDataSetChanged();
@@ -292,7 +299,7 @@ public class AnswersActivity extends ListActivity {
 				int visibleItemCount, int totalItemCount) {
 			if (mIsRequestOngoing == false && mNoMoreAnswers == false && firstVisibleItem + visibleItemCount == totalItemCount) {
 				mPage++;
-				getAnswers();
+				new GetAnswersTask().execute();
 			}
 		}
 	};

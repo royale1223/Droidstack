@@ -42,7 +42,6 @@ import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AbsListView.LayoutParams;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 
@@ -139,7 +138,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(this);
 		
-		if (inState == null) new GetQuestionsAsync().execute();
+		if (inState == null) new GetQuestionsTask().execute();
 		else getListView().setSelection(inState.getInt("scroll"));
 		
 		setNiceTitle();
@@ -147,7 +146,6 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 	
 	@Override
 	public void setTitle(CharSequence title) {
-		mTitleView.setVisibility(View.VISIBLE);
 		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
 	}
 	
@@ -244,7 +242,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 					mAdapter.notifyDataSetChanged();
 					mNoMoreQuestions = false;
 					mPage = 1;
-					new GetQuestionsAsync().execute();
+					new GetQuestionsTask().execute();
 				}
 			});
     		b.setNegativeButton(android.R.string.cancel, null);
@@ -288,7 +286,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 					mAdapter.notifyDataSetChanged();
 					mNoMoreQuestions = false;
 					mPage = 1;
-					new GetQuestionsAsync().execute();
+					new GetQuestionsTask().execute();
 					setNiceTitle();
 				}
 			});
@@ -298,7 +296,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
     	return false;
     }
 	
-	private class GetQuestionsAsync extends AsyncTask<Void, Void, List<Question>> {
+	private class GetQuestionsTask extends AsyncTask<Void, Void, List<Question>> {
 		private Exception mException;
 		@Override
 		protected void onPreExecute() {
@@ -457,7 +455,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 			int visibleItemCount, int totalItemCount) {
 		if (!mIsRequestOngoing && !mNoMoreQuestions && firstVisibleItem + visibleItemCount == totalItemCount) {
 			mPage++;
-			new GetQuestionsAsync().execute();
+			new GetQuestionsTask().execute();
 		}
 	}
 
@@ -510,7 +508,7 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
 				mQuestions.clear();
 				mAdapter.notifyDataSetChanged();
 				setLoading(true);
-				new GetQuestionsAsync().execute();
+				new GetQuestionsTask().execute();
 				setNiceTitle();
 			}
 		});
