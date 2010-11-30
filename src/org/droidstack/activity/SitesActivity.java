@@ -54,6 +54,8 @@ public class SitesActivity extends ListActivity {
 	private final static int REQUEST_PICK_USER = 1;
 	private final static int REQUEST_PICK_SITES = 2;
 	
+	private boolean isPaused = false;
+	
 	private SitesDatabase mSitesDatabase;
 	private Cursor mSites;
 	private SitesCursorAdapter mAdapter;
@@ -107,6 +109,7 @@ public class SitesActivity extends ListActivity {
     @Override
     protected void onResume() {
     	super.onResume();
+    	isPaused = false;
     	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     	int minutes = 0;
     	try {
@@ -123,6 +126,14 @@ public class SitesActivity extends ListActivity {
     				minutes*60*1000, pi);
     		Log.d(Const.TAG, "AlarmManager set");
     	}
+    	// mSites will be requeried by Android automatically
+    	// because we called startManagingCursor()
+    	mAdapter.notifyDataSetChanged();
+    }
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	isPaused = true;
     }
     
     private class GetReputation extends AsyncTask<Void, Void, Void> {
@@ -151,7 +162,7 @@ public class SitesActivity extends ListActivity {
 		}
 		@Override
 		protected void onProgressUpdate(Void... values) {
-			if (isFinishing()) return;
+			if (isFinishing() || isPaused) return;
 			mSites.requery();
 			mAdapter.notifyDataSetChanged();
 		}
@@ -204,12 +215,7 @@ public class SitesActivity extends ListActivity {
     	}
     	@Override
     	protected void onProgressUpdate(Void... values) {
-    		if (isFinishing()) return;
-    		mAdapter.notifyDataSetChanged();
-    	}
-    	@Override
-    	protected void onPostExecute(Void result) {
-    		if (isFinishing()) return;
+    		if (isFinishing() || isPaused) return;
     		mAdapter.notifyDataSetChanged();
     	}
     }

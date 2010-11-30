@@ -19,12 +19,10 @@ import android.widget.TextView;
 
 public class QuestionsAdapter extends BaseAdapter {
 	
-	private String title;
 	private final Context context;
 	private final LayoutInflater inflater;
 	private final List<Question> questions;
 	private Resources resources;
-	private boolean loading;
 	private final LinearLayout.LayoutParams tagLayout;
 	private OnClickListener tagClickListener;
 	
@@ -62,90 +60,23 @@ public class QuestionsAdapter extends BaseAdapter {
 		inflater = LayoutInflater.from(context);
 	}
 	
-	public void setLoading(boolean isLoading) {
-		if (loading == isLoading) return;
-		loading = isLoading;
-		notifyDataSetChanged();
-	}
-	
-	public void setTitle(String title) {
-		if (title.equals(this.title)) return;
-		this.title = title;
-		notifyDataSetChanged();
-	}
-	
 	@Override
 	public int getCount() {
-		int count = questions.size();
-		if (loading) count++;
-		if (title != null) count++;
-		return count;
-	}
-	
-	@Override
-	public int getViewTypeCount() {
-		return 1;
-	}
-	
-	@Override
-	public int getItemViewType(int position) {
-		if (title != null) {
-			if (position == 0) return IGNORE_ITEM_VIEW_TYPE;
-			position--;
-		}
-		if (position == questions.size()) return IGNORE_ITEM_VIEW_TYPE;
-		return 0;
+		return questions.size();
 	}
 	
 	@Override
 	public Object getItem(int position) {
-		if (title != null) position--;
-		try {
-			return questions.get(position);
-		}
-		catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return questions.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
-		if (title != null) position--;
-		try {
-			return questions.get(position).getPostId();
-		}
-		catch (IndexOutOfBoundsException e) {
-			return -1;
-		}
-	}
-
-	@Override
-	public boolean areAllItemsEnabled() {
-		if (loading || title != null) return false;
-		else return true;
-	}
-
-	@Override
-	public boolean isEnabled(int position) {
-		if (title != null) {
-			if (position == 0) return false;
-			position--;
-		}
-		if (position == questions.size()) return false;
-		return true;
+		return questions.get(position).getPostId();
 	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (title != null) {
-			if (position == 0) {
-				View v = inflater.inflate(R.layout.item_header, null);
-				((TextView)v.findViewById(R.id.title)).setText(title);
-				return v;
-			}
-			position--;
-		}
-		if (position == questions.size()) return inflater.inflate(R.layout.item_loading, null);
 		Question q = questions.get(position);
 		View v;
 		TextView tagView;

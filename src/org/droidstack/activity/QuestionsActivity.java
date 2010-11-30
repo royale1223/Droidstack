@@ -36,17 +36,17 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AbsListView.LayoutParams;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 
-public class QuestionsActivity extends ListActivity {
+public class QuestionsActivity extends ListActivity implements OnScrollListener, OnClickListener {
 	
 	public final static String TYPE_ALL = "all";
 	public final static String TYPE_UNANSWERED = "unanswered";
@@ -74,6 +74,9 @@ public class QuestionsActivity extends ListActivity {
 	private QuestionsAdapter mAdapter;
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
+	
+	private View mTitleView;
+	private View mLoadingView;
 	
 	@Override
 	protected void onCreate(Bundle inState) {
@@ -129,13 +132,14 @@ public class QuestionsActivity extends ListActivity {
 			if (inState.getBoolean("isAsc")) mOrder = Order.ASC;
 			mIsRequestOngoing = false;
 		}
-		mAdapter = new QuestionsAdapter(this, mQuestions, onTagClicked);
-		mAdapter.setTitle("Questions");
+		mAdapter = new QuestionsAdapter(this, mQuestions, this);
+		mTitleView = View.inflate(this, R.layout.item_header, null);
+		mLoadingView = View.inflate(this, R.layout.item_loading, null);
+		getListView().addHeaderView(mTitleView, null, false);
 		setListAdapter(mAdapter);
-		getListView().setOnItemClickListener(onQuestionClicked);
-		getListView().setOnScrollListener(onQuestionsScrolled);
+		getListView().setOnScrollListener(this);
 		
-		if (inState == null) getQuestions();
+		if (inState == null) new GetQuestionsAsync().execute();
 		else getListView().setSelection(inState.getInt("scroll"));
 		
 		setNiceTitle();
@@ -143,8 +147,8 @@ public class QuestionsActivity extends ListActivity {
 	
 	@Override
 	public void setTitle(CharSequence title) {
-		if (mAdapter == null) return;
-		mAdapter.setTitle(title.toString());
+		mTitleView.setVisibility(View.VISIBLE);
+		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
 	}
 	
 	@Override
@@ -186,6 +190,11 @@ public class QuestionsActivity extends ListActivity {
 		}
 		
 		setTitle(b);
+	}
+	
+	private void setLoading(boolean loading) {
+		getListView().removeFooterView(mLoadingView);
+		if (loading) getListView().addFooterView(mLoadingView, null, false);
 	}
 	
 	@Override
@@ -235,7 +244,7 @@ public class QuestionsActivity extends ListActivity {
 					mAdapter.notifyDataSetChanged();
 					mNoMoreQuestions = false;
 					mPage = 1;
-					getQuestions();
+					new GetQuestionsAsync().execute();
 				}
 			});
     		b.setNegativeButton(android.R.string.cancel, null);
@@ -279,7 +288,7 @@ public class QuestionsActivity extends ListActivity {
 					mAdapter.notifyDataSetChanged();
 					mNoMoreQuestions = false;
 					mPage = 1;
-					getQuestions();
+					new GetQuestionsAsync().execute();
 					setNiceTitle();
 				}
 			});
@@ -289,14 +298,13 @@ public class QuestionsActivity extends ListActivity {
     	return false;
     }
 	
-	private void getQuestions() {
-		mIsRequestOngoing = true;
-		mAdapter.setLoading(true);
-		new GetQuestionsAsync().execute();
-	}
-	
 	private class GetQuestionsAsync extends AsyncTask<Void, Void, List<Question>> {
 		private Exception mException;
+		@Override
+		protected void onPreExecute() {
+			setLoading(true);
+			mIsRequestOngoing = true;
+		}
 		
 		@Override
 		protected List<Question> doInBackground(Void... queries) {
@@ -390,7 +398,6 @@ public class QuestionsActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(List<Question> result) {
 			if (isFinishing()) return;
-			setProgressBarIndeterminateVisibility(false);
 			mIsRequestOngoing = false;
 			if (mException != null) {
 				new AlertDialog.Builder(QuestionsActivity.this)
@@ -409,7 +416,7 @@ public class QuestionsActivity extends ListActivity {
 				if (mPage == 1) mQuestions.clear();
 				if (result.size() < mPageSize) {
 					mNoMoreQuestions = true;
-					mAdapter.setLoading(false);
+					setLoading(false);
 				}
 				mQuestions.addAll(result);
 				mAdapter.notifyDataSetChanged();
@@ -421,99 +428,93 @@ public class QuestionsActivity extends ListActivity {
 		}
 	}
 	
-	private OnClickListener onTagClicked = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			// these query types do not support tags
-			if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES) || mQueryType.equals(TYPE_SEARCH)) {
-				Log.i(Const.TAG, "Tags not supported by API for this query type");
-				return;
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		if (!mIsStartedForResult) {
+			Intent i = new Intent(QuestionsActivity.this, QuestionActivity.class);
+			String uri = "droidstack://question" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + id;
+			i.setData(Uri.parse(uri));
+			startActivity(i);
+		}
+		else {
+			Question q = mQuestions.get(position);
+			Intent i = new Intent();
+			i.putExtra("id", q.getPostId());
+			i.putExtra("title", q.getTitle());
+			i.putExtra("tags", q.getTags().toArray());
+			i.putExtra("score", q.getScore());
+			i.putExtra("answers", q.getAnswerCount());
+			i.putExtra("views", q.getViewCount());
+			i.putExtra("accepted", q.getAcceptedAnswerId());
+			setResult(RESULT_OK, i);
+			finish();
+		}
+	};
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (!mIsRequestOngoing && !mNoMoreQuestions && firstVisibleItem + visibleItemCount == totalItemCount) {
+			mPage++;
+			new GetQuestionsAsync().execute();
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// not used
+	}
+
+	/* Called when a tag is clicked
+	 * @see android.view.View.OnClickListener#onClick(android.view.View)
+	 */
+	@Override
+	public void onClick(View v) {
+		// these query types do not support tags
+		if (mQueryType.equals(TYPE_USER) || mQueryType.equals(TYPE_FAVORITES) || mQueryType.equals(TYPE_SEARCH)) {
+			Log.i(Const.TAG, "Tags not supported by API for this query type");
+			return;
+		}
+		final String tag = ((TextView) v).getText().toString();
+		String[] items;
+		if (mTagged == null || mTagged.size() == 0 || mTagged.contains(tag)) {
+			items = new String[1];
+			items[0] = tag;
+		}
+		else {
+			items = new String[2];
+			items[0] = tag;
+			StringBuffer buf = new StringBuffer(tag);
+			for (String t: mTagged) {
+				buf.append(", ").append(t);
 			}
-			final String tag = ((TextView) v).getText().toString();
-			String[] items;
-			if (mTagged == null || mTagged.size() == 0 || mTagged.contains(tag)) {
-				items = new String[1];
-				items[0] = tag;
-			}
-			else {
-				items = new String[2];
-				items[0] = tag;
-				StringBuffer buf = new StringBuffer(tag);
-				for (String t: mTagged) {
-					buf.append(", ").append(t);
+			items[1] = buf.toString();
+		}
+		AlertDialog.Builder b = new AlertDialog.Builder(QuestionsActivity.this);
+		b.setTitle(R.string.title_menu_tag);
+		b.setItems(items, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch(which) {
+				case 0:
+					if (mTagged == null) mTagged = new ArrayList<String>();
+					mTagged.clear();
+					mTagged.add(tag);
+					break;
+				case 1:
+					mTagged.add(tag);
+					break;
 				}
-				items[1] = buf.toString();
+				mPage = 1;
+				mQuestions.clear();
+				mAdapter.notifyDataSetChanged();
+				setLoading(true);
+				new GetQuestionsAsync().execute();
+				setNiceTitle();
 			}
-			AlertDialog.Builder b = new AlertDialog.Builder(QuestionsActivity.this);
-			b.setTitle(R.string.title_menu_tag);
-			b.setItems(items, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					switch(which) {
-					case 0:
-						if (mTagged == null) mTagged = new ArrayList<String>();
-						mTagged.clear();
-						mTagged.add(tag);
-						break;
-					case 1:
-						mTagged.add(tag);
-						break;
-					}
-					mPage = 1;
-					mQuestions.clear();
-					mAdapter.notifyDataSetChanged();
-					mAdapter.setLoading(true);
-					getQuestions();
-					setNiceTitle();
-				}
-			});
-			b.create().show();
-		}
-	};
-	
-	private OnItemClickListener onQuestionClicked = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position,
-				long id) {
-			if (!mIsStartedForResult) {
-				Intent i = new Intent(QuestionsActivity.this, QuestionActivity.class);
-				String uri = "droidstack://question" +
-					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&qid=" + id;
-				i.setData(Uri.parse(uri));
-				startActivity(i);
-			}
-			else {
-				Question q = mQuestions.get(position);
-				Intent i = new Intent();
-				i.putExtra("id", q.getPostId());
-				i.putExtra("title", q.getTitle());
-				i.putExtra("tags", q.getTags().toArray());
-				i.putExtra("score", q.getScore());
-				i.putExtra("answers", q.getAnswerCount());
-				i.putExtra("views", q.getViewCount());
-				i.putExtra("accepted", q.getAcceptedAnswerId());
-				setResult(RESULT_OK, i);
-				finish();
-			}
-		}
-	};
-	
-	private OnScrollListener onQuestionsScrolled = new OnScrollListener() {
-		
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			// not used
-		}
-		
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
-			if (mIsRequestOngoing == false && mNoMoreQuestions == false && firstVisibleItem + visibleItemCount == totalItemCount) {
-				mPage++;
-				getQuestions();
-			}
-		}
-	};
+		});
+		b.create().show();
+	}
 	
 }
