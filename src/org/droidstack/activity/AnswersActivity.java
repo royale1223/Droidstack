@@ -55,7 +55,7 @@ public class AnswersActivity extends ListActivity {
 	private ArrayAdapter<CharSequence> mSortAdapter;
 	private ArrayAdapter<CharSequence> mOrderAdapter;
 	
-	private View mTitleView;
+	private TextView mTitleView;
 	private View mLoadingView;
 	
 	@Override
@@ -90,7 +90,7 @@ public class AnswersActivity extends ListActivity {
 			mIsRequestOngoing = false;
 		}
 		mAdapter = new AnswersAdapter(this, mAnswers);
-		mTitleView = View.inflate(this, R.layout.item_header, null);
+		mTitleView = (TextView) View.inflate(this, R.layout.item_header, null);
 		mLoadingView = View.inflate(this, R.layout.item_loading, null);
 		getListView().addHeaderView(mTitleView, null, false);
 		setListAdapter(mAdapter);
@@ -109,12 +109,7 @@ public class AnswersActivity extends ListActivity {
 	
 	@Override
 	public void setTitle(CharSequence title) {
-		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
-	}
-	
-	@Override
-	public void setTitle(int titleId) {
-		setTitle(getString(titleId));
+		mTitleView.setText(title);
 	}
 	
 	private void setNiceTitle() {

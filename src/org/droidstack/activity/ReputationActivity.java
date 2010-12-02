@@ -21,11 +21,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView.OnItemClickListener;
 
 public class ReputationActivity extends ListActivity implements OnScrollListener {
 	
@@ -43,7 +41,7 @@ public class ReputationActivity extends ListActivity implements OnScrollListener
 	private boolean isRequestOngoing = false;
 	private boolean noMoreChanges = false;
 	
-	private View mTitleView;
+	private TextView mTitleView;
 	private View mLoadingView;
 	
 	@Override
@@ -68,9 +66,9 @@ public class ReputationActivity extends ListActivity implements OnScrollListener
 		mPageSize = Const.getPageSize(this);
 		mRepChanges = new ArrayList<Reputation>();
 		mAdapter = new ReputationAdapter(this, mRepChanges);
-		mTitleView = View.inflate(this, R.layout.item_header, null);
+		mTitleView = (TextView) View.inflate(this, R.layout.item_header, null);
 		mLoadingView = View.inflate(this, R.layout.item_loading, null);
-		getListView().addHeaderView(mTitleView);
+		getListView().addHeaderView(mTitleView, null, false);
 		setListAdapter(mAdapter);
 		getListView().setOnScrollListener(this);
 		
@@ -89,7 +87,7 @@ public class ReputationActivity extends ListActivity implements OnScrollListener
 	
 	@Override
 	public void setTitle(CharSequence title) {
-		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
+		mTitleView.setText(title);
 	}
 	
 	private void setNiceTitle() {
@@ -105,7 +103,7 @@ public class ReputationActivity extends ListActivity implements OnScrollListener
 	
 	private void setLoading(boolean loading) {
 		getListView().removeFooterView(mLoadingView);
-		if (loading) getListView().addFooterView(mLoadingView);
+		if (loading) getListView().addFooterView(mLoadingView, null, false);
 	}
 	
 	@Override

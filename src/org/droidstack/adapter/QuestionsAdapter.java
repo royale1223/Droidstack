@@ -82,7 +82,7 @@ public class QuestionsAdapter extends BaseAdapter {
 		TextView tagView;
 		Tag h;
 		
-		if (convertView == null || convertView.getTag() == null) {
+		if (convertView == null) {
 			v = inflater.inflate(R.layout.item_question, null);
 			h = new Tag(v);
 			v.setTag(h);

@@ -20,12 +20,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.TextView;
 
 public class SitePickerActivity extends ListActivity {
 	
 	private List<Site> mSites;
 	private String[] mCheckedEndpoints;
 	private SitesArrayAdapter mAdapter;
+	
+	private TextView mTitleView;
+	private View mLoadingView;
 	
 	@Override
 	protected void onCreate(Bundle inState) {
@@ -37,9 +42,23 @@ public class SitePickerActivity extends ListActivity {
 		
 		mSites = new ArrayList<Site>();
 		mAdapter = new SitesArrayAdapter(this, mSites);
+		mTitleView = (TextView) View.inflate(this, R.layout.item_header, null);
+		mLoadingView = View.inflate(this, R.layout.item_loading, null);
+		getListView().addHeaderView(mTitleView, null, false);
 		setListAdapter(mAdapter);
 		
 		new GetSites().execute();
+		setTitle("Pick sites");
+	}
+	
+	@Override
+	public void setTitle(CharSequence title) {
+		mTitleView.setText(title);
+	}
+	
+	private void setLoading(boolean loading) {
+		getListView().removeFooterView(mLoadingView);
+		if (loading) getListView().addFooterView(mLoadingView, null, false);
 	}
 	
 	private class GetSites extends AsyncTask<Void, Void, List<Site>> {
@@ -47,7 +66,7 @@ public class SitePickerActivity extends ListActivity {
 		
 		@Override
 		protected void onPreExecute() {
-			mAdapter.setLoading(true);
+			setLoading(true);
 		}
 		@Override
 		protected List<Site> doInBackground(Void... params) {
@@ -62,7 +81,7 @@ public class SitePickerActivity extends ListActivity {
 		@Override
 		protected void onPostExecute(List<Site> result) {
 			if (isFinishing()) return;
-			mAdapter.setLoading(false);
+			setLoading(false);
 			if (e != null) {
 				new AlertDialog.Builder(SitePickerActivity.this)
 					.setTitle(R.string.title_error)

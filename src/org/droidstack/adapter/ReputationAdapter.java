@@ -57,7 +57,7 @@ public class ReputationAdapter extends BaseAdapter {
 		View v;
 		Tag t;
 		
-		if (convertView == null || convertView.getTag() == null) {
+		if (convertView == null) {
 			v = inflater.inflate(R.layout.item_rep, null);
 			t = new Tag(v);
 			v.setTag(t);

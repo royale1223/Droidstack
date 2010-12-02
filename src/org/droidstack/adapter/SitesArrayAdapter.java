@@ -18,7 +18,6 @@ public class SitesArrayAdapter extends BaseAdapter {
 	private Context context;
 	private LayoutInflater inflater;
 	private List<Site> sites;
-	private boolean loading;
 	
 	public SitesArrayAdapter(Context context, List<Site> sites) {
 		this.context = context;
@@ -26,17 +25,9 @@ public class SitesArrayAdapter extends BaseAdapter {
 		inflater = LayoutInflater.from(context);
 	}
 	
-	public void setLoading(boolean isLoading) {
-		if (loading == isLoading) return;
-		loading = isLoading;
-		notifyDataSetChanged();
-	}
-	
 	@Override
 	public int getCount() {
-		int count = sites.size();
-		if (loading) count++;
-		return count;
+		return sites.size();
 	}
 
 	@Override
@@ -47,17 +38,6 @@ public class SitesArrayAdapter extends BaseAdapter {
 	@Override
 	public long getItemId(int position) {
 		return position;
-	}
-
-	@Override
-	public int getViewTypeCount() {
-		return 2;
-	}
-	
-	@Override
-	public int getItemViewType(int position) {
-		if (position == sites.size()) return IGNORE_ITEM_VIEW_TYPE;
-		return 1;
 	}
 	
 	@Override
