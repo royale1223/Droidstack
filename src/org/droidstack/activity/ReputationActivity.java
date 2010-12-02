@@ -22,13 +22,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class ReputationActivity extends ListActivity {
+public class ReputationActivity extends ListActivity implements OnScrollListener {
 	
 	private String mEndpoint;
 	private int mUserID;
+	private String mUserName;
 	
 	private int mPageSize;
 	private int mPage = 1;
@@ -40,6 +43,9 @@ public class ReputationActivity extends ListActivity {
 	private boolean isRequestOngoing = false;
 	private boolean noMoreChanges = false;
 	
+	private View mTitleView;
+	private View mLoadingView;
+	
 	@Override
 	public void onCreate(Bundle inState) {
 		super.onCreate(inState);
@@ -47,7 +53,6 @@ public class ReputationActivity extends ListActivity {
 		
 		Uri data = getIntent().getData();
 		mEndpoint = data.getQueryParameter("endpoint");
-		
 		try {
 			mUserID = Integer.parseInt(data.getQueryParameter("uid"));
 			if (mEndpoint == null) throw new NullPointerException();
@@ -57,14 +62,17 @@ public class ReputationActivity extends ListActivity {
 			finish();
 			return;
 		}
+		mUserName = data.getQueryParameter("uname");
 		
 		mAPI = new StackWrapper(mEndpoint);
 		mPageSize = Const.getPageSize(this);
 		mRepChanges = new ArrayList<Reputation>();
 		mAdapter = new ReputationAdapter(this, mRepChanges);
+		mTitleView = View.inflate(this, R.layout.item_header, null);
+		mLoadingView = View.inflate(this, R.layout.item_loading, null);
+		getListView().addHeaderView(mTitleView);
 		setListAdapter(mAdapter);
-		getListView().setOnScrollListener(onScroll);
-		getListView().setOnItemClickListener(onClick);
+		getListView().setOnScrollListener(this);
 		
 		if (inState == null) {
 			new GetData().execute();
@@ -75,6 +83,29 @@ public class ReputationActivity extends ListActivity {
 			mAdapter.notifyDataSetChanged();
 			getListView().setSelection(inState.getInt("scroll"));
 		}
+		
+		setNiceTitle();
+	}
+	
+	@Override
+	public void setTitle(CharSequence title) {
+		((TextView) mTitleView.findViewById(R.id.title)).setText(title);
+	}
+	
+	private void setNiceTitle() {
+		StringBuilder b = new StringBuilder();
+		if (mUserName != null) {
+			b.append(mUserName);
+			if (mUserName.endsWith("s")) b.append(mUserName).append("' ");
+			else b.append("'s ");
+		}
+		b.append("Reputation");
+		setTitle(b);
+	}
+	
+	private void setLoading(boolean loading) {
+		getListView().removeFooterView(mLoadingView);
+		if (loading) getListView().addFooterView(mLoadingView);
 	}
 	
 	@Override
@@ -84,45 +115,25 @@ public class ReputationActivity extends ListActivity {
 		outState.putInt("scroll", getListView().getFirstVisiblePosition());
 	}
 	
-	private OnScrollListener onScroll = new OnScrollListener() {
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Reputation r = mRepChanges.get(position);
+		Intent i = new Intent(ReputationActivity.this, QuestionActivity.class);
+		if (r.getPostType().equals("question")) {
+			String uri = "droidstack://question" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&qid=" + Uri.encode(String.valueOf(r.getPostId()));
+			i.setData(Uri.parse(uri));
+		}
+		else {
+			String uri = "droidstack://question" +
+				"?endpoint=" + Uri.encode(mEndpoint) +
+				"&aid=" + Uri.encode(String.valueOf(r.getPostId()));
+			i.setData(Uri.parse(uri));
+		}
+		startActivity(i);
+	}
 		
-		@Override
-		public void onScrollStateChanged(AbsListView view, int scrollState) {
-			// not used
-		}
-		
-		@Override
-		public void onScroll(AbsListView view, int firstVisibleItem,
-				int visibleItemCount, int totalItemCount) {
-			if (isRequestOngoing == false && noMoreChanges == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
-				mPage++;
-				new GetData().execute();
-			}
-		}
-	};
-	
-	private OnItemClickListener onClick = new OnItemClickListener() {
-
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			Reputation r = mRepChanges.get(position);
-			Intent i = new Intent(ReputationActivity.this, QuestionActivity.class);
-			if (r.getPostType().equals("question")) {
-				String uri = "droidstack://question" +
-					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&qid=" + Uri.encode(String.valueOf(r.getPostId()));
-				i.setData(Uri.parse(uri));
-			}
-			else {
-				String uri = "droidstack://question" +
-					"?endpoint=" + Uri.encode(mEndpoint) +
-					"&aid=" + Uri.encode(String.valueOf(r.getPostId()));
-				i.setData(Uri.parse(uri));
-			}
-			startActivity(i);
-		}
-	};
-	
 	private class GetData extends AsyncTask<Void, Void, List<Reputation>> {
 		
 		private Exception mException;
@@ -130,7 +141,7 @@ public class ReputationActivity extends ListActivity {
 		@Override
 		protected void onPreExecute() {
 			isRequestOngoing = true;
-			mAdapter.setLoading(true);
+			setLoading(true);
 		}
 		
 		@Override
@@ -170,7 +181,7 @@ public class ReputationActivity extends ListActivity {
 				mRepChanges.addAll(result);
 				if (result.size() < mPageSize) {
 					noMoreChanges = true;
-					mAdapter.setLoading(false);
+					setLoading(false);
 				}
 				if (mRepChanges.size() == 0) {
 					findViewById(R.id.empty).setVisibility(View.VISIBLE);
@@ -180,6 +191,20 @@ public class ReputationActivity extends ListActivity {
 			}
 		}
 		
+	}
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (isRequestOngoing == false && noMoreChanges == false && totalItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount) {
+			mPage++;
+			new GetData().execute();
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// not used
 	}
 	
 }

@@ -18,7 +18,6 @@ public class ReputationAdapter extends BaseAdapter {
 	private final Context context;
 	private final LayoutInflater inflater;
 	private final List<Reputation> changes;
-	private boolean loading;
 	
 	private class Tag {
 		TextView rep_pos;
@@ -36,27 +35,15 @@ public class ReputationAdapter extends BaseAdapter {
 		this.changes = changes;
 		inflater = LayoutInflater.from(context);
 	}
-
-	public void setLoading(boolean isLoading) {
-		if (loading == isLoading) return;
-		loading = isLoading;
-		notifyDataSetChanged();
-	}
 	
 	@Override
 	public int getCount() {
-		if (loading) return changes.size()+1;
-		else return changes.size();
+		return changes.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		try {
-			return changes.get(position);
-		}
-		catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return changes.get(position);
 	}
 
 	@Override
@@ -65,20 +52,7 @@ public class ReputationAdapter extends BaseAdapter {
 	}
 	
 	@Override
-	public boolean areAllItemsEnabled() {
-		if (loading) return false;
-		else return true;
-	}
-
-	@Override
-	public boolean isEnabled(int position) {
-		if (position == changes.size()) return false;
-		return true;
-	}
-	
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == changes.size()) return inflater.inflate(R.layout.item_loading, null);
 		Reputation r = changes.get(position);
 		View v;
 		Tag t;
