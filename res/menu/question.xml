@@ -10,4 +10,9 @@
 		android:title="@string/menu_share"
 		android:icon="@drawable/ic_menu_share"
 	/>
+	<item
+		android:id="@+id/menu_select"
+		android:title="@string/menu_select"
+		android:icon="@drawable/ic_menu_select"
+	/>
 </menu>

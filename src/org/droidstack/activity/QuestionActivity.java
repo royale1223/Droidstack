@@ -1,6 +1,7 @@
 package org.droidstack.activity;
 
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -162,6 +163,12 @@ public class QuestionActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		if (isRequestOngoing) return false;
 		getMenuInflater().inflate(R.menu.question, menu);
+		try {
+			Method emulateShiftHeld = WebView.class.getMethod("emulateShiftHeld", null);
+		}
+		catch (NoSuchMethodException e) {
+			menu.findItem(R.id.menu_select).setEnabled(false);
+		}
     	return true;
 	}
 	
@@ -181,6 +188,9 @@ public class QuestionActivity extends Activity {
 			i.putExtra(Intent.EXTRA_SUBJECT, mQuestion.getTitle());
 			i.putExtra(Intent.EXTRA_TEXT, questionUrl);
 			startActivity(Intent.createChooser(i, getString(R.string.menu_share)));
+			return true;
+		case R.id.menu_select:
+			mWebView.emulateShiftHeld();
 			return true;
 		}
 		return false;
