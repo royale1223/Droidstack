@@ -23,12 +23,8 @@ import android.widget.TextView;
 public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 	
 	private class TagFilter extends Filter {
-		
-		private boolean isRequestOngoing = false;
-		
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
-			if (isRequestOngoing || constraint == null) return null;
 			try {
 				FilterResults results = new FilterResults();
 				TagQuery query = new TagQuery();
@@ -54,7 +50,6 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 			}
 			notifyDataSetChanged();
 		}
-		
 	}
 	
 	private final ArrayList<String> tags;
@@ -97,7 +92,7 @@ public class TagAutoCompleteAdapter extends BaseAdapter implements Filterable {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		if (convertView != null) {
-			((TextView)convertView).setText(tags.get(position));
+			((TextView) convertView).setText(tags.get(position));
 			return convertView;
 		}
 		else {

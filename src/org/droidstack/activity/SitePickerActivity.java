@@ -102,7 +102,7 @@ public class SitePickerActivity extends ListActivity {
 				List<String> checked = Arrays.asList(mCheckedEndpoints);
 				for (int i=0; i < mSites.size(); i++) {
 					if (checked.contains(mSites.get(i).getApiEndpoint()))
-						getListView().setItemChecked(i, true);
+						getListView().setItemChecked(i+1, true);
 				}
 			}
 		}
@@ -116,7 +116,7 @@ public class SitePickerActivity extends ListActivity {
 				SparseBooleanArray checked = getListView().getCheckedItemPositions();
 				ArrayList<Integer> checkedPositions = new ArrayList<Integer>();
 				for (int i=0; i < mSites.size(); i++) {
-					if (checked.get(i)) checkedPositions.add(i);
+					if (checked.get(i)) checkedPositions.add(i-1);
 				}
 				String[] endpoints = new String[checkedPositions.size()];
 				String[] names = new String[checkedPositions.size()];
