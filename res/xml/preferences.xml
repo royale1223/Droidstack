@@ -33,10 +33,19 @@
 		android:key="notif_rep"
 		android:defaultValue="true"
 	/>
-	<CheckBoxPreference
-		android:title="Sound"
-		android:summary="Make a sound for a new notification"
+	<RingtonePreference
+		android:title="Ringtone"
+		android:summary="Choose a notification ringtone"
 		android:key="notif_sound"
+		android:ringtoneType="notification"
+		android:showDefault="true"
+		android:showSilent="true"
+		android:defaultValue="default"
+	/>
+	<CheckBoxPreference
+		android:title="Lights"
+		android:summary="Flash LED lights (if available) for new notifications"
+		android:key="notif_light"
 		android:defaultValue="true"
 	/>
 	<CheckBoxPreference

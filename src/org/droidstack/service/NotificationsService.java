@@ -1,5 +1,7 @@
 package org.droidstack.service;
 
+import java.util.ArrayList;
+
 import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.User;
 import net.sf.stackwrap4j.http.HttpClient;
@@ -33,12 +35,25 @@ public class NotificationsService extends Service {
 	
 	private WakeLock mWakeLock;
 	
+	private final ArrayList<NotificationWrapper> notifications = new ArrayList<NotificationWrapper>();
 	private SharedPreferences mPreferences;
 	private NotificationManager mNotifManager;
 	
 	private boolean rep;
-	private boolean sound;
+	private String sound;
+	private boolean light;
 	private boolean vibrate;
+	
+	private static class NotificationWrapper {
+		public final Notification n;
+		public final String tag;
+		public final int id;
+		public NotificationWrapper(Notification n, String tag, int id) {
+			this.n = n;
+			this.tag = tag;
+			this.id = id;
+		}
+	}
 	
 	@Override
 	public void onStart(Intent intent, int startId) {
@@ -77,7 +92,8 @@ public class NotificationsService extends Service {
         	stopSelf();
         	return;
         }
-        sound = mPreferences.getBoolean(Const.PREF_NOTIF_SOUND, Const.DEF_NOTIF_SOUND);
+        sound = mPreferences.getString(Const.PREF_NOTIF_SOUND, Const.DEF_NOTIF_SOUND);
+        light = mPreferences.getBoolean(Const.PREF_NOTIF_LIGHT, Const.DEF_NOTIF_LIGHT);
         vibrate = mPreferences.getBoolean(Const.PREF_NOTIF_VIBRATE, Const.DEF_NOTIF_VIBRATE);
         
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
@@ -121,19 +137,16 @@ public class NotificationsService extends Service {
 								notifIntent.setData(Uri.parse(uri));
 								PendingIntent contentIntent = PendingIntent.getActivity(NotificationsService.this, 0, notifIntent, 0);
 								Notification notif = new Notification(R.drawable.ic_notif_rep, "Reputation on " + name + ": " + newRep, System.currentTimeMillis());
-								String contentText = "Reputation: " + Const.longFormatRep(newRep) + ", ";
-								if (diffRep > 0) contentText += "up " + diffRep;
-								else contentText += "down " + diffRep;
+								String contentText = "New reputation: " + Const.longFormatRep(newRep);
 								notif.setLatestEventInfo(NotificationsService.this, name, contentText, contentIntent);
-								notif.defaults |= Notification.DEFAULT_ALL;
 								notif.flags |= Notification.FLAG_AUTO_CANCEL;
-								if (!sound) {
-									notif.sound = null;
+								if (sound == null || sound.equals(Const.DEF_NOTIF_SOUND)) {
+									notif.defaults |= Notification.DEFAULT_SOUND;
 								}
-								if (!vibrate) {
-									notif.vibrate = null;
-								}
-								mNotifManager.notify(endpoint, REP_ID, notif);
+								else notif.sound = Uri.parse(sound);
+								if (light) notif.defaults |= Notification.DEFAULT_LIGHTS;
+								if (vibrate) notif.defaults |= Notification.DEFAULT_VIBRATE;
+								notifications.add(new NotificationWrapper(notif, endpoint, REP_ID));
 								db.setReputation(endpoint, newRep);
 							}
 						}
@@ -151,6 +164,9 @@ public class NotificationsService extends Service {
 		
 		@Override
 		protected void onPostExecute(Void result) {
+			for (NotificationWrapper notif: notifications) {
+				mNotifManager.notify(notif.tag, notif.id, notif.n);
+			}
 			stopSelf();
 		}
 	}

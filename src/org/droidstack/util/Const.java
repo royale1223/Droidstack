@@ -29,16 +29,14 @@ public final class Const {
 	public final static String PREF_NOTIF_REP = "notif_rep";
 	public final static boolean DEF_NOTIF_REP = true;
 	public final static String PREF_NOTIF_SOUND = "notif_sound";
-	public final static boolean DEF_NOTIF_SOUND = true;
+	public final static String DEF_NOTIF_SOUND = "default";
+	public final static String PREF_NOTIF_LIGHT = "notif_light";
+	public final static boolean DEF_NOTIF_LIGHT = true;
 	public final static String PREF_NOTIF_VIBRATE = "notif_vib";
 	public final static boolean DEF_NOTIF_VIBRATE = true;
 	
-	public final static String PREF_NOTIF_LASTRUN = "notif_lastrun";
-	
 	public final static String PREF_FONTSIZE = "fontsize";
 	public final static String DEF_FONTSIZE = "1em";
-	
-	public final static String PREF_SITES_LAST_ICON_REFRESH = "sites_last_icon_refresh";
 	
 	public static int getPageSize(Context ctx) {
 		String items = PreferenceManager.getDefaultSharedPreferences(ctx).getString(PREF_PAGESIZE, DEF_PAGESIZE);
