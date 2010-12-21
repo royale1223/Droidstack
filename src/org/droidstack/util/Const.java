@@ -28,6 +28,10 @@ public final class Const {
 	
 	public final static String PREF_NOTIF_REP = "notif_rep";
 	public final static boolean DEF_NOTIF_REP = true;
+	public final static String PREF_NOTIF_SOUND = "notif_sound";
+	public final static boolean DEF_NOTIF_SOUND = true;
+	public final static String PREF_NOTIF_VIBRATE = "notif_vib";
+	public final static boolean DEF_NOTIF_VIBRATE = true;
 	
 	public final static String PREF_NOTIF_LASTRUN = "notif_lastrun";
 	

@@ -37,6 +37,8 @@ public class NotificationsService extends Service {
 	private NotificationManager mNotifManager;
 	
 	private boolean rep;
+	private boolean sound;
+	private boolean vibrate;
 	
 	@Override
 	public void onStart(Intent intent, int startId) {
@@ -75,6 +77,8 @@ public class NotificationsService extends Service {
         	stopSelf();
         	return;
         }
+        sound = mPreferences.getBoolean(Const.PREF_NOTIF_SOUND, Const.DEF_NOTIF_SOUND);
+        vibrate = mPreferences.getBoolean(Const.PREF_NOTIF_VIBRATE, Const.DEF_NOTIF_VIBRATE);
         
 		HttpClient.setTimeout(Const.NET_TIMEOUT);
 		mNotifManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -123,6 +127,12 @@ public class NotificationsService extends Service {
 								notif.setLatestEventInfo(NotificationsService.this, name, contentText, contentIntent);
 								notif.defaults |= Notification.DEFAULT_ALL;
 								notif.flags |= Notification.FLAG_AUTO_CANCEL;
+								if (!sound) {
+									notif.sound = null;
+								}
+								if (!vibrate) {
+									notif.vibrate = null;
+								}
 								mNotifManager.notify(endpoint, REP_ID, notif);
 								db.setReputation(endpoint, newRep);
 							}

@@ -33,5 +33,17 @@
 		android:key="notif_rep"
 		android:defaultValue="true"
 	/>
+	<CheckBoxPreference
+		android:title="Sound"
+		android:summary="Make a sound for a new notification"
+		android:key="notif_sound"
+		android:defaultValue="true"
+	/>
+	<CheckBoxPreference
+		android:title="Vibrate"
+		android:summary="Vibrate for a new notification"
+		android:key="notif_vib"
+		android:defaultValue="true"
+	/>
 </PreferenceCategory>
 </PreferenceScreen>
