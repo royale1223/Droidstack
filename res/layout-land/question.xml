@@ -52,20 +52,18 @@
 			android:id="@+id/progress"
 			android:visibility="gone"
 		/>
-		<Button
+		<ImageButton
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:text="◀"
-			android:textAppearance="@android:style/TextAppearance.Large"
+			android:src="@drawable/left_arrow"
 			android:id="@+id/previous"
 			android:onClick="changePost"
 			android:enabled="false"
 		/>
-		<Button
+		<ImageButton
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:text="▶"
-			android:textAppearance="@android:style/TextAppearance.Large"
+			android:src="@drawable/right_arrow"
 			android:id="@+id/next"
 			android:onClick="changePost"
 			android:enabled="false"

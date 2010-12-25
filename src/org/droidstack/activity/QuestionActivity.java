@@ -38,7 +38,7 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -63,8 +63,8 @@ public class QuestionActivity extends Activity {
 	private WebView mWebView;
 	private TextView mAnswerCountView;
 	private TextView mAnswerLabel;
-	private Button mNextButton;
-	private Button mPreviousButton;
+	private ImageButton mNextButton;
+	private ImageButton mPreviousButton;
 	private ProgressBar mProgress;
 	
 	private boolean isRequestOngoing = false;
@@ -211,8 +211,8 @@ public class QuestionActivity extends Activity {
 		}
 		mAnswerCountView = (TextView) findViewById(R.id.answer_count);
 		mAnswerLabel = (TextView) findViewById(R.id.answer_label);
-		mNextButton = (Button) findViewById(R.id.next);
-		mPreviousButton = (Button) findViewById(R.id.previous);
+		mNextButton = (ImageButton) findViewById(R.id.next);
+		mPreviousButton = (ImageButton) findViewById(R.id.previous);
 		mProgress = (ProgressBar) findViewById(R.id.progress);
 	}
 	
