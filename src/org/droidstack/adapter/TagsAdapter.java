@@ -28,7 +28,7 @@ public class TagsAdapter extends BaseAdapter implements Filterable {
 			try {
 				FilterResults results = new FilterResults();
 				TagQuery query = new TagQuery();
-				query.setFilter(constraint.toString()).setPageSize(Const.getPageSize(context));
+				query.setFilter(constraint.toString()).setPageSize(pageSize);
 				List<Tag> tags = api.listTags(query);
 				results.count = tags.size();
 				results.values = tags;
@@ -63,6 +63,7 @@ public class TagsAdapter extends BaseAdapter implements Filterable {
 	private final LayoutInflater inflater;
 	private final String endpoint;
 	private final StackWrapper api;
+	private final int pageSize;
 	private final List<Tag> tags = new ArrayList<Tag>();
 	private final TagFilter filter = new TagFilter();
 	
@@ -70,6 +71,7 @@ public class TagsAdapter extends BaseAdapter implements Filterable {
 		this.context = context;
 		this.endpoint = endpoint;
 		api = new StackWrapper(endpoint, Const.APIKEY);
+		pageSize = Const.getPageSize(context);
 		inflater = LayoutInflater.from(context);
 	}
 	

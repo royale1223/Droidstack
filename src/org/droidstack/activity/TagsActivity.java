@@ -5,22 +5,29 @@ import net.sf.stackwrap4j.entities.Tag;
 import org.droidstack.R;
 import org.droidstack.adapter.TagsAdapter;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Filter.FilterListener;
 
-public class TagsActivity extends Activity implements OnItemClickListener {
+public class TagsActivity extends ListActivity implements TextWatcher {
 
 	private String mEndpoint;
 	
 	private TagsAdapter mAdapter;
 	
-	private AutoCompleteTextView mFilter;
+	private Drawable progress;
+	private EditText mFilter;
 	
 	private boolean isStartedForResult = false;
 	
@@ -35,12 +42,16 @@ public class TagsActivity extends Activity implements OnItemClickListener {
 		mEndpoint = data.getQueryParameter("endpoint");
 		
 		mAdapter = new TagsAdapter(this, mEndpoint);
-		mFilter = (AutoCompleteTextView) findViewById(R.id.filter);
-		mFilter.setAdapter(mAdapter);
-		mFilter.setOnItemClickListener(this);
+		setListAdapter(mAdapter);
+		
+		mFilter = (EditText) findViewById(R.id.filter);
+		mFilter.addTextChangedListener(this);
+		
+		mAdapter.getFilter().filter(mFilter.getText());
 	}
 	
-	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
 		Tag t = mAdapter.getTag(position);
 		if (!isStartedForResult) {
 			Intent i = new Intent(TagsActivity.this, QuestionsActivity.class);
@@ -55,8 +66,24 @@ public class TagsActivity extends Activity implements OnItemClickListener {
 			i.putExtra("name", t.getName());
 			i.putExtra("count", t.getCount());
 			setResult(RESULT_OK, i);
+			finish();
 		}
-		finish();
-	};
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		mAdapter.getFilter().filter(s);
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+		// unused
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		// unused
+	}
 	
 }

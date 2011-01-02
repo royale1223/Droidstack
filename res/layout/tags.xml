@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:background="@drawable/search_bg"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
 >
-	<AutoCompleteTextView android:id="@+id/filter"
+	<FrameLayout
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:singleLine="true"
-		android:hint="Type to find tags"
-		android:dropDownHeight="fill_parent"
+		android:background="@drawable/search_bg"
+	>
+		<EditText android:id="@+id/filter"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			android:hint="Type to find tags"
+		/>
+	</FrameLayout>
+	<ListView android:id="@android:id/list"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:layout_marginTop="-10dp"
+		android:cacheColorHint="@android:color/transparent"
 	/>
-</FrameLayout>
+</LinearLayout>
