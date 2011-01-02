@@ -17,6 +17,7 @@ import net.sf.stackwrap4j.query.UserQuestionQuery;
 import org.droidstack.R;
 import org.droidstack.adapter.QuestionsAdapter;
 import org.droidstack.adapter.TagAutoCompleteAdapter;
+import org.droidstack.adapter.TagsAdapter;
 import org.droidstack.util.Const;
 
 import android.app.AlertDialog;
@@ -244,22 +245,14 @@ public class QuestionsActivity extends ListActivity implements OnScrollListener,
     		b.create().show();
     		break;
     	case R.id.menu_tags:
-    		final Dialog diag = new Dialog(this, android.R.style.Theme_Panel);
+    		final Dialog diag = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
     		diag.setContentView(R.layout.dialog_tags);
-    		
-    		WindowManager.LayoutParams lp = diag.getWindow().getAttributes();
-    		lp.width = ViewGroup.LayoutParams.FILL_PARENT;
-    		lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-    		lp.gravity = Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
-    		lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-    		
-    		diag.getWindow().setAttributes(lp);
     		diag.setCanceledOnTouchOutside(true);
     		diag.show();
     		
     		final MultiAutoCompleteTextView taggedEdit = (MultiAutoCompleteTextView) diag.findViewById(R.id.tagged);
     		taggedEdit.setTokenizer(new CommaTokenizer());
-    		taggedEdit.setAdapter(new TagAutoCompleteAdapter(this, mEndpoint));
+    		taggedEdit.setAdapter(new TagsAdapter(this, mEndpoint));
     		final ImageButton searchButton = (ImageButton) diag.findViewById(R.id.search);
     		
     		StringBuilder builder = new StringBuilder();

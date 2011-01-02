@@ -4,25 +4,20 @@
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:orientation="horizontal"
-	android:padding="5dp"
 	android:background="@drawable/search_bg"
+	android:gravity="center_vertical"
 >
-	<MultiAutoCompleteTextView
-		android:layout_width="fill_parent"
+	<MultiAutoCompleteTextView android:id="@+id/tagged"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_weight="1"
 		android:hint="@string/search_tagged"
 		android:singleLine="true"
-		android:id="@+id/tagged"
-		android:completionThreshold="2"
+		android:dropDownHeight="fill_parent"
 	/>
-	<ImageButton
-		android:id="@+id/search"
+	<ImageButton android:id="@+id/search"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentRight="true"
-		android:layout_centerVertical="true"
-		android:layout_marginBottom="5dp"
 		android:src="@drawable/ic_btn_search"
 	/>
 </LinearLayout>
