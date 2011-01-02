@@ -49,7 +49,7 @@
 	        	<data android:path="/user" />
 	        </intent-filter>
 	    </activity>
-	    <activity android:name=".activity.TagsActivity" android:configChanges="orientation|keyboard|keyboardHidden">
+	    <activity android:name=".activity.TagsActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar" android:configChanges="orientation|keyboard|keyboardHidden">
 	        <intent-filter
 	        	android:icon="@drawable/icon"
 	        	android:label="View tags">

@@ -1,19 +1,54 @@
 package org.droidstack.adapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.stackwrap4j.StackWrapper;
 import net.sf.stackwrap4j.entities.Tag;
+import net.sf.stackwrap4j.query.TagQuery;
 
 import org.droidstack.R;
+import org.droidstack.util.Const;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
-public class TagsAdapter extends BaseAdapter {
+public class TagsAdapter extends BaseAdapter implements Filterable {
+	
+	private class TagFilter extends Filter {
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			try {
+				FilterResults results = new FilterResults();
+				TagQuery query = new TagQuery();
+				query.setFilter(constraint.toString()).setPageSize(Const.getPageSize(context));
+				List<Tag> tags = api.listTags(query);
+				results.count = tags.size();
+				results.values = tags;
+				return results;
+			}
+			catch (Exception e) {
+				Log.e(Const.TAG, "TagFilter.performFiltering error while fetching", e);
+				return null;
+			}
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			if (results == null) return;
+			tags.clear();
+			tags.addAll((List<Tag>) results.values);
+			notifyDataSetChanged();
+		}
+	}
 	
 	private static class ViewTag {
 		public TextView title;
@@ -26,56 +61,39 @@ public class TagsAdapter extends BaseAdapter {
 	
 	private final Context context;
 	private final LayoutInflater inflater;
-	private final List<Tag> tags;
-	private boolean loading;
+	private final String endpoint;
+	private final StackWrapper api;
+	private final List<Tag> tags = new ArrayList<Tag>();
+	private final TagFilter filter = new TagFilter();
 	
-	public TagsAdapter(Context context, List<Tag> tags) {
+	public TagsAdapter(Context context, String endpoint) {
 		this.context = context;
-		this.tags = tags;
+		this.endpoint = endpoint;
+		api = new StackWrapper(endpoint, Const.APIKEY);
 		inflater = LayoutInflater.from(context);
-	}
-	
-	public void setLoading(boolean isLoading) {
-		if (loading == isLoading) return;
-		loading = isLoading;
-		notifyDataSetChanged();
 	}
 	
 	@Override
 	public int getCount() {
-		if (loading) return tags.size()+1;
-		else return tags.size();
+		return tags.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		try {
-			return tags.get(position);
-		}
-		catch (IndexOutOfBoundsException e) {
-			return null;
-		}
+		return tags.get(position).getName();
+	}
+	
+	public Tag getTag(int position) {
+		return tags.get(position);
 	}
 
 	@Override
 	public long getItemId(int position) {
 		return position;
 	}
-	
-	@Override
-	public boolean areAllItemsEnabled() {
-		return false;
-	}
-
-	@Override
-	public boolean isEnabled(int position) {
-		if (position == tags.size()) return false;
-		return true;
-	}
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == tags.size()) return inflater.inflate(R.layout.item_loading, null);
 		Tag tag = tags.get(position);
 		View v = convertView;
 		ViewTag t;
@@ -92,6 +110,11 @@ public class TagsAdapter extends BaseAdapter {
 		t.count.setText("×" + tag.getCount());
 		
 		return v;
+	}
+
+	@Override
+	public Filter getFilter() {
+		return filter;
 	}
 
 }
