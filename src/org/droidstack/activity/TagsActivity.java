@@ -7,18 +7,13 @@ import org.droidstack.adapter.TagsAdapter;
 
 import android.app.ListActivity;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Filter.FilterListener;
 
 public class TagsActivity extends ListActivity implements TextWatcher {
 
@@ -26,7 +21,6 @@ public class TagsActivity extends ListActivity implements TextWatcher {
 	
 	private TagsAdapter mAdapter;
 	
-	private Drawable progress;
 	private EditText mFilter;
 	
 	private boolean isStartedForResult = false;
