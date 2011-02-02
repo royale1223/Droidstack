@@ -14,7 +14,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckedTextView;
 
 public class SitesArrayAdapter extends BaseAdapter {
-
+	
 	private Context context;
 	private LayoutInflater inflater;
 	private List<Site> sites;
@@ -42,7 +42,6 @@ public class SitesArrayAdapter extends BaseAdapter {
 	
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
-		if (position == sites.size()) return inflater.inflate(R.layout.item_loading, null);
 		Site site = sites.get(position);
 		View v;
 		if (convertView == null)
@@ -50,11 +49,6 @@ public class SitesArrayAdapter extends BaseAdapter {
 		else v = convertView;
 		((CheckedTextView) v).setText(site.getName());
 		return v;
-	}
-
-	@Override
-	public void notifyDataSetChanged() {
-		super.notifyDataSetChanged();
 	}
 
 }
